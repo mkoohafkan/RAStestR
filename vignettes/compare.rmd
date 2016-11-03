@@ -1,0 +1,352 @@
+---
+title: "Fargo model testing"
+author: "Michael Koohafkan"
+date: "31 October 2016"
+output:
+  html_document:
+  toc: true
+---
+
+```{r initialize, eval = FALSE, echo = FALSE}
+rmarkdown::render("compare.rmd")
+```
+
+# Summary
+
+This document describes the following tests using the Fargo model:
+
+1. Conversion from quasi-unsteady to unsteady sediment transport.
+2. Comparison of results for 30-second, 1-minute, and 5-minute unsteady 
+computation time step.
+
+# Outputs tested
+
+1. daily water surface elevations (01Oct1992 -- 01Nov2005) for all cross-sections.
+2. cumulative mass in (01Nov2005) for all cross-sections.
+3. longitudinal cumulative mass change (01Nov2005) for all cross-sections.
+
+
+# Methods
+
+- For comparison between quasi-unsteady and unsteady model outputs, the 
+quasi-unsteady outputs are considered the "true" values, and the three 
+unsteady time step model outputs are considered the "test" values.
+- For comparison between unsteady computation step outputs, the 
+30-second computation step outputs are considered the "true" values and 
+the 1-minute and 5-minute computation step outputs are considered the 
+"test" values.
+
+#### water surface elevation
+
+1. Difference between "true" and "test" outputs is computed at each 
+  station on each day.
+2. Root mean square error (RMSE) between "true" and "test" outputs over
+  the entire period at each station is computed.
+3. RMSE between "true" and "test" outputs over the entire reach on 
+  each day is computed.
+
+#### cumulative mass in
+
+1. RMSE between "true" and "test" outputs for each grain class is 
+  computed over the entire reach for the 01Nov2005 profile.
+2. Difference between "true" and "test" outputs for each grain class 
+    is computed at each station for the 01Nov2005 profile.
+
+#### longitudinal cumulative mass change
+
+1. RMSE between "true" and "test" outputs for each grain class is 
+  computed over the entire reach for the 01Nov2005 profile.
+2. Difference between "true" and "test" outputs for each grain class 
+    is computed at each station for the 01Nov2005 profile.
+  
+```{r methods, results = "hide", echo = FALSE}
+library(RAStestR)
+library(magrittr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+```
+
+# Data
+
+Data were obtained from the HEC-RAS Sediment viewer and saved to the 
+following files. Cumulative mass in is abbreviated as "cmi", water 
+surface elevation as "wse", and longitudinal cumulative mass change as
+"lcmc".
+
+```{r get_files, echo = FALSE}
+folder = "C:/PROJECTS/FARGO/NEW - HWF-WF Sediment 2015_clip"           
+
+files = list(
+  quasi = "HWF-WF_2015.p08.hdf",
+  u30s = "HWF-WF_2015.p07.hdf",
+  u1m = "HWF-WF_2015.p06.hdf",
+  u5m = "HWF-WF_2015.p05.hdf"
+)
+
+isunsteady = list(
+  quasi = "quasi",
+  #u30s = "unsteady",
+  u1m = "unsteady",
+  u5m = "unsteady"
+)
+
+
+kable(as_data_frame(files))
+
+resenvs = replicate(length(files), new.env()) %>% setNames(names(files))
+
+for (n in names(files)) {
+  with(resenvs[[n]], {
+    f = file.path(folder, files[[n]])
+    wse = readwse(f, isunsteady[[n]])
+    cmi = readcmi(f, isunsteady[[n]], which.rows = 4778)
+    lcmc = readlcmc(f, isunsteady[[n]], which.rows = 4778)
+  })
+}
+
+```
+
+# Results
+
+Results of the comparisons are described below.
+
+## water surface elevations
+
+### difference from quasi-unsteady
+
+Differences between the quasi-unsteady results and the unsteady results 
+are roughly the same for all computation step sizes. Higher RMSE occurs 
+at upstream stations and decreases with distance downstream. Zero RMSE 
+is expected at the downstream boundary condition as stage is fixed to 
+match the quasi-unsteady model, but stage at the upstream boundary may
+differ due to differences in the stage-discharge relationship between 
+quasi-unsteady and unsteady models.
+
+```{r diff_quasi, fig.show = "hold", fig.width = 12, dpi = 300, echo = FALSE}
+wsefiles = lapply(resenvs, function(x) x$wse)
+
+quasirun = names(isunsteady)[which(!unlist(isunsteady))]
+unsteadyruns= names(isunsteady)[which(unlist(isunsteady))]
+
+res = list(
+  label = NULL, 
+  min_diff = NULL, 
+  max_diff = NULL, 
+  min_RMSE_profile = NULL, 
+  max_RMSE_profile = NULL,
+  min_RMSE_time = NULL, 
+  max_RMSE_time = NULL
+)
+for(n in unsteadyfiles){
+  wseres = diff_wse(wsefiles[[quasirun]], wsefiles[[n]])   
+  wsermse = wseres %>% rmse_table("profile", "diff_wse") 
+  wsermse_time = wseres %>% rmse_table("Time", "diff_wse") 
+  res$label %<>% append(n)
+  res$min_diff %<>% append(wseres$diff_wse[which.min(abs(wseres$diff_wse))])
+  res$max_diff %<>% append(wseres$diff_wse[which.max(abs(wseres$diff_wse))])
+  res$min_RMSE_profile %<>% append(min(wsermse$rmse))
+  res$max_RMSE_profile %<>% append(max(wsermse$rmse))
+  res$min_RMSE_time %<>% append(min(wsermse_time$rmse))
+  res$max_RMSE_time %<>% append(max(wsermse_time$rmse))
+      
+  p1 = wsermse %>% arrange(profile) %>% 
+    ggplot() + aes(x = profile, y = rmse) + geom_bar(stat = "identity") + 
+    coord_flip() + 
+    ggtitle(paste((quasirun), n, sep = " vs "))
+  p2 = wsermse_time %>% 
+    mutate(Time = as.POSIXct(Time, format = "%d%b%Y %M:%S", 
+      tz = "UTC")) %>% arrange(Time) %>% 
+    ggplot() + aes(x = Time, y = rmse) + geom_line() + 
+    ggtitle(paste((quasirun), n, sep = " vs "))
+  multiplot(p1,p2, cols = 2)
+}
+
+kable(as.data.frame(res))
+```
+
+### difference from 30s-unsteady
+```{r diff_unsteady, fig.show = "hold", fig.width = 12, dpi = 300, echo = FALSE}
+wsefiles = ufiles[2,] %>% lapply(paste) %>% unlist()
+res = list(
+  label = NULL, 
+  min_diff = NULL, 
+  max_diff = NULL, 
+  min_RMSE_profile = NULL, 
+  max_RMSE_profile = NULL,
+  min_RMSE_time = NULL, 
+  max_RMSE_time = NULL
+)
+for(i in tail(wsefiles, -1)){
+  wseres = diff_wse(readwse(wsefiles[[1]]), readwse(i))   
+  wsermse = wseres %>% rmse_wse() 
+  wsermse_time = wseres %>% rmse_wse(gb = "Time") 
+  res$label %<>% append(i)
+  res$min_diff %<>% append(wseres$diff_wse[which.min(abs(wseres$diff_wse))])
+  res$max_diff %<>% append(wseres$diff_wse[which.max(abs(wseres$diff_wse))])
+  res$min_RMSE_profile %<>% append(min(wsermse$rmse))
+  res$max_RMSE_profile %<>% append(max(wsermse$rmse))
+  res$min_RMSE_time %<>% append(min(wsermse_time$rmse))
+  res$max_RMSE_time %<>% append(max(wsermse_time$rmse))
+      
+  p1 = wsermse %>% arrange(profile) %>%
+    ggplot() + aes(x = profile, y = rmse) + geom_bar(stat = "identity") + 
+    coord_flip() + 
+    ggtitle(paste((wsefiles[[1]]), i, sep = " vs "))
+  p2 = wseres %>% rmse_wse(gb = "Time") %>% arrange(Time) %>%
+    ggplot() + aes(x = Time, y = rmse) + geom_line() + 
+    ggtitle(paste((wsefiles[[1]]), i, sep = " vs "))
+  multiplot(p1,p2, cols = 2)
+}
+
+kable(as.data.frame(res))
+```
+
+
+## Cumulative mass in
+
+### difference from quasi-unsteady
+
+```{r cmidiff_quasi, fig.show = "hold", fig.width = 12, dpi = 300, echo = FALSE}
+cmifiles = c(quasi = qfiles[1,], ufiles[1,]) %>% lapply(paste) %>% unlist()
+res = list(
+  label = NULL, 
+  min_diff = NULL, 
+  max_diff = NULL, 
+  min_RMSE = NULL, 
+  max_RMSE = NULL
+)
+for(i in tail(cmifiles, -1)){
+  cmires = diff_cmi(readcmi(cmifiles[["quasi"]]), readcmi(i))   
+  cmirmse = cmires %>% rmse_cmi() 
+  cmirmse_station = cmires %>% rmse_cmi(gb = c("Station", "profile")) 
+  res$label %<>% append(i)
+  res$min_diff %<>% append(cmires$diff_cmi[which.min(abs(cmires$diff_cmi))])
+  res$max_diff %<>% append(cmires$diff_cmi[which.max(abs(cmires$diff_cmi))])
+  res$min_RMSE %<>% append(min(cmirmse$rmse))
+  res$max_RMSE %<>% append(max(cmirmse$rmse))
+      
+  p1 = cmirmse %>% arrange(profile) %>%
+    ggplot() + aes(x = profile, y = rmse, fill = profile) + 
+    geom_bar(stat = "identity") + coord_flip() + 
+    scale_fill_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((cmifiles[["quasi"]]), i, sep = " vs "))
+  p2 = cmires %>% arrange(Station) %>%
+    ggplot() + aes(x = Station, y = diff_cmi, color = profile) + 
+    geom_line() + 
+    scale_color_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((cmifiles[["quasi"]]), i, sep = " vs ")) 
+  multiplot(p1,p2, cols = 2)
+}
+
+kable(as.data.frame(res))
+
+```
+
+### difference from 30s-unsteady
+
+```{r cmidiff_unsteady, fig.show = "hold", fig.width = 12, dpi = 300, echo = FALSE}
+cmifiles = ufiles[1,] %>% lapply(paste) %>% unlist()
+res = list(
+  label = NULL, 
+  min_diff = NULL, 
+  max_diff = NULL, 
+  min_RMSE = NULL, 
+  max_RMSE = NULL
+)
+for(i in tail(cmifiles, -1)){
+  cmires = diff_cmi(readcmi(cmifiles[[1]]), readcmi(i))   
+  cmirmse = cmires %>% rmse_cmi() 
+  res$label %<>% append(i)
+  res$min_diff %<>% append(cmires$diff_cmi[which.min(abs(cmires$diff_cmi))])
+  res$max_diff %<>% append(cmires$diff_cmi[which.max(abs(cmires$diff_cmi))])
+  res$min_RMSE %<>% append(min(cmirmse$rmse))
+  res$max_RMSE %<>% append(max(cmirmse$rmse))
+      
+  p1 = cmirmse %>% arrange(profile) %>%
+    ggplot() + aes(x = profile, y = rmse, fill = profile) + 
+    geom_bar(stat = "identity") + coord_flip() + 
+    scale_fill_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((cmifiles[[1]]), i, sep = " vs "))
+  p2 = cmires %>% arrange(Station) %>%
+    ggplot() + aes(x = Station, y = diff_cmi, color = profile) + 
+    geom_line() + scale_color_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((cmifiles[[1]]), i, sep = " vs ")) 
+  multiplot(p1,p2, cols = 2)
+}
+
+kable(as.data.frame(res))
+
+```
+
+## Longitudinal cumulative mass change
+
+### difference from quasi-unsteady
+```{r lcmcdiff_quasi, fig.show = "hold", fig.width = 12, dpi = 300, echo = FALSE}
+lcmcfiles = c(quasi = qfiles[3,], ufiles[3,]) %>% lapply(paste) %>% unlist()
+res = list(
+  label = NULL, 
+  min_diff = NULL, 
+  max_diff = NULL, 
+  min_RMSE = NULL, 
+  max_RMSE = NULL
+)
+for(i in tail(lcmcfiles, -1)){
+  lcmcres = diff_lcmc(readcmi(lcmcfiles[["quasi"]]), readcmi(i))   
+  lcmcrmse = lcmcres %>% rmse_lcmc() 
+  res$label %<>% append(i)
+  res$min_diff %<>% append(lcmcres$diff_lcmc[which.min(abs(lcmcres$diff_lcmc))])
+  res$max_diff %<>% append(lcmcres$diff_lcmc[which.max(abs(lcmcres$diff_lcmc))])
+  res$min_RMSE %<>% append(min(lcmcrmse$rmse))
+  res$max_RMSE %<>% append(max(lcmcrmse$rmse))
+      
+  p1 = lcmcrmse %>% arrange(profile) %>%
+    ggplot() + aes(x = profile, y = rmse, fill = profile) + 
+    geom_bar(stat = "identity") + 
+    coord_flip() + 
+    scale_fill_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((lcmcfiles[["quasi"]]), i, sep = " vs "))
+  p2 = lcmcres %>% arrange(Station) %>%
+    ggplot() + aes(x = Station, y = diff_lcmc, color = profile) + geom_line() + 
+    scale_color_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((lcmcfiles[["quasi"]]), i, sep = " vs ")) 
+  multiplot(p1,p2, cols = 2)
+}
+
+kable(as.data.frame(res))
+```
+
+### difference from 30s-unsteady
+```{r lcmcdiff_unsteady, fig.show = "hold", fig.width = 12, dpi = 300, echo = FALSE}
+lcmcfiles = ufiles[3,] %>% lapply(paste) %>% unlist()
+res = list(
+  label = NULL, 
+  min_diff = NULL, 
+  max_diff = NULL, 
+  min_RMSE = NULL, 
+  max_RMSE = NULL
+)
+for(i in tail(lcmcfiles, -1)){
+  lcmcres = diff_lcmc(readcmi(lcmcfiles[[1]]), readcmi(i))   
+  lcmcrmse = lcmcres %>% rmse_lcmc() 
+  res$label %<>% append(i)
+  res$min_diff %<>% append(lcmcres$diff_lcmc[which.min(abs(lcmcres$diff_lcmc))])
+  res$max_diff %<>% append(lcmcres$diff_lcmc[which.max(abs(lcmcres$diff_lcmc))])
+  res$min_RMSE %<>% append(min(lcmcrmse$rmse))
+  res$max_RMSE %<>% append(max(lcmcrmse$rmse))
+      
+  p1 = lcmcrmse %>% arrange(profile) %>%
+    ggplot() + aes(x = profile, y = rmse, fill = profile) + 
+    geom_bar(stat = "identity") + coord_flip() + 
+    scale_fill_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((lcmcfiles[[1]]), i, sep = " vs "))
+  p2 = lcmcres %>% arrange(Station) %>%
+    ggplot() + aes(x = Station, y = diff_lcmc, color = profile) + geom_line() + 
+    scale_color_brewer(palette = "Accent", guide = FALSE) +
+    ggtitle(paste((lcmcfiles[[1]]), i, sep = " vs ")) 
+  multiplot(p1,p2, cols = 2)
+}
+
+kable(as.data.frame(res))
+```

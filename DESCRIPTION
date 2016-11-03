@@ -1,0 +1,23 @@
+Package: RAStestR
+Type: Package
+Title: Functions for testing RAS outputs
+Version: 0.0.1.9000
+Date: 2016-11-03
+Author: Michael C Koohafkan [aut, cre]
+Maintainer: Michael C Koohafkan <michael.koohafkan@gmail.com>
+Description: A collection of functions for comparing RAS model outputs.
+URL: https://github.com/mkoohafkan/RAStestR
+BugReports: https://github.com/mkoohafkan/RAStestR/issues
+License: GPL (>= 3)
+Depends:
+    R (>= 3.2.2)
+Imports:
+    dplyr,
+    stringr,
+    tidyr,
+    h5
+Suggests:
+    knitr
+LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1
