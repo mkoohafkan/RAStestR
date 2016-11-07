@@ -242,3 +242,4 @@ ModelManifest.xml
 .fake/
 /.Rhistory
 /vignettes/compare.html
+/vignettes/compare_files/figure-html

@@ -122,8 +122,8 @@ for (n in names(files)) {
   with(resenvs[[n]], {
     f = file.path(folder, files[[n]])
     wse = readwse(f, run.type[[n]])
-    cmi = readcmi(f, run.type[[n]], which.rows = 4778)
-    lcmc = readlcmc(f, run.type[[n]], which.rows = 4778)
+    cmi = readcmi(f, run.type[[n]], which.rows = 4777)
+    lcmc = readlcmc(f, run.type[[n]], which.rows = 4777)
   })
 }
 
@@ -198,7 +198,7 @@ res = list(
   min_RMSE_time = NULL, 
   max_RMSE_time = NULL
 )
-for(i in tail(unsteadyruns, -1)){
+for(n in tail(unsteadyruns, -1)){
   wseres = diff_wse(wsefiles[[unsteadyruns[1]]], wsefiles[[n]])   
   wsermse = wseres %>% rmse_table("profile", "diff_wse") 
   wsermse_time = wseres %>% rmse_table("Time", "diff_wse") 
