@@ -159,9 +159,15 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
   rlabs = x[rowtablepath][] %>% str_trim()
   this = x[tablepath][] %>% as_data_frame()
   if (run.type == "unsteady") {
-      this = this %>% tail(-1) %>% head(-1)
-      rlabs[2] = rlabs[1]
+      nr = nrow(this)
+      this = this %>% tail(-1) %>% head(-2)
+      rlabs = rlabs[c(1, 3:nr)]
       rlabs = rlabs %>% tail(-1) %>% head(-1)
+  }
+  else if(run.type == "quasi"){
+      this = this %>% tail(-1)
+      rlabs = rlabs %>% tail(-1)
+  
   }
   clabs = str_c(colprefix, clabs)
   names(this) = clabs
