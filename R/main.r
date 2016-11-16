@@ -1,88 +1,49 @@
-#' Water Surface Elevation Table
+#' Read Standard Table
 #'
-#' Read the Water Surface Elevation sediment data output. 
+#' Read a standard (not grain class-specific) table.
 #'
-#' @param f The h5 object to read.
-#' @param run.type If TRUE, the data is from an unsteady flow plan
-#'   and needs some additional cleanup. Use FALSE for quasi-unsteady 
-#'   data.
+#' @param f The h5 file to read.
+#' @param tablelab The table to read.
+#' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @return A dataframe with a column "Time" containing the Date Time 
 #'   Stamp data and columns "XS_####" where ### is the cross-section ID.
 #'
 #' @export
-readwse = function(f, run.type) {
-    geompath = "Geometry/Cross Sections/River Stations"
-    if (run.type == "unsteady") {
-        wsepath = file.path("Results", "Unsteady", "Output", "Output Blocks",
+read_standard = function(f, tablelab, run.type) {
+  geompath = "Geometry/Cross Sections/River Stations"
+  if (run.type == "unsteady") {
+    tblpath = file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections",
-      "Water Surface")
-        tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
+      tablelab)
+    tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Time Date Stamp")
-    } else if (run.type == "quasi"){
-        wsepath = file.path("Results", "Sediment", "Output Blocks",
+  } else if (run.type == "quasi") {
+    tblpath = file.path("Results", "Sediment", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections",
-      "Water Surface")
-        tspath = file.path("Results", "Sediment", "Output Blocks",
+      tablelab)
+    tspath = file.path("Results", "Sediment", "Output Blocks",
       "Sediment", "Sediment Time Series", "Time Date Stamp")
-    }
-    read_hdtable(f, wsepath, tspath, geompath, run.type, "Time", "XS_")
+  }
+  read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_")
 }
 
-#' Cumulative Mass In Table
-#'
-#' Read the Cumulative Mass In sediment data output. 
-#'
-#' @param f The h5 object to read.
-#' @param run.type If TRUE, the data is from an unsteady flow plan
-#'   and needs some additional cleanup. Use FALSE for quasi-unsteady 
-#'   data.
-#' @param which.grains Which grain class tables to extract data from. If
-#'   missing, all grain class tables will be extracted. Character value
-#'   "" extracts the total table, "1" the first grain class, etc.
-#' @param which.rows Which rows to extract from each grain class table. 
-#'   0 refers to the first row of the HDF5 table. Note that this index 
-#'   refers to the cleaned-up data, so check the row ID to ensure the 
-#'   correct rows are extracted.
-#' @return A dataframe with a column "Time" containing the Date Time 
-#'   Stamp data and columns "XS_####" where ### is the cross-section ID.
-#'
+#' @describeIn read_standard Read the Invert Change data output.
 #' @export
-readcmi = function(f, run.type, which.grains, which.rows) {
-    readsediment(f, "Mass In Cum", run.type, which.grains, which.rows)
+read_ic = function(f, run.type) {
+  read_standard(f, "Invert Change", run.type)
 }
 
-#' Longitudinal Cumulative Mass Change Table
-#'
-#' Read the Longitudinal Cumulative Mass Change sediment data output. 
-#'
-#' @param x The h5 object to read.
-#' @param run.type If TRUE, the data is from an unsteady flow plan
-#'   and needs some additional cleanup. Use FALSE for quasi-unsteady 
-#'   data.
-#' @param which.grains Which grain class tables to extract data from. If
-#'   missing, all grain class tables will be extracted. Character value
-#'   "" extracts the total table, "1" the first grain class, etc.
-#' @param which.rows Which rows to extract from each grain class table. 
-#'   0 refers to the first row of the HDF5 table. Note that this index 
-#'   refers to the cleaned-up data, so check the row ID to ensure the 
-#'   correct rows are extracted.
-#' @return A dataframe with a column "Time" containing the Date Time 
-#'   Stamp data and columns "XS_####" where ### is the cross-section ID.
-#'
+#' @describeIn read_standard Read the Water Surface data output.
 #' @export
-readlcmc = function(f, run.type, which.grains, which.rows) {
-    readsediment(f, "Long. Cum Mass Change", run.type, which.grains,
-    which.rows)
+read_ws = function(f, run.type) {
+  read_standard(f, "Water Surface", run.type)
 }
 
 #' Sediment By Grain Class Table
 #'
 #' Read the sediment data output for all grain classes. 
 #'
-#' @param f The h5 object to read.
-#' @param run.type If TRUE, the data is from an unsteady flow plan
-#'   and needs some additional cleanup. Use FALSE for quasi-unsteady 
-#'   data.
+#' @inheritParams read_standard
 #' @param which.grains Grain class tables to extract. "" Corresponds to 
 #'   the totals, "1" is the first grain class, etc.
 #' @param which.rows A numeric identifying the row numbers to extract, 
@@ -94,42 +55,54 @@ readlcmc = function(f, run.type, which.grains, which.rows) {
 #' @import dplyr 
 #' @import stringr
 #' @export
-readsediment = function(f, tablelab, run.type, which.grains = "",
+read_sediment = function(f, tablelab, run.type, which.grains = "",
   which.rows = NULL) {
   x = h5file(f)
   on.exit(h5close(x))
   geompath = "Geometry/Cross Sections/River Stations"
   if (run.type == "unsteady") {
-      tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
+    tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
     "Sediment", "Sediment Time Series", "Time Date Stamp")
-      sedimentpath = file.path("Results", "Unsteady", "Output",
+    sedimentpath = file.path("Results", "Unsteady", "Output",
     "Output Blocks", "Sediment", "Sediment Time Series",
     "Cross Sections", tablelab)
   } else if (run.type == "quasi") {
-      tspath = file.path("Results", "Sediment", "Output Blocks",
+    tspath = file.path("Results", "Sediment", "Output Blocks",
     "Sediment", "Sediment Time Series", "Time Date Stamp")
-      sedimentpath = file.path("Results", "Sediment", "Output Blocks",
+    sedimentpath = file.path("Results", "Sediment", "Output Blocks",
     "Sediment", "Sediment Time Series", "Cross Sections", tablelab)
   }
   alltables = str_subset(list.datasets(x), sedimentpath)
   if (!missing(which.grains)) {
-      whichtables = str_c(tablelab, which.grains, sep = " ") %>% str_trim()
-      tablepaths = alltables[basename(alltables) %in% whichtables]
+    whichtables = str_c(tablelab, which.grains, sep = " ") %>% str_trim()
+    tablepaths = alltables[basename(alltables) %in% whichtables]
   } else {
-      tablepaths = alltables
-      which.grains = basename(tablepaths) %>% str_replace(tablelab, "") %>%
+    tablepaths = alltables
+    which.grains = basename(tablepaths) %>% str_replace(tablelab, "") %>%
       str_trim()
   }
   res = vector("list", length(tablepaths))
   for (i in seq_along(tablepaths)) {
-      res[[i]] = read_hdtable(f, tablepaths[i], tspath, geompath,
+    res[[i]] = read_hdtable(f, tablepaths[i], tspath, geompath,
     run.type, "Time", "XS_")
-      res[[i]]["GrainClass"] = which.grains[i]
+    res[[i]]["GrainClass"] = which.grains[i]
   }
   if (!missing(which.rows)) {
-      res = lapply(res, function(x) x[which.rows + 1,])
+    res = lapply(res, function(x) x[which.rows + 1,])
   }
   do.call(bind_rows, res)
+}
+
+#' @describeIn read_sediment Read the Mass In Cumulative data output.
+#' @export
+read_mic = function(f, run.type, which.grains, which.rows)
+  read_sediment(f, "Mass In Cum", run.type, which.grains, which.rows)
+
+#' @describeIn read_sediment Read the Longitudinal Cumulative Mass Change data output. 
+#' @export
+read_lcmc = function(f, run.type, which.grains, which.rows) {
+  read_sediment(f, "Long. Cum Mass Change", run.type, which.grains,
+    which.rows)
 }
 
 #' Generic Table Read Function
@@ -140,17 +113,16 @@ readsediment = function(f, tablelab, run.type, which.grains = "",
 #' @param tablepath The table to read in.
 #' @param rowtablepath The table containing the row identifiers.
 #' @param coltablepath The table containing the column identifiers.
-#' @param run.type If TRUE, the data is from an unsteady flow plan
-#'   and needs some additional cleanup. Use FALSE for quasi-unsteady 
-#'   data.
+#' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @param rowcolname The name to assign to the new row id column.
 #' @param colprefix A prefix to apply to the column IDs. 
 #' @return A dataframe.
 #'
+#' @importFrom utils head
+#' @importFrom utils tail
 #' @import h5 
 #' @import dplyr 
 #' @import stringr
-#' @export
 read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
   run.type, rowcolname, colprefix) {
   x = h5file(f)
@@ -159,15 +131,15 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
   rlabs = x[rowtablepath][] %>% str_trim()
   this = x[tablepath][] %>% as_data_frame()
   if (run.type == "unsteady") {
-      nr = nrow(this)
-      this = this %>% tail(-1) %>% head(-2)
-      rlabs = rlabs[c(1, 3:nr)]
-      rlabs = rlabs %>% tail(-1) %>% head(-1)
+    nr = nrow(this)
+    this = this %>% tail(-1) %>% head(-2)
+    rlabs = rlabs[c(1, 3:nr)]
+    rlabs = rlabs %>% tail(-1) %>% head(-1)
   }
-  else if(run.type == "quasi"){
-      this = this %>% tail(-1)
-      rlabs = rlabs %>% tail(-1)
-  
+  else if (run.type == "quasi") {
+    this = this %>% tail(-1)
+    rlabs = rlabs %>% tail(-1)
+
   }
   clabs = str_c(colprefix, clabs)
   names(this) = clabs
@@ -181,22 +153,31 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
 #'
 #' @param d1 The first dataframe.
 #' @param d2 The second dataframe.
-#' @param tcol the time column name.
-#' @param profcol The name of the profile column to be created.
+#' @param tcol The time column name.
 #' @param diffcol The name of the difference column to be created.
 #' @return A dataframe.
 #'
 #' @import dplyr
 #' @export
-diff_table = function(d1, d2, tcol, profcol, diffcol) {
-    datcols = intersect(names(d1), names(d2))
-    datcols = datcols[datcols != tcol]
-    d1 = d1 %>% arrange_(tcol)
-    d2 = d2 %>% arrange_(tcol)
-    as_data_frame(cbind(d1[tcol], d1[, datcols] - d2[, datcols])) %>%
-    gather_(profcol, diffcol, gather_cols = datcols) %>%
-    mutate(profile = factor(profile, levels = datcols))
+diff_table = function(d1, d2, tcol, diffcol) {
+  Station = NULL # workaround for nse
+  datcols = intersect(names(d1), names(d2))
+  datcols = datcols[datcols != tcol]
+  d1 = d1 %>% arrange_(tcol)
+  d2 = d2 %>% arrange_(tcol)
+  as_data_frame(cbind(d1[tcol], d1[, datcols] - d2[, datcols])) %>%
+    gather_("Station", diffcol, gather_cols = datcols) %>%
+    mutate(Station = factor(Station, levels = datcols))
 }
+
+#' @describeIn diff_table Compute a difference table for Water Surface data.
+#' @export
+diff_ws = function(d1, d2, tcol = "Time") {
+  diff_table(d1, d2, tcol, "diff_ws")
+}
+
+
+
 
 #' Difference Table (Sediment)
 #'
@@ -206,66 +187,34 @@ diff_table = function(d1, d2, tcol, profcol, diffcol) {
 #' @param d2 The second dataframe.
 #' @param tcol the time column name.
 #' @param gcol the grain class column name.
-#' @param profcol The name of the profile column to be created.
 #' @param diffcol The name of the difference column to be created.
 #' @return A dataframe.
 #'
 #' @import dplyr
 #' @import tidyr
 #' @export
-diff_sediment = function(d1, d2, tcol, gcol, profcol, diffcol) {
-    datcols = intersect(names(d1), names(d2))
-    datcols = datcols[datcols != tcol & datcols != gcol]
-    gvals = intersect(unique(d1[[gcol]]), unique(d2[[gcol]]))
-    d1 = d1[d1[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
-    d2 = d2[d2[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
-    as_data_frame(cbind(d1[tcol], d1[gcol], d1[, datcols] - d2[, datcols])) %>%
-    gather_(profcol, diffcol, gather_cols = datcols) %>%
-    mutate(profile = factor(profile, levels = datcols))
+diff_sediment = function(d1, d2, tcol, gcol, diffcol) {
+  Station = NULL # workaround for nse
+  datcols = intersect(names(d1), names(d2))
+  datcols = datcols[datcols != tcol & datcols != gcol]
+  gvals = intersect(unique(d1[[gcol]]), unique(d2[[gcol]]))
+  d1 = d1[d1[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
+  d2 = d2[d2[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
+  as_data_frame(cbind(d1[tcol], d1[gcol], d1[, datcols] - d2[, datcols])) %>%
+    gather_("Station", diffcol, gather_cols = datcols) %>%
+    mutate(Station = factor(Station, levels = datcols))
 }
 
-#' Water Surface Elevation Difference Table
-#'
-#' Compute a difference table for water surface elevation data.
-#'
-#' @param d1 The first dataframe.
-#' @param d2 The second dataframe.
-#' @param tcol the time column name.
-#' @return A dataframe.
-#'
-#' @export
-diff_wse = function(d1, d2, tcol = "Time") {
-    diff_table(d1, d2, tcol, "profile", "diff_wse")
-}
-
-#' Longitudinal Cumulative Mass Change Difference Table
-#'
-#' Compute a difference table for longitudinal cumulative mass change data.
-#'
-#' @param d1 The first dataframe.
-#' @param d2 The second dataframe.
-#' @param tcol the time column name.
-#' @param gcol the grain class column name.
-#' @return A dataframe.
-#'
+#' @describeIn diff_sediment Compute a difference table for Longitudinal Cumulative Mass Change data.
 #' @export
 diff_lcmc = function(d1, d2, tcol = "Time", gcol = "GrainClass") {
-    diff_sediment(d1, d2, tcol, gcol, "profile", "diff_lcmc")
+  diff_sediment(d1, d2, tcol, gcol, "diff_lcmc")
 }
 
-#' Cumulative Mass In Difference Table
-#'
-#' Compute a difference table for cumulative mass in data.
-#'
-#' @param d1 The first dataframe.
-#' @param d2 The second dataframe.
-#' @param tcol the time column name.
-#' @param gcol the grain class column name.
-#' @return A dataframe.
-#'
+#' @describeIn diff_sediment Compute a difference table for Mass In Cumulative data.
 #' @export
-diff_cmi = function(d1, d2, tcol = "Time", gcol = "GrainClass") {
-    diff_sediment(d1, d2, tcol, gcol, "profile", "diff_cmi")
+diff_mic = function(d1, d2, tcol = "Time", gcol = "GrainClass") {
+  diff_sediment(d1, d2, tcol, gcol, "diff_mic")
 }
 
 #' Root Mean Square Error Table
@@ -275,12 +224,27 @@ diff_cmi = function(d1, d2, tcol = "Time", gcol = "GrainClass") {
 #' @param d The difference table.
 #' @param groupcol the column to group differences by.
 #' @param diffcol the column containing difference values.
+#' @param rmsecol The output column containing RMSE values
 #' @return A dataframe.
 #'
+#' @importFrom stats setNames
 #' @import dplyr
 #' @import stringr
 #' @export
-rmse_table = function(d, groupcol, diffcol) {
-    d %>% group_by_(.dots = groupcol) %>%
-    summarize_(rmse = str_c("sqrt(mean(", diffcol, "^2))"))
+rmse_table = function(d, groupcol, diffcol, rmsecol) {
+  d %>% group_by_(.dots = groupcol) %>% summarize_(
+    .dots = setNames(str_c("sqrt(mean(", diffcol, "^2))"), rmsecol))
+}
+
+
+#' @describeIn rmse_table Compute RMSE of Invert Change outputs. 
+#' @export
+rmse_ic = function(d, groupcol = "Station") {
+  rmse_table(d, groupcol, "diff_ic", "rmse_ic")
+}
+
+#' @describeIn rmse_table Compute RMSE of Water Surface outputs. 
+#' @export
+rmse_ws = function(d, groupcol = "Station") {
+  rmse_table(d, groupcol, "diff_ws", "rmse_ws")
 }

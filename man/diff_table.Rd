@@ -2,18 +2,19 @@
 % Please edit documentation in R/main.r
 \name{diff_table}
 \alias{diff_table}
+\alias{diff_ws}
 \title{Difference Table}
 \usage{
-diff_table(d1, d2, tcol, profcol, diffcol)
+diff_table(d1, d2, tcol, diffcol)
+
+diff_ws(d1, d2, tcol = "Time")
 }
 \arguments{
 \item{d1}{The first dataframe.}
 
 \item{d2}{The second dataframe.}
 
-\item{tcol}{the time column name.}
-
-\item{profcol}{The name of the profile column to be created.}
+\item{tcol}{The time column name.}
 
 \item{diffcol}{The name of the difference column to be created.}
 }
@@ -23,4 +24,8 @@ A dataframe.
 \description{
 Compute a difference table.
 }
+\section{Functions}{
+\itemize{
+\item \code{diff_ws}: Compute a difference table for Water Surface data.
+}}
 

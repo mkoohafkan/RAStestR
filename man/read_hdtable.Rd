@@ -16,9 +16,7 @@ read_hdtable(f, tablepath, rowtablepath, coltablepath, run.type, rowcolname,
 
 \item{coltablepath}{The table containing the column identifiers.}
 
-\item{run.type}{If TRUE, the data is from an unsteady flow plan
-and needs some additional cleanup. Use FALSE for quasi-unsteady 
-data.}
+\item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
 \item{rowcolname}{The name to assign to the new row id column.}
 
