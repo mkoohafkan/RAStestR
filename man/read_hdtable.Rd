@@ -26,6 +26,6 @@ read_hdtable(f, tablepath, rowtablepath, coltablepath, run.type, rowcolname,
 A dataframe.
 }
 \description{
-Read RAS data output.
+Read RAS sediment data output.
 }
 

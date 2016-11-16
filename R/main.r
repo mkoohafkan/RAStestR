@@ -27,18 +27,6 @@ read_standard = function(f, tablelab, run.type) {
   read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_")
 }
 
-#' @describeIn read_standard Read the Invert Change data output.
-#' @export
-read_ic = function(f, run.type) {
-  read_standard(f, "Invert Change", run.type)
-}
-
-#' @describeIn read_standard Read the Water Surface data output.
-#' @export
-read_ws = function(f, run.type) {
-  read_standard(f, "Water Surface", run.type)
-}
-
 #' Sediment By Grain Class Table
 #'
 #' Read the sediment data output for all grain classes. 
@@ -93,21 +81,9 @@ read_sediment = function(f, tablelab, run.type, which.grains = "",
   do.call(bind_rows, res)
 }
 
-#' @describeIn read_sediment Read the Mass In Cumulative data output.
-#' @export
-read_mic = function(f, run.type, which.grains, which.rows)
-  read_sediment(f, "Mass In Cum", run.type, which.grains, which.rows)
-
-#' @describeIn read_sediment Read the Longitudinal Cumulative Mass Change data output. 
-#' @export
-read_lcmc = function(f, run.type, which.grains, which.rows) {
-  read_sediment(f, "Long. Cum Mass Change", run.type, which.grains,
-    which.rows)
-}
-
 #' Generic Table Read Function
 #'
-#' Read RAS data output. 
+#' Read RAS sediment data output. 
 #'
 #' @param f The h5 file to read.
 #' @param tablepath The table to read in.
@@ -170,15 +146,6 @@ diff_table = function(d1, d2, tcol, diffcol) {
     mutate(Station = factor(Station, levels = datcols))
 }
 
-#' @describeIn diff_table Compute a difference table for Water Surface data.
-#' @export
-diff_ws = function(d1, d2, tcol = "Time") {
-  diff_table(d1, d2, tcol, "diff_ws")
-}
-
-
-
-
 #' Difference Table (Sediment)
 #'
 #' Compute a difference table from sediment data.
@@ -205,24 +172,16 @@ diff_sediment = function(d1, d2, tcol, gcol, diffcol) {
     mutate(Station = factor(Station, levels = datcols))
 }
 
-#' @describeIn diff_sediment Compute a difference table for Longitudinal Cumulative Mass Change data.
-#' @export
-diff_lcmc = function(d1, d2, tcol = "Time", gcol = "GrainClass") {
-  diff_sediment(d1, d2, tcol, gcol, "diff_lcmc")
-}
-
-#' @describeIn diff_sediment Compute a difference table for Mass In Cumulative data.
-#' @export
-diff_mic = function(d1, d2, tcol = "Time", gcol = "GrainClass") {
-  diff_sediment(d1, d2, tcol, gcol, "diff_mic")
-}
-
 #' Root Mean Square Error Table
 #'
 #' Compute RMSE from a difference table.
 #'
 #' @param d The difference table.
-#' @param groupcol the column to group differences by.
+#' @param groupcol the column(s) to group differences by. For standard
+#'   tables, \code{groupcol} will typically be either \code{"Station"}
+#'    or \code{"Time"}. For sediment tables, \code{groupcol} will 
+#'   typically be either \code{c("GrainClass", "Station")} or
+#'   \code{c("GrainClass", "Time")}.
 #' @param diffcol the column containing difference values.
 #' @param rmsecol The output column containing RMSE values
 #' @return A dataframe.
@@ -234,17 +193,4 @@ diff_mic = function(d1, d2, tcol = "Time", gcol = "GrainClass") {
 rmse_table = function(d, groupcol, diffcol, rmsecol) {
   d %>% group_by_(.dots = groupcol) %>% summarize_(
     .dots = setNames(str_c("sqrt(mean(", diffcol, "^2))"), rmsecol))
-}
-
-
-#' @describeIn rmse_table Compute RMSE of Invert Change outputs. 
-#' @export
-rmse_ic = function(d, groupcol = "Station") {
-  rmse_table(d, groupcol, "diff_ic", "rmse_ic")
-}
-
-#' @describeIn rmse_table Compute RMSE of Water Surface outputs. 
-#' @export
-rmse_ws = function(d, groupcol = "Station") {
-  rmse_table(d, groupcol, "diff_ws", "rmse_ws")
 }
