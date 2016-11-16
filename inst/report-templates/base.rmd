@@ -1,0 +1,24 @@
+```{r requirements, echo = FALSE}
+library(ggplot2)
+library(knitr)
+plot.theme = list(
+  theme_grey(base_size = 16),
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+)
+```
+
+# RAStestR Report
+
+This is a basic RASTestR report. The following two model outputs are compared:
+ - `r file1` (`r type1`)
+ - `r file2` (`r type2`)
+
+
+The following sections are included in this report:
+```{r print-section, echo = FALSE, results = "asis"}
+cat(paste0(seq_along(childsections), ". ", childsections), sep = '\n')
+```
+
+```{r main, child = childpaths, echo = FALSE, fig.width = 12, dpi = 150}
+```
+

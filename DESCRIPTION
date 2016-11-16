@@ -17,7 +17,9 @@ Imports:
     tidyr,
     h5
 Suggests:
-    knitr
+    knitr,
+    markdown,
+    ggplot2
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
