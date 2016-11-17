@@ -45,6 +45,8 @@ read_standard = function(f, tablelab, run.type) {
 #' @export
 read_sediment = function(f, tablelab, run.type, which.grains = "",
   which.rows = NULL) {
+  grain.levels = c("", paste(1:20))
+  grain.labels = c("ALL", paste("grain class", 1:20))
   x = h5file(f)
   on.exit(h5close(x))
   geompath = "Geometry/Cross Sections/River Stations"
@@ -73,7 +75,8 @@ read_sediment = function(f, tablelab, run.type, which.grains = "",
   for (i in seq_along(tablepaths)) {
     res[[i]] = read_hdtable(f, tablepaths[i], tspath, geompath,
     run.type, "Time", "XS_")
-    res[[i]]["GrainClass"] = which.grains[i]
+    res[[i]]["GrainClass"] = factor(which.grains[i], 
+      levels = grain.levels, labels = grain.labels)
   }
   if (!missing(which.rows)) {
     res = lapply(res, function(x) x[which.rows + 1,])
