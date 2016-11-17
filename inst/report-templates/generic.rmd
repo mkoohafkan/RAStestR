@@ -1,5 +1,7 @@
 ```{r requirements, echo = FALSE}
 library(ggplot2)
+library(dplyr)
+library(stringr)
 library(knitr)
 plot.theme = list(
   theme_grey(base_size = 16),
@@ -15,10 +17,19 @@ This is a basic RASTestR report. The following two model outputs are compared:
 
 
 The following sections are included in this report:
+
 ```{r print-section, echo = FALSE, results = "asis"}
 cat(paste0(seq_along(childsections), ". ", childsections), sep = '\n')
 ```
 
-```{r main, child = childpaths, echo = FALSE, fig.width = 12, dpi = 150}
+```{r loop-children, echo = FALSE, include = FALSE}
+out = NULL
+for (section.label in childsections) {
+  chunkfile = sectionchunk(section.label)
+  out = c(out, knit_child(chunkfile))
+}
 ```
 
+```{r print-report, echo= FALSE, results = "asis"}
+cat(out, sep= '\n\n')
+```

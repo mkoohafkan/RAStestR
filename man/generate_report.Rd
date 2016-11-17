@@ -5,8 +5,8 @@
 \title{Generate Report}
 \usage{
 generate_report(model1.file, model2.file, model1.type, model2.type, sections,
-  sediment.table.classes, sediment.table.rows, output.folder = "",
-  output.html = TRUE)
+  sediment.table.classes, sediment.table.rows, output.file = "report",
+  output.folder = tempdir(), output.html = TRUE)
 }
 \arguments{
 \item{model1.file}{The path to the first RAS model HDF output.}
@@ -25,7 +25,10 @@ the grain classes to include in the report.}
 \item{sediment.table.rows}{If grain class sections are specified,
 which rows of the grain class tables to include in the report.}
 
-\item{output.folder}{The folder to write out files to.}
+\item{output.file}{The output filename, without an extension.}
+
+\item{output.folder}{The folder to write out files to. Defaults to
+the R temporary directory.}
 
 \item{output.html}{If \code{TRUE}, generate an HTML report.}
 }
@@ -37,14 +40,19 @@ Generating a report requires that the packages
   \pkg{knitr}, \pkg{markdown} and \pkg{ggplot2}
   are installed. The following sections can be included in a report:
   \itemize{
-    \item dredged cum
+    \item dredged cum 
     \item effective depth
     \item effective_width
     \item flow
-    \item invert change
     \item froude number channel
     \item invert change
+    \item invert elevation
+    \item lat struc mass div
+    \item long cum mass change
     \item mannings n channel
+    \item mass bed change cum
+    \item mass in cum
+    \item mass out cum
     \item mean effective invert change
     \item mean effective invert elevation
     \item sediment concentration
@@ -53,9 +61,9 @@ Generating a report requires that the packages
     \item velocity
     \item water surface
     \item d10 active
-    \item d10inactive
-    \item d50active
-    \item d50inactive
+    \item d10 inactive
+    \item d50 active
+    \item d50 inactive
     \item d90 active
     \item d90 inactive
   }
