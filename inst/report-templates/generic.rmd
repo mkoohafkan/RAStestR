@@ -1,4 +1,4 @@
-```{r requirements, echo = FALSE}
+```{r requirements, echo = FALSE, include = FALSE}
 library(ggplot2)
 library(dplyr)
 library(stringr)
