@@ -1,0 +1,28 @@
+
+## Mass Out Cumulative
+
+```{r mass-out-cum, echo = FALSE}
+# expects parameters file1, file2, type1, type2
+moc1 = read_moc(file1, type1, grain.classes, grain.rows)
+moc2 = read_moc(file2, type2, grain.classes, grain.rows)
+moc.diff = diff_moc(moc1, moc2)
+moc.rmse.time = rmse_moc(moc.diff, "Time")
+
+moc.diff %>%
+  mutate(Station = as.numeric(str_extract(Station, "[0-9]+"))) %>%
+  ggplot() + plot.theme +
+  aes(x = Station, y = diff_moc, color = GrainClass) + geom_line() +
+  ylab("Difference") +
+  ggtitle("Mass Out Cumulative Differences at Stations") +
+  facet_wrap( ~ Time)
+moc.diff %>% ggplot() + plot.theme +
+  aes(x = Time, y = diff_moc, fill = GrainClass) +
+  geom_boxplot() + facet_wrap( ~ GrainClass) +
+  ylab("Difference") +
+  ggtitle("Mass Out Cumulative Differences")
+moc.rmse.time %>% ggplot() + plot.theme +
+  aes(x = GrainClass, y = rmse_moc, fill = GrainClass) +
+  geom_col(color = "black") + ylab("RMSE") +
+  facet_wrap( ~ factor(Time, levels = rev(sort(unique(Time))))) + 
+  ggtitle("Mass Out Cumulative RMSE by Grain Class")
+```

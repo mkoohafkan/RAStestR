@@ -11,16 +11,16 @@ ws.rmse.time = rmse_ws(ws.diff, "Time")
 
 ws.diff %>% ggplot() + plot.theme +
   aes(x = Station, y = diff_ws) + geom_boxplot() +
-  ylab("Water Surface Difference") +
-  ggtitle("Water Surface differences at Stations")
+  ylab("Difference") +
+  ggtitle("Water Surface Differences at Stations")
 ws.rmse.station %>% ggplot() + plot.theme +
   aes(x = Station, y = rmse_ws) +
-  geom_col() + ylab("Water Surface RMSE") +
-  ggtitle("Water Surface RMSE at each Station")
+  geom_col() + ylab("RMSE") +
+  ggtitle("Water Surface RMSE at Stations")
 ws.rmse.time %>% mutate(Time = as.POSIXct(Time, format = "%d%b%Y %M:%S",
     tz = "UTC")) %>% ggplot() + plot.theme +
   aes(x = Time, y = rmse_ws) + geom_line() +
   scale_x_datetime(date_labels = "%b %Y") + 
-  ylab(" Water Surface RMSE ") +
-  ggtitle("Water Surface RMSE through time")
+  ylab("RMSE") +
+  ggtitle("Water Surface RMSE Through Time")
 ```

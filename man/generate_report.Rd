@@ -5,7 +5,8 @@
 \title{Generate Report}
 \usage{
 generate_report(model1.file, model2.file, model1.type, model2.type, sections,
-  output.folder = "", output.html = TRUE)
+  sediment.table.classes, sediment.table.rows, output.folder = "",
+  output.html = TRUE)
 }
 \arguments{
 \item{model1.file}{The path to the first RAS model HDF output.}
@@ -17,6 +18,12 @@ generate_report(model1.file, model2.file, model1.type, model2.type, sections,
 \item{model2.type}{The type of the second RAS model.}
 
 \item{sections}{The sections to include in the report.}
+
+\item{sediment.table.classes}{If grain class sections are specified,
+the grain classes to include in the report.}
+
+\item{sediment.table.rows}{If grain class sections are specified,
+which rows of the grain class tables to include in the report.}
 
 \item{output.folder}{The folder to write out files to.}
 
@@ -52,5 +59,10 @@ Generating a report requires that the packages
     \item d90 active
     \item d90 inactive
   }
+}
+\seealso{
+\link{read_standard}
+
+\link{read_sediment}
 }
 

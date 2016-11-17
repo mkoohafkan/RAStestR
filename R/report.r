@@ -7,6 +7,10 @@
 #' @param model1.type The type ("quasi" or "unsteady") of the first RAS model.
 #' @param model2.type The type of the second RAS model.
 #' @param sections The sections to include in the report.
+#' @param sediment.table.classes If grain class sections are specified,
+#'   the grain classes to include in the report.
+#' @param sediment.table.rows If grain class sections are specified,
+#'   which rows of the grain class tables to include in the report.
 #' @param output.folder The folder to write out files to.
 #' @param output.html If \code{TRUE}, generate an HTML report.
 #' @details Generating a report requires that the packages 
@@ -36,9 +40,12 @@
 #'     \item d90 inactive
 #'   }
 #'
+#' @seealso \link{read_standard}
+#' @seealso \link{read_sediment}
 #' @export
 generate_report = function(model1.file, model2.file, model1.type, model2.type,
-  sections, output.folder = "", output.html = TRUE) {
+  sections, sediment.table.classes, sediment.table.rows, output.folder = "", 
+  output.html = TRUE) {
   if (!requireNamespace("knitr"))
     stop("Package 'knitr' is required to generate RAStestR reports.")
   if (!requireNamespace("markdown"))
@@ -63,6 +70,10 @@ generate_report = function(model1.file, model2.file, model1.type, model2.type,
   sedimentsections = tolower(sections) %>% intersect(c(
      "lat struct mass div", "long cum mass change", 
      "mass bed change cum", "mass in cum", "mass out cum"))
+  if (length(sedimentsections) > 0)
+    if (missing(sediment.table.classes) || missing(sediment.table.rows))
+      stop("One or more sections require the arguments ",
+      "'sediment.table.classes' and 'sediment.table.rows'.")
   sections = c(standardsections, sedimentsections)
   children = sections %>% str_replace(" ", "-") %>% str_c(".rmd")
   paths = system.file("report-templates/sections", children,
@@ -79,6 +90,10 @@ generate_report = function(model1.file, model2.file, model1.type, model2.type,
   assign("type1", model1.type, pos = doc.env)
   assign("type2", model2.type, pos = doc.env)
   assign("type2", model2.type, pos = doc.env)
+  if (!missing(sediment.table.classes))
+    assign("grain.classes", sediment.table.classes, pos = doc.env)
+  if (!missing(sediment.table.rows))
+    assign("grain.rows", sediment.table.rows, pos = doc.env)
   doc.template = system.file("report-templates/base.rmd", package = "RAStestR")
   out = knitr::knit(doc.template, "output.md", envir = doc.env)
   if (output.html)

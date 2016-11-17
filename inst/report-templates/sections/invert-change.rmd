@@ -1,0 +1,26 @@
+
+## Invert Change
+
+```{r invert-change, echo = FALSE}
+# expects parameters file1, file2, type1, type2
+ic1 = read_ic(file1, type1)
+ic2 = read_ic(file2, type2)
+ic.diff = diff_ic(ic1, ic2)
+ic.rmse.station = rmse_ic(ic.diff, "Station")
+ic.rmse.time = rmse_ic(ic.diff, "Time")
+
+ic.diff %>% ggplot() + plot.theme +
+  aes(x = Station, y = diff_ic) + geom_boxplot() +
+  ylab("Difference") +
+  ggtitle("Invert Change Differences at Stations")
+ic.rmse.station %>% ggplot() + plot.theme +
+  aes(x = Station, y = rmse_ic) +
+  geom_col() + ylab("RMSE") +
+  ggtitle("Invert Change RMSE at Stations")
+ic.rmse.time %>% mutate(Time = as.POSIXct(Time, format = "%d%b%Y %M:%S",
+    tz = "UTC")) %>% ggplot() + plot.theme +
+  aes(x = Time, y = rmse_ic) + geom_line() +
+  scale_x_datetime(date_labels = "%b %Y") + 
+  ylab("RMSE") +
+  ggtitle("Invert Change RMSE Through Time")
+```
