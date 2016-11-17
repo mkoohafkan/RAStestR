@@ -48,7 +48,7 @@ Generating a report requires that the packages
     \item invert change
     \item invert elevation
     \item lat struc mass div
-    \item long cum mass change
+    \item long. cum mass change
     \item mannings n channel
     \item mass bed change cum
     \item mass in cum

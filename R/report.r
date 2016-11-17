@@ -27,7 +27,7 @@
 #'     \item invert change
 #'     \item invert elevation
 #'     \item lat struc mass div
-#'     \item long cum mass change
+#'     \item long. cum mass change
 #'     \item mannings n channel
 #'     \item mass bed change cum
 #'     \item mass in cum
@@ -74,7 +74,7 @@ generate_report = function(model1.file, model2.file, model1.type, model2.type,
       "d10 Active", "d10 Inactive", "d50 Active", "d50 Inactive",
       "d90 Active", "d90 Inactive")
   sediment = c(
-     "Lat Struc Mass Div", "Long Cum Mass Change",
+     "Lat Struc Mass Div", "Long. Cum Mass Change",
      "Mass Bed Change Cum", "Mass In Cum", "Mass Out Cum")
   selectedstandard = standard[str_to_lower(standard) %in% 
     str_to_lower(sections)]
