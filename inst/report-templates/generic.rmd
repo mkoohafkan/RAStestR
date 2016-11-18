@@ -11,10 +11,12 @@ plot.theme = list(
 
 # RAStestR Report
 
-This is a basic RASTestR report. The following two model outputs are compared:
- - `r file1` (`r type1`)
- - `r file2` (`r type2`)
-
+This is a basic RASTestR report for comparing outputs of a 
+**new model `r label2`** to outputs of a **base model `r label1`**. 
+The new model is *type `r type2`*  and the base model is 
+*type `r type1`*  The data sources of the two models are listed below:
+ - **Base:** `r file1`
+ - **Compare**: `r file2`
 
 The following sections are included in this report:
 

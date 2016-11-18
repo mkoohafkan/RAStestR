@@ -4,7 +4,8 @@
 \alias{generate_report}
 \title{Generate Report}
 \usage{
-generate_report(model1.file, model2.file, model1.type, model2.type, sections,
+generate_report(model1.file, model2.file, model1.type, model2.type,
+  model1.label = NULL, model2.label = NULL, sections,
   sediment.table.classes, sediment.table.rows, output.file = "report",
   output.folder = tempdir(), output.html = TRUE)
 }

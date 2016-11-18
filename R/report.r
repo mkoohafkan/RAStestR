@@ -51,8 +51,8 @@
 #' @seealso \link{read_sediment}
 #' @export
 generate_report = function(model1.file, model2.file, model1.type, model2.type,
-  sections, sediment.table.classes, sediment.table.rows, output.file = "report", 
-  output.folder = tempdir(),
+  model1.label = NULL, model2.label = NULL, sections, sediment.table.classes, 
+  sediment.table.rows, output.file = "report", output.folder = tempdir(), 
   output.html = TRUE) {
   if (!requireNamespace("knitr"))
     stop("Package 'knitr' is required to generate RAStestR reports.")
@@ -95,7 +95,8 @@ generate_report = function(model1.file, model2.file, model1.type, model2.type,
   assign("file2", model2.file, pos = doc.env)
   assign("type1", model1.type, pos = doc.env)
   assign("type2", model2.type, pos = doc.env)
-  assign("type2", model2.type, pos = doc.env)
+  assign("label1", model1.label, pos = doc.env)
+  assign("label2", model2.label, pos = doc.env)
   assign("sectionchunk", report_chunk, pos = doc.env)
   if (!missing(sediment.table.classes))
     assign("grain.classes", sediment.table.classes, pos = doc.env)
