@@ -2,10 +2,12 @@
 #'
 #' Generate a RAStestR report.
 #'
-#' @param model1.file The path to the first RAS model HDF output.
-#' @param model2.file The path to the second RAS model HDF output.
-#' @param model1.type The type ("quasi" or "unsteady") of the first RAS model.
-#' @param model2.type The type of the second RAS model.
+#' @param model1.file The path to the first or "base" RAS model HDF output.
+#' @param model2.file The path to the second or "new" RAS model HDF output.
+#' @param model1.type The type ("quasi" or "unsteady") of the base RAS model.
+#' @param model2.type The type of the new RAS model.
+#' @param model1.label Optional label for the base RAS model.
+#' @param model2.label Optional label for the new RAS model.
 #' @param sections The sections to include in the report.
 #' @param sediment.table.classes If grain class sections are specified,
 #'   the grain classes to include in the report.

@@ -1,3 +1,6 @@
+#' @include main.r
+NULL
+
 #' @describeIn read_standard Read the Dredged Cum data output.
 #' @export
 read_dc = function(f, run.type) {

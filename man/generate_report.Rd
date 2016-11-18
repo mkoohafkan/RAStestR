@@ -10,13 +10,17 @@ generate_report(model1.file, model2.file, model1.type, model2.type,
   output.folder = tempdir(), output.html = TRUE)
 }
 \arguments{
-\item{model1.file}{The path to the first RAS model HDF output.}
+\item{model1.file}{The path to the first or "base" RAS model HDF output.}
 
-\item{model2.file}{The path to the second RAS model HDF output.}
+\item{model2.file}{The path to the second or "new" RAS model HDF output.}
 
-\item{model1.type}{The type ("quasi" or "unsteady") of the first RAS model.}
+\item{model1.type}{The type ("quasi" or "unsteady") of the base RAS model.}
 
-\item{model2.type}{The type of the second RAS model.}
+\item{model2.type}{The type of the new RAS model.}
+
+\item{model1.label}{Optional label for the base RAS model.}
+
+\item{model2.label}{Optional label for the new RAS model.}
 
 \item{sections}{The sections to include in the report.}
 

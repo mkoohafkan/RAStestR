@@ -23,3 +23,7 @@ Suggests:
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
+Collate:
+    'main.r'
+    'helper.r'
+    'report.r'
