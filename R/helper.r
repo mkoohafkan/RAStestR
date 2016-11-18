@@ -303,13 +303,13 @@ diff_mbcc = function(d1, d2) {
 #' @describeIn diff_sediment Compute a difference table for Mass In Cumulative data.
 #' @export
 diff_mic = function(d1, d2) {
-  diff_sediment(d1, "Time", "GrainClass", "diff_mic")
+  diff_sediment(d1, d2, "Time", "GrainClass", "diff_mic")
 }
 
 #' @describeIn diff_sediment Compute a difference table for Mass Out Cumulative data.
 #' @export
 diff_moc = function(d1, d2) {
-  diff_sediment(d1, "Time", "GrainClass", "diff_moc")
+  diff_sediment(d1, d2, "Time", "GrainClass", "diff_moc")
 }
 
 
