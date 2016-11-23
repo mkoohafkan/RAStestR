@@ -18,7 +18,7 @@ Imports:
     h5
 Suggests:
     knitr,
-    markdown,
+    rmarkdown,
     ggplot2
 LazyData: true
 VignetteBuilder: knitr

@@ -11,25 +11,18 @@ d.rmse.time = rmse_table(d.diff, "Time", "Diff", "RMSE")
 diffidx = which.max(d.diff$Diff)
 tidx = which.max(d.rmse.time$RMSE)
 sidx = which.max(d.rmse.station$RMSE)
+txt = paste(
+  "The maximum %s difference of %f occurred at Station %s on %s.",
+  "The largest total RMSE at a single time was %f on %s.",
+  "The largest total RMSE at a single station was %f at %s."
+)
+res = sprintf(txt, section.label, d.diff$Diff[diffidx], d.diff$Station[diffidx], 
+  d.diff$Time[diffidx], d.rmse.time$RMSE[tidx], d.rmse.time$Time[tidx], 
+  d.rmse.station$RMSE[sidx], d.rmse.station$Station[sidx])
 
-#' The maximum 
-{{ section.label }}
-#' difference of 
-{{ d.diff$Diff[diffidx] }}
-#' occurred at Station 
-{{ d.diff$Station[diffidx] }}
-#' on
-{{ d.diff$Time[diffidx] }}
-#' . The largest total RMSE at a single time
-#' was 
-{{ d.rmse.time$RMSE[tidx] }}
-#' on 
-{{ d.rmse.time$Time[tidx] }}
-#' . The largest total RMSE at a single station was
-{{ d.rmse.station$RMSE[sidx] }}
-#' at 
-{{ d.rmse.station$Station[sidx] }}
-#' .
+#'
+{{ res }}
+#'
 
 #+ echo = FALSE, fig.width = 12, dpi = 150
 d.diff %>% ggplot() + plot.theme +
@@ -40,7 +33,7 @@ d.diff %>% ggplot() + plot.theme +
 #+ echo = FALSE, fig.width = 12, dpi = 150
 d.rmse.station %>% ggplot() + plot.theme +
   aes(x = Station, y = RMSE) +
-  geom_col() + ylab("RMSE") +
+  geom_col(color = "black", fill = "white") + ylab("RMSE") +
   ggtitle(paste(section.label, "RMSE at Stations"))
 
 #+ echo = FALSE, fig.width = 12, dpi = 150

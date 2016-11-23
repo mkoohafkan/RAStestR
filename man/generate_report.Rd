@@ -7,7 +7,7 @@
 generate_report(model1.file, model2.file, model1.type, model2.type,
   model1.label = NULL, model2.label = NULL, sections,
   sediment.table.classes, sediment.table.rows, output.file = "report",
-  output.folder = tempdir(), output.html = TRUE)
+  output.folder = tempdir(), output.type = c("html", "pdf"))
 }
 \arguments{
 \item{model1.file}{The path to the first or "base" RAS model HDF output.}
@@ -35,14 +35,14 @@ which rows of the grain class tables to include in the report.}
 \item{output.folder}{The folder to write out files to. Defaults to
 the R temporary directory.}
 
-\item{output.html}{If \code{TRUE}, generate an HTML report.}
+\item{output.type}{The file type to generate, either "html" or "pdf".}
 }
 \description{
 Generate a RAStestR report.
 }
 \details{
 Generating a report requires that the packages 
-  \pkg{knitr}, \pkg{markdown} and \pkg{ggplot2}
+  \pkg{knitr}, \pkg{rmarkdown} and \pkg{ggplot2}
   are installed. The following sections can be included in a report:
   \itemize{
     \item dredged cum 

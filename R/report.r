@@ -16,9 +16,10 @@
 #' @param output.file The output filename, without an extension.
 #' @param output.folder The folder to write out files to. Defaults to
 #'   the R temporary directory.
-#' @param output.html If \code{TRUE}, generate an HTML report.
+#' @param output.type The file type to generate, either "html" or "pdf".
+#'
 #' @details Generating a report requires that the packages 
-#'   \pkg{knitr}, \pkg{markdown} and \pkg{ggplot2}
+#'   \pkg{knitr}, \pkg{rmarkdown} and \pkg{ggplot2}
 #'   are installed. The following sections can be included in a report:
 #'   \itemize{
 #'     \item dredged cum 
@@ -53,92 +54,13 @@
 #' @seealso \link{read_sediment}
 #' @export
 generate_report = function(model1.file, model2.file, model1.type, model2.type,
-  model1.label = NULL, model2.label = NULL, sections, sediment.table.classes, 
-  sediment.table.rows, output.file = "report", output.folder = tempdir(), 
-  output.html = TRUE) {
-  if (!requireNamespace("knitr"))
-    stop("Package 'knitr' is required to generate RAStestR reports.")
-  if (!requireNamespace("markdown"))
-    stop("Package 'knitr' is required to generate RAStestR reports.")
-  if (!requireNamespace("ggplot2"))
-    stop("Package 'ggplot2' is required to generate RAStestR reports.")
-
-  oldwd = getwd()
-  on.exit(setwd(oldwd))
-  setwd(output.folder)
-
-  standard = c(
-    "Dredged Cum", "Effective Depth", "Effective_Width", "Flow",
-    "Froude Number Channel", "Invert Change", "Invert Elevation",
-    "Mannings n Channel", "Mean Effective Invert Change",
-      "Mean Effective Invert Elevation", "Sediment Concentration",
-      "Shear Stress", "Slope", "Velocity", "Water Surface",
-      "d10 Active", "d10 Inactive", "d50 Active", "d50 Inactive",
-      "d90 Active", "d90 Inactive")
-  sediment = c(
-     "Lat Struc Mass Div", "Long. Cum Mass Change",
-     "Mass Bed Change Cum", "Mass In Cum", "Mass Out Cum")
-  selectedstandard = standard[str_to_lower(standard) %in% 
-    str_to_lower(sections)]
-  selectedsediment = sediment[str_to_lower(sediment) %in% 
-    str_to_lower(sections)]
-  sections = c(selectedstandard, selectedsediment)
-  if (length(sections) < 1)
-    stop("No recognizable sections specified.")
-  if (length(selectedsediment) > 0)
-    if (missing(sediment.table.classes) || missing(sediment.table.rows))
-      stop("One or more sections require the arguments ",
-      "'sediment.table.classes' and 'sediment.table.rows'.")
-
-  doc.env = new.env()
-#  assign("childpaths", paths, pos = doc.env)
-  assign("childsections", sections, pos = doc.env)
-  assign("file1", model1.file, pos = doc.env)
-  assign("file2", model2.file, pos = doc.env)
-  assign("type1", model1.type, pos = doc.env)
-  assign("type2", model2.type, pos = doc.env)
-  assign("label1", model1.label, pos = doc.env)
-  assign("label2", model2.label, pos = doc.env)
-  assign("sectionchunk", report_chunk, pos = doc.env)
-  if (!missing(sediment.table.classes))
-    assign("grain.classes", sediment.table.classes, pos = doc.env)
-  if (!missing(sediment.table.rows))
-    assign("grain.rows", sediment.table.rows, pos = doc.env)
-  doc.template = system.file("report-templates/generic.rmd", package = "RAStestR")
-  outmd = str_c(output.file, ".md")
-  suppressWarnings(knitr::knit(doc.template, outmd, envir = doc.env,
-    quiet = TRUE))
-  if (output.html) {
-    outhtml = str_c(output.file, ".html")
-    markdown::markdownToHTML(file = outmd, output = outhtml)
-    shell.exec(file.path(output.folder, outhtml))
-    file.path(output.folder, outhtml)
-  } else
-    shell.exec(file.path(output.folder, outmd))
-  file.path(output.folder, outmd)
-}
-
-report_chunk = function(label) { 
-  if(tolower(label) %in% c("dredged cum", "effective depth", 
-      "effective_width", "flow", "froude number channel", 
-      "invert change", "invert elevation", "mannings n channel", 
-      "mean effective invert change", "mean effective invert elevation", 
-      "sediment concentration", "shear stress", "slope", "velocity", 
-      "water surface", "d10 active", "d10inactive", "d50active", 
-      "d50inactive", "d90 active", "d90 inactive"))
-    system.file("report-templates/sections/standard-chunk.rmd", package = "RAStestR")
-  else
-    system.file("report-templates/sections/sediment-chunk.rmd", package = "RAStestR")
-}
-
-spin_report = function(model1.file, model2.file, model1.type, model2.type,
   model1.label = NULL, model2.label = NULL, sections, sediment.table.classes,
   sediment.table.rows, output.file = "report", output.folder = tempdir(),
   output.type = c("html", "pdf")) {
   if (!requireNamespace("knitr"))
     stop("Package 'knitr' is required to generate RAStestR reports.")
-  if (!requireNamespace("markdown"))
-    stop("Package 'knitr' is required to generate RAStestR reports.")
+  if (!requireNamespace("rmarkdown"))
+    stop("Package 'rmarkdown' is required to generate RAStestR reports.")
   if (!requireNamespace("ggplot2"))
     stop("Package 'ggplot2' is required to generate RAStestR reports.")
 

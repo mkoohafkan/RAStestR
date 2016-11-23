@@ -23,7 +23,7 @@ d.diff %>%
 #+ echo = FALSE, fig.width = 12, dpi = 150
 d.diff %>% ggplot() + plot.theme +
   aes(x = Time, y = Diff, fill = GrainClass) +
-  geom_boxplot() + facet_wrap(~GrainClass) +
+  geom_boxplot() +
   ylab("Difference") +
   ggtitle(paste(section.label, "Differences"))
 
