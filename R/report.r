@@ -64,6 +64,11 @@ generate_report = function(model1.file, model2.file, model1.type, model2.type,
   if (!requireNamespace("ggplot2"))
     stop("Package 'ggplot2' is required to generate RAStestR reports.")
 
+  if (!(file.exists(model1.file)))
+    stop("file ", model1.file, " could not be found.")
+  if (!(file.exists(model2.file)))
+    stop("file ", model2.file, " could not be found.")
+
   # prepare output folder
   oldwd = getwd()
   setwd(output.folder)

@@ -106,6 +106,9 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
   run.type, rowcolname, colprefix) {
   x = h5file(f)
   on.exit(h5close(x))
+  if (!existsDataSet(x, tablepath))
+    stop('Specified table could not be found. Check that argument "run.type" is correct.',
+      call. = FALSE)
   clabs = x[coltablepath][] %>% str_trim()
   rlabs = x[rowtablepath][] %>% str_trim()
   this = x[tablepath][] %>% as_data_frame()
