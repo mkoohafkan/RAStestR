@@ -36,7 +36,7 @@ read_standard = function(f, tablelab, run.type, which.times = NULL,
   }
   if (!is.null(which.stations)) {
     othercols = !str_detect(names(res), "XS_")
-    stationcols = str_detect(names(res), str_c("XS_", which.stations))
+    stationcols = names(res) %in% str_c("XS_", which.stations)
     res = res[, which(othercols | stationcols)]
   }
   res
@@ -96,7 +96,7 @@ read_sediment = function(f, tablelab, run.type, which.times = NULL,
     }
     if (!is.null(which.stations)) {
       othercols = !str_detect(names(res[[i]]), "XS_")
-      stationcols = str_detect(names(res[[i]]), str_c("XS_", which.stations))
+      stationcols = names(res[[i]]) %in% str_c("XS_", which.stations)
       res[[i]] = res[[i]][, which(othercols | stationcols)]
     }
     res[[i]]["GrainClass"] = factor(which.grains[i], 
