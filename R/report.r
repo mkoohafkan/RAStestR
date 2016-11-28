@@ -9,14 +9,13 @@
 #' @param model1.label Optional label for the base RAS model.
 #' @param model2.label Optional label for the new RAS model.
 #' @param sections The sections to include in the report.
-
-#' @param which.grains Grain class tables to extract. "" Corresponds to 
-#'   the totals, "1" is the first grain class, etc. If NULL, all grain
-#'   classes will be returned.
-#' @param which.times Character vector of timestamps to extract. If
-#'   NULL, all timestamps will be returned.
-#' @param which.stations Character vector of station numbers to extract. If
-#'   NULL, all stations will be returned.
+#' @param standard.opts List with elements \code{which.times} and 
+#'   \code{which.stations} specifying the times and stations to output
+#'   for standard tables. See \code{\link{read_standard}} for details.
+#' @param sediment.opts List with elements \code{which.times},
+#'   \code{which.stations} and \code{which.grains} specifying the times,
+#'   stations and grain classes to output for sediment tables. See 
+#'   \code{\link{read_sediment}} for details.
 #' @param output.file The output filename, without an extension.
 #' @param output.folder The folder to write out files to. Defaults to
 #'   the R temporary directory.
@@ -59,7 +58,7 @@
 #' @export
 generate_report = function(model1.file, model2.file, model1.type, 
   model2.type, model1.label = NULL, model2.label = NULL, sections, 
-  which.times = NULL, which.stations = NULL, which.grains = NULL, 
+  standard.opts = list(), sediment.opts = list(),  
   output.file = "report", output.folder = tempdir(), 
   output.type = c("html", "pdf")) {
   if (!requireNamespace("knitr"))
@@ -73,6 +72,17 @@ generate_report = function(model1.file, model2.file, model1.type,
     stop("file ", model1.file, " could not be found.")
   if (!(file.exists(model2.file)))
     stop("file ", model2.file, " could not be found.")
+
+  # prepare table options
+  if (!all(names(standard.opts) %in% c("which.times", "which.stations")))
+    stop("Some elements of argument 'standard.opts' were not recognized.")
+  if (!all(names(sediment.opts) %in% c("which.times", "which.stations", "which.grains")))
+    stop("Some elements of argument 'sediment.opts' were not recognized.")
+  which.times.standard = standard.opts[["which.times"]]
+  which.stations.standard = standard.opts[["which.stations"]]
+  which.times.sediment = sediment.opts[["which.times"]]
+  which.stations.sediment = sediment.opts[["which.stations"]]
+  which.grains = sediment.opts[["which.grains"]]
 
   # prepare output folder
   oldwd = getwd()
@@ -132,7 +142,6 @@ generate_report = function(model1.file, model2.file, model1.type,
     stop("No recognizable sections specified.")
 
   doc.env = new.env()
-  #  assign("childpaths", paths, pos = doc.env)
   assign("childsections", sections, pos = doc.env)
   assign("file1", model1.file, pos = doc.env)
   assign("file2", model2.file, pos = doc.env)
@@ -141,8 +150,10 @@ generate_report = function(model1.file, model2.file, model1.type,
   assign("label1", model1.label, pos = doc.env)
   assign("label2", model2.label, pos = doc.env)
   assign("sectionchunk", spin_chunk, pos = doc.env)
-  assign("table.times", which.times, pos = doc.env)
-  assign("table.stations", which.stations, pos = doc.env)  
+  assign("table.times.standard", which.times.standard, pos = doc.env)
+  assign("table.stations.standard", which.stations.standard, pos = doc.env)  
+  assign("table.times.sediment", which.times.sediment, pos = doc.env)
+  assign("table.stations.sediment", which.stations.sediment, pos = doc.env)
   assign("table.grains", which.grains, pos = doc.env)
 
   rmarkdown::render(basename(doc.template), output_format = spin.format,
@@ -154,13 +165,23 @@ generate_report = function(model1.file, model2.file, model1.type,
 
 
 spin_chunk = function(label) {
-  if (tolower(label) %in% c("dredged cum", "effective depth",
-      "effective_width", "flow", "froude number channel",
-      "invert change", "invert elevation", "mannings n channel",
-      "mean effective invert change", "mean effective invert elevation",
-      "sediment concentration", "shear stress", "slope", "velocity",
-      "water surface", "d10 active", "d10inactive", "d50active",
-      "d50inactive", "d90 active", "d90 inactive"))
+  if (label %in% c(
+    "Dredged Cum", "Effective Depth", "Effective_Width", "Flow",
+    "Froude Number Channel", "Hydraulic Radius",
+    "Invert Change", "Invert Elevation", "Mannings n Channel",
+    "Mean Effective Invert Change", "Mean Effective Invert Elevation",
+    "Moveable Elv L", "Moveable Elv R",
+    "Moveable Sta L", "Moveable Sta R",
+    "Observed Data", "Sediment Concentration",
+    "Shear Stress", "Shear Velocity", "Slope", "Temperature",
+    "Thickness Cover", "Thickness Inactive", "Thickness Subsurface",
+    "Velocity", "Water Surface",
+    "d10 Active", "d10 Cover", "d10 Inactive", "d10 Subsurface",
+    "d16 Active", "d16 Cover", "d16 Inactive", "d16 Subsurface",
+    "d50 Active", "d50 Cover", "d50 Inactive", "d50 Subsurface",
+    "d84 Active", "d84 Cover", "d84 Inactive", "d84 Subsurface",
+    "d90 Active", "d90 Cover", "d90 Inactive", "d90 Subsurface"
+    ))
     "standard-spin.r"
   else
     "sediment-spin.r"
