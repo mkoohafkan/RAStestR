@@ -100,15 +100,29 @@ generate_report = function(model1.file, model2.file, model1.type,
 
   standard = c(
     "Dredged Cum", "Effective Depth", "Effective_Width", "Flow",
-    "Froude Number Channel", "Invert Change", "Invert Elevation",
-    "Mannings n Channel", "Mean Effective Invert Change",
-      "Mean Effective Invert Elevation", "Sediment Concentration",
-      "Shear Stress", "Slope", "Velocity", "Water Surface",
-      "d10 Active", "d10 Inactive", "d50 Active", "d50 Inactive",
-      "d90 Active", "d90 Inactive")
+    "Froude Number Channel", "Hydraulic Radius", 
+    "Invert Change", "Invert Elevation", "Mannings n Channel", 
+    "Mean Effective Invert Change", "Mean Effective Invert Elevation", 
+    "Moveable Elv L", "Moveable Elv R", 
+    "Moveable Sta L", "Moveable Sta R", 
+    "Observed Data", "Sediment Concentration", 
+    "Shear Stress", "Shear Velocity", "Slope", "Temperature", 
+    "Thickness Cover", "Thickness Inactive", "Thickness Subsurface", 
+    "Velocity", "Water Surface", 
+    "d10 Active", "d10 Cover", "d10 Inactive", "d10 Subsurface",
+    "d16 Active", "d16 Cover", "d16 Inactive", "d16 Subsurface",
+    "d50 Active", "d50 Cover", "d50 Inactive", "d50 Subsurface",
+    "d84 Active", "d84 Cover", "d84 Inactive", "d84 Subsurface",
+    "d90 Active", "d90 Cover", "d90 Inactive", "d90 Subsurface"    
+    )
   sediment = c(
-     "Lat Struc Mass Div", "Long. Cum Mass Change",
-     "Mass Bed Change Cum", "Mass In Cum", "Mass Out Cum")
+     "Fall Velocity", "Lat Struc Mass Div", 
+     "Long. Cum Mass Change", "Long. Cum Mass Moveable Limit", 
+     "Mass Bed Change", "Mass Bed Change Cum", 
+     "Mass Capacity", "Mass Cover",  
+     "Mass In", "Mass Inactive", "Mass In Cum", 
+     "Mass Out", "Mass Out Cum", "Mass Subsurface", 
+     "Reduce Armor Factor")
   selectedstandard = standard[str_to_lower(standard) %in%
     str_to_lower(sections)]
   selectedsediment = sediment[str_to_lower(sediment) %in%
