@@ -8,3 +8,4 @@ RAStestR.rproj
 RAStestR.rxproj
 RAStestR.sln
 LICENSE
+inst/build_helper.r
