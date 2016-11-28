@@ -5,8 +5,8 @@
 \title{Generate Report}
 \usage{
 generate_report(model1.file, model2.file, model1.type, model2.type,
-  model1.label = NULL, model2.label = NULL, sections,
-  sediment.table.classes, sediment.table.rows, output.file = "report",
+  model1.label = NULL, model2.label = NULL, sections, which.times = NULL,
+  which.stations = NULL, which.grains = NULL, output.file = "report",
   output.folder = tempdir(), output.type = c("html", "pdf"))
 }
 \arguments{
@@ -24,11 +24,15 @@ generate_report(model1.file, model2.file, model1.type, model2.type,
 
 \item{sections}{The sections to include in the report.}
 
-\item{sediment.table.classes}{If grain class sections are specified,
-the grain classes to include in the report.}
+\item{which.times}{Character vector of timestamps to extract. If
+NULL, all timestamps will be returned.}
 
-\item{sediment.table.rows}{If grain class sections are specified,
-which rows of the grain class tables to include in the report.}
+\item{which.stations}{Character vector of station numbers to extract. If
+NULL, all stations will be returned.}
+
+\item{which.grains}{Grain class tables to extract. "" Corresponds to 
+the totals, "1" is the first grain class, etc. If NULL, all grain
+classes will be returned.}
 
 \item{output.file}{The output filename, without an extension.}
 

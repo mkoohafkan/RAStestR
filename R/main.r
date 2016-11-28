@@ -5,11 +5,16 @@
 #' @param f The h5 file to read.
 #' @param tablelab The table to read.
 #' @param run.type The model run type, e.g. "quasi" or "unsteady".
+#' @param which.times Character vector of timestamps to extract. If
+#'   NULL, all timestamps will be returned.
+#' @param which.stations Character vector of station numbers to extract. If
+#'   NULL, all stations will be returned.
 #' @return A dataframe with a column "Time" containing the Date Time 
 #'   Stamp data and columns "XS_####" where ### is the cross-section ID.
 #'
 #' @export
-read_standard = function(f, tablelab, run.type) {
+read_standard = function(f, tablelab, run.type, which.times = NULL, 
+  which.stations = NULL) {
   geompath = "Geometry/Cross Sections/River Stations"
   if (run.type == "unsteady") {
     tblpath = file.path("Results", "Unsteady", "Output", "Output Blocks",
@@ -24,7 +29,17 @@ read_standard = function(f, tablelab, run.type) {
     tspath = file.path("Results", "Sediment", "Output Blocks",
       "Sediment", "Sediment Time Series", "Time Date Stamp")
   }
-  read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_")
+  res = read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_") 
+  if (!is.null(which.times)) {
+    Time = NULL
+    res = filter(res, Time %in% which.times)
+  }
+  if (!is.null(which.stations)) {
+    othercols = !str_detect(names(res), "XS_")
+    stationcols = str_detect(names(res), str_c("XS_", which.stations))
+    res = res[, which(othercols | stationcols)]
+  }
+  res
 }
 
 #' Sediment By Grain Class Table
@@ -33,18 +48,18 @@ read_standard = function(f, tablelab, run.type) {
 #'
 #' @inheritParams read_standard
 #' @param which.grains Grain class tables to extract. "" Corresponds to 
-#'   the totals, "1" is the first grain class, etc.
-#' @param which.rows A numeric identifying the row numbers to extract, 
-#'   0 being the first row.
+#'   the totals, "1" is the first grain class, etc. If NULL, all grain
+#'   classes will be returned.
 #' @return A dataframe with a column "Time" containing the Date Time 
-#'   Stamp data and columns "XS_####" where ### is the cross-section ID.
+#'   Stamp data; columns "XS_####" where ### is the cross-section ID;
+#'   and column "GrainClass".
 #'
 #' @import h5 
 #' @import dplyr 
 #' @import stringr
 #' @export
-read_sediment = function(f, tablelab, run.type, which.grains = "",
-  which.rows = NULL) {
+read_sediment = function(f, tablelab, run.type, which.times = NULL, 
+  which.stations = NULL, which.grains = NULL) {
   grain.levels = c("", paste(1:20))
   grain.labels = c("ALL", paste("grain class", 1:20))
   x = h5file(f)
@@ -63,7 +78,7 @@ read_sediment = function(f, tablelab, run.type, which.grains = "",
     "Sediment", "Sediment Time Series", "Cross Sections", tablelab)
   }
   alltables = str_subset(list.datasets(x), sedimentpath)
-  if (!missing(which.grains)) {
+  if (!is.null(which.grains)) {
     whichtables = str_c(tablelab, which.grains, sep = " ") %>% str_trim()
     tablepaths = alltables[basename(alltables) %in% whichtables]
   } else {
@@ -74,12 +89,18 @@ read_sediment = function(f, tablelab, run.type, which.grains = "",
   res = vector("list", length(tablepaths))
   for (i in seq_along(tablepaths)) {
     res[[i]] = read_hdtable(f, tablepaths[i], tspath, geompath,
-    run.type, "Time", "XS_")
+      run.type, "Time", "XS_")
+    if (!is.null(which.times)) {
+      Time = NULL
+      res[[i]] = filter(res[[i]], Time %in% which.times)
+    }
+    if (!is.null(which.stations)) {
+      othercols = !str_detect(names(res[[i]]), "XS_")
+      stationcols = str_detect(names(res[[i]]), str_c("XS_", which.stations))
+      res[[i]] = res[[i]][, which(othercols | stationcols)]
+    }
     res[[i]]["GrainClass"] = factor(which.grains[i], 
       levels = grain.levels, labels = grain.labels)
-  }
-  if (!missing(which.rows)) {
-    res = lapply(res, function(x) x[which.rows + 1,])
   }
   do.call(bind_rows, res)
 }

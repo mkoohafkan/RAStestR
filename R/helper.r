@@ -3,159 +3,158 @@ NULL
 
 #' @describeIn read_standard Read the Dredged Cum data output.
 #' @export
-read_dc = function(f, run.type) {
-  read_standard(f, "Dredged Cum", run.type)
+read_dc = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Dredged Cum", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Effective Depth data output.
 #' @export
-read_ed = function(f, run.type) {
-  read_standard(f, "Effective Depth", run.type)
+read_ed = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Effective Depth", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Effective Width data output.
 #' @export
-read_ew = function(f, run.type) {
-  read_standard(f, "Effective Width", run.type)
+read_ew = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Effective Width", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Flow data output.
 #' @export
-read_f = function(f, run.type) {
-  read_standard(f, "Flow", run.type)
+read_f = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Flow", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Froude Number Channel data output.
 #' @export
-read_fnc = function(f, run.type) {
-  read_standard(f, "Froude Number Channel", run.type)
+read_fnc = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Froude Number Channel", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Invert Change data output.
 #' @export
-read_ic = function(f, run.type) {
-  read_standard(f, "Invert Change", run.type)
+read_ic = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Invert Change", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Invert Elevation data output.
 #' @export
-read_ie = function(f, run.type) {
-  read_standard(f, "Invert Elevation", run.type)
+read_ie = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Invert Elevation", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Manning's n Channel data output.
 #' @export
-read_mnc = function(f, run.type) {
-  read_standard(f, "Manning's n Channel", run.type)
+read_mnc = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Manning's n Channel", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Mean Effective Invert Change data output.
 #' @export
-read_meic = function(f, run.type) {
-  read_standard(f, "Mean Effective Invert Change", run.type)
+read_meic = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Mean Effective Invert Change", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Mean Effective Invert Elevation data output.
 #' @export
-read_meie = function(f, run.type) {
-  read_standard(f, "Mean Effective Invert Elevation", run.type)
+read_meie = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Mean Effective Invert Elevation", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Sediment Concentration data output.
 #' @export
-read_sc = function(f, run.type) {
-  read_standard(f, "Sediment Concentration", run.type)
+read_sc = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Sediment Concentration", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Shear Stress data output.
 #' @export
-read_ss = function(f, run.type) {
-  read_standard(f, "Shear Stress", run.type)
+read_ss = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Shear Stress", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Slope data output.
 #' @export
-read_s = function(f, run.type) {
-  read_standard(f, "Slope", run.type)
+read_s = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Slope", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Velocity data output.
 #' @export
-read_v = function(f, run.type) {
-  read_standard(f, "Velocity", run.type)
+read_v = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Velocity", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the Water Surface data output.
 #' @export
-read_ws = function(f, run.type) {
-  read_standard(f, "Water Surface", run.type)
+read_ws = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "Water Surface", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the d10 Active data output.
 #' @export
-read_d10a = function(f, run.type) {
-  read_standard(f, "d10 Active", run.type)
+read_d10a = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "d10 Active", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the d10 Inactive data output.
 #' @export
-read_d10i = function(f, run.type) {
-  read_standard(f, "d10 Inactive", run.type)
+read_d10i = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "d10 Inactive", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the d50 Active data output.
 #' @export
-read_d50a = function(f, run.type) {
-  read_standard(f, "d50 Active", run.type)
+read_d50a = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "d50 Active", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the d50 Inactive data output.
 #' @export
-read_d50i = function(f, run.type) {
-  read_standard(f, "d50 Inactive", run.type)
+read_d50i = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "d50 Inactive", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the d90 Active data output.
 #' @export
-read_d90a = function(f, run.type) {
-  read_standard(f, "d90 Active", run.type)
+read_d90a = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "d90 Active", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_standard Read the d90 Inactive data output.
 #' @export
-read_d90i = function(f, run.type) {
-  read_standard(f, "d90 Inactive", run.type)
+read_d90i = function(f, run.type, which.times = NULL, which.stations = NULL) {
+  read_standard(f, "d90 Inactive", run.type, which.times, which.stations)
 }
 
 #' @describeIn read_sediment Read the Lateral Structure Mass Divergence data output.
 #' @export
-read_lsmd = function(f, run.type, which.grains, which.rows) {
-  read_sediment(f, "Lat Struct Mass Div", run.type, which.grains, which.rows)
+read_lsmd = function(f, run.type, which.times = NULL, which.stations = NULL, which.grains = NULL) {
+  read_sediment(f, "Lat Struct Mass Div", run.type, which.times, which.stations, which.grains)
 }
 
 #' @describeIn read_sediment Read the Longitudinal Cumulative Mass Change data output. 
 #' @export
-read_lcmc = function(f, run.type, which.grains, which.rows) {
-  read_sediment(f, "Long. Cum Mass Change", run.type, which.grains,
-    which.rows)
+read_lcmc = function(f, run.type, which.times = NULL, which.stations = NULL, which.grains = NULL) {
+  read_sediment(f, "Long. Cum Mass Change", run.type, which.times, which.stations, which.grains)
 }
 
 #' @describeIn read_sediment Read the Mass Bed Change Cumulative data output.
 #' @export
-read_mbcc = function(f, run.type, which.grains, which.rows) {
-  read_sediment(f, "Mass Bed Change Cum", run.type, which.grains, which.rows)
+read_mbcc = function(f, run.type, which.times = NULL, which.stations = NULL, which.grains = NULL) {
+  read_sediment(f, "Mass Bed Change Cum", run.type, which.times, which.stations, which.grains)
 }
 
 #' @describeIn read_sediment Read the Mass In Cumulative data output.
 #' @export
-read_mic = function(f, run.type, which.grains, which.rows) {
-  read_sediment(f, "Mass In Cum", run.type, which.grains, which.rows)
+read_mic = function(f, run.type, which.times = NULL, which.stations = NULL, which.grains = NULL) {
+  read_sediment(f, "Mass In Cum", run.type, which.times, which.stations, which.grains)
 }
 
 #' @describeIn read_sediment Read the Mass Out Cumulative data output.
 #' @export
-read_moc = function(f, run.type, which.grains, which.rows) {
-  read_sediment(f, "Mass Out Cum", run.type, which.grains, which.rows)
+read_moc = function(f, run.type, which.times = NULL, which.stations = NULL, which.grains = NULL) {
+  read_sediment(f, "Mass Out Cum", run.type, which.times, which.stations, which.grains)
 }
 
 

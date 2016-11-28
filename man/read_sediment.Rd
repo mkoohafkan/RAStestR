@@ -9,17 +9,23 @@
 \alias{read_sediment}
 \title{Sediment By Grain Class Table}
 \usage{
-read_sediment(f, tablelab, run.type, which.grains = "", which.rows = NULL)
+read_sediment(f, tablelab, run.type, which.times = NULL,
+  which.stations = NULL, which.grains = NULL)
 
-read_lsmd(f, run.type, which.grains, which.rows)
+read_lsmd(f, run.type, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
 
-read_lcmc(f, run.type, which.grains, which.rows)
+read_lcmc(f, run.type, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
 
-read_mbcc(f, run.type, which.grains, which.rows)
+read_mbcc(f, run.type, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
 
-read_mic(f, run.type, which.grains, which.rows)
+read_mic(f, run.type, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
 
-read_moc(f, run.type, which.grains, which.rows)
+read_moc(f, run.type, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
 }
 \arguments{
 \item{f}{The h5 file to read.}
@@ -28,15 +34,20 @@ read_moc(f, run.type, which.grains, which.rows)
 
 \item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
-\item{which.grains}{Grain class tables to extract. "" Corresponds to 
-the totals, "1" is the first grain class, etc.}
+\item{which.times}{Character vector of timestamps to extract. If
+NULL, all timestamps will be returned.}
 
-\item{which.rows}{A numeric identifying the row numbers to extract, 
-0 being the first row.}
+\item{which.stations}{Character vector of station numbers to extract. If
+NULL, all stations will be returned.}
+
+\item{which.grains}{Grain class tables to extract. "" Corresponds to 
+the totals, "1" is the first grain class, etc. If NULL, all grain
+classes will be returned.}
 }
 \value{
 A dataframe with a column "Time" containing the Date Time 
-  Stamp data and columns "XS_####" where ### is the cross-section ID.
+  Stamp data; columns "XS_####" where ### is the cross-section ID;
+  and column "GrainClass".
 }
 \description{
 Read the sediment data output for all grain classes.

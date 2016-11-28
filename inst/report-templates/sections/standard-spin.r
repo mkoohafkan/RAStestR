@@ -3,8 +3,10 @@
 
 
 #+ echo = FALSE
-d1 = read_standard(file1, section.label, type1)
-d2 = read_standard(file2, section.label, type2)
+d1 = read_standard(file1, section.label, type1, table.times, 
+  table.stations)
+d2 = read_standard(file2, section.label, type2, table.times,
+  table.stations)
 d.diff = diff_table(d1, d2, "Time", "Diff")
 d.rmse.station = rmse_table(d.diff, "Station", "Diff", "RMSE")
 d.rmse.time = rmse_table(d.diff, "Time", "Diff", "RMSE")

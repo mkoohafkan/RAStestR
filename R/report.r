@@ -9,10 +9,14 @@
 #' @param model1.label Optional label for the base RAS model.
 #' @param model2.label Optional label for the new RAS model.
 #' @param sections The sections to include in the report.
-#' @param sediment.table.classes If grain class sections are specified,
-#'   the grain classes to include in the report.
-#' @param sediment.table.rows If grain class sections are specified,
-#'   which rows of the grain class tables to include in the report.
+
+#' @param which.grains Grain class tables to extract. "" Corresponds to 
+#'   the totals, "1" is the first grain class, etc. If NULL, all grain
+#'   classes will be returned.
+#' @param which.times Character vector of timestamps to extract. If
+#'   NULL, all timestamps will be returned.
+#' @param which.stations Character vector of station numbers to extract. If
+#'   NULL, all stations will be returned.
 #' @param output.file The output filename, without an extension.
 #' @param output.folder The folder to write out files to. Defaults to
 #'   the R temporary directory.
@@ -53,9 +57,10 @@
 #' @seealso \link{read_standard}
 #' @seealso \link{read_sediment}
 #' @export
-generate_report = function(model1.file, model2.file, model1.type, model2.type,
-  model1.label = NULL, model2.label = NULL, sections, sediment.table.classes,
-  sediment.table.rows, output.file = "report", output.folder = tempdir(),
+generate_report = function(model1.file, model2.file, model1.type, 
+  model2.type, model1.label = NULL, model2.label = NULL, sections, 
+  which.times = NULL, which.stations = NULL, which.grains = NULL, 
+  output.file = "report", output.folder = tempdir(), 
   output.type = c("html", "pdf")) {
   if (!requireNamespace("knitr"))
     stop("Package 'knitr' is required to generate RAStestR reports.")
@@ -111,10 +116,6 @@ generate_report = function(model1.file, model2.file, model1.type, model2.type,
   sections = c(selectedstandard, selectedsediment)
   if (length(sections) < 1)
     stop("No recognizable sections specified.")
-  if (length(selectedsediment) > 0)
-    if (missing(sediment.table.classes) || missing(sediment.table.rows))
-      stop("One or more sections require the arguments ",
-      "'sediment.table.classes' and 'sediment.table.rows'.")
 
   doc.env = new.env()
   #  assign("childpaths", paths, pos = doc.env)
@@ -126,10 +127,9 @@ generate_report = function(model1.file, model2.file, model1.type, model2.type,
   assign("label1", model1.label, pos = doc.env)
   assign("label2", model2.label, pos = doc.env)
   assign("sectionchunk", spin_chunk, pos = doc.env)
-  if (!missing(sediment.table.classes))
-    assign("grain.classes", sediment.table.classes, pos = doc.env)
-  if (!missing(sediment.table.rows))
-    assign("grain.rows", sediment.table.rows, pos = doc.env)
+  assign("table.times", which.times, pos = doc.env)
+  assign("table.stations", which.stations, pos = doc.env)  
+  assign("table.grains", which.grains, pos = doc.env)
 
   rmarkdown::render(basename(doc.template), output_format = spin.format,
      output_file = output.file, output_dir = output.folder, 

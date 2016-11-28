@@ -25,49 +25,50 @@
 \alias{read_ws}
 \title{Read Standard Table}
 \usage{
-read_standard(f, tablelab, run.type)
+read_standard(f, tablelab, run.type, which.times = NULL,
+  which.stations = NULL)
 
-read_dc(f, run.type)
+read_dc(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_ed(f, run.type)
+read_ed(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_ew(f, run.type)
+read_ew(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_f(f, run.type)
+read_f(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_fnc(f, run.type)
+read_fnc(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_ic(f, run.type)
+read_ic(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_ie(f, run.type)
+read_ie(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_mnc(f, run.type)
+read_mnc(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_meic(f, run.type)
+read_meic(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_meie(f, run.type)
+read_meie(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_sc(f, run.type)
+read_sc(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_ss(f, run.type)
+read_ss(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_s(f, run.type)
+read_s(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_v(f, run.type)
+read_v(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_ws(f, run.type)
+read_ws(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_d10a(f, run.type)
+read_d10a(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_d10i(f, run.type)
+read_d10i(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_d50a(f, run.type)
+read_d50a(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_d50i(f, run.type)
+read_d50i(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_d90a(f, run.type)
+read_d90a(f, run.type, which.times = NULL, which.stations = NULL)
 
-read_d90i(f, run.type)
+read_d90i(f, run.type, which.times = NULL, which.stations = NULL)
 }
 \arguments{
 \item{f}{The h5 file to read.}
@@ -75,6 +76,12 @@ read_d90i(f, run.type)
 \item{tablelab}{The table to read.}
 
 \item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
+
+\item{which.times}{Character vector of timestamps to extract. If
+NULL, all timestamps will be returned.}
+
+\item{which.stations}{Character vector of station numbers to extract. If
+NULL, all stations will be returned.}
 }
 \value{
 A dataframe with a column "Time" containing the Date Time 

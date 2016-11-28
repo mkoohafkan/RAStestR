@@ -3,8 +3,10 @@
 
 
 #+ echo = FALSE
-d1 = read_sediment(file1, section.label, type1, grain.classes, grain.rows)
-d2 = read_sediment(file2, section.label, type2, grain.classes, grain.rows)
+d1 = read_sediment(file1, section.label, type1, table.times, 
+  table.stations, table.grains)
+d2 = read_sediment(file2, section.label, type2, table.times,
+  table.stations, table.grains)
 d.diff = diff_sediment(d1, d2, "Time", "GrainClass", "Diff")
 d.rmse.time = rmse_table(d.diff, c("GrainClass", "Time"), "Diff", "RMSE")
 #diffidx = which.max(d.diff$Diff)
