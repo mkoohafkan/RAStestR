@@ -1,32 +1,9 @@
 library(stringr)
+devtools::load_all()
 output.file = "R/helper.r"
 
-  standard = c(
-    "Dredged Cum", "Effective Depth", "Effective_Width", "Flow",
-    "Froude Number Channel", "Hydraulic Radius", 
-    "Invert Change", "Invert Elevation", "Mannings n Channel", 
-    "Mean Effective Invert Change", "Mean Effective Invert Elevation", 
-    "Moveable Elv L", "Moveable Elv R", 
-    "Moveable Sta L", "Moveable Sta R", 
-    "Observed Data", "Sediment Concentration", 
-    "Shear Stress", "Shear Velocity", "Slope", "Temperature", 
-    "Thickness Cover", "Thickness Inactive", "Thickness Subsurface", 
-    "Velocity", "Water Surface", 
-    "d10 Active", "d10 Cover", "d10 Inactive", "d10 Subsurface",
-    "d16 Active", "d16 Cover", "d16 Inactive", "d16 Subsurface",
-    "d50 Active", "d50 Cover", "d50 Inactive", "d50 Subsurface",
-    "d84 Active", "d84 Cover", "d84 Inactive", "d84 Subsurface",
-    "d90 Active", "d90 Cover", "d90 Inactive", "d90 Subsurface"    
-    )
-  sediment = c(
-     "Fall Velocity", "Lat Struc Mass Div", 
-     "Long. Cum Mass Change", "Long. Cum Mass Moveable Limit", 
-     "Mass Bed Change", "Mass Bed Change Cum", 
-     "Mass Capacity", "Mass Cover",  
-     "Mass In", "Mass Inactive", "Mass In Cum", 
-     "Mass Out", "Mass Out Cum", "Mass Subsurface", 
-     "Reduce Armor Factor")
-
+standard = list_tables()$standard
+sediment = list_tables()$sediment
 
 make_helper_standard = function(table){
   tstring = table %>% str_replace_all(c(" " = "\\_", "\\." = "")) %>% 
@@ -96,6 +73,3 @@ funcs = unlist(c(
 ))
 
 writeLines(funcs, output.file, sep = "\n\n")
-
-
-
