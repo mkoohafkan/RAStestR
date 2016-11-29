@@ -1,9 +1,8 @@
-
 {{ sprintf("## %s", section.label) }}
 
 
 #+ echo = FALSE
-d1 = read_sediment(file1, section.label, type1, table.times.sediment, 
+d1 = read_sediment(file1, section.label, type1, table.times.sediment,
   table.stations.sediment, table.grains)
 d2 = read_sediment(file2, section.label, type2, table.times.sediment,
   table.stations.sediment, table.grains)
@@ -19,7 +18,7 @@ d.diff %>%
   mutate(Station = as.numeric(str_extract(Station, "[0-9]+"))) %>%
   ggplot() + plot.theme +
   aes(x = Station, y = Diff, color = GrainClass) + geom_line() +
-  ylab("Difference") + facet_wrap(~Time) +
+  ylab("Difference") + facet_wrap( ~ Time) +
   ggtitle(paste(section.label, "Differences at Stations"))
 
 #+ echo = FALSE, fig.width = 12, dpi = 150
@@ -27,11 +26,11 @@ d.diff %>% ggplot() + plot.theme +
   aes(x = Time, y = Diff, fill = GrainClass) +
   geom_boxplot() +
   ylab("Difference") +
-  ggtitle(paste(section.label, "Differences"))
+  ggtitle(paste(section.label, "Differences"), subtitle = "all stations")
 
 #+ echo = FALSE, fig.width = 12, dpi = 150
 d.rmse.time %>% ggplot() + plot.theme +
   aes(x = GrainClass, y = RMSE, fill = GrainClass) +
   geom_col(color = "black") + ylab("RMSE") +
   facet_wrap(~factor(Time, levels = rev(sort(unique(Time))))) + 
-  ggtitle(paste(section.label, "RMSE by Grain Class"))
+  ggtitle(paste(section.label, "RMSE by Grain Class"), subtitle = "summed over stations")

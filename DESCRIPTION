@@ -12,14 +12,14 @@ License: GPL (>= 3)
 Depends:
     R (>= 3.2.2)
 Imports:
-    dplyr,
-    stringr,
-    tidyr,
-    h5
+    dplyr (>= 0.5.0),
+    stringr (>= 1.1.0),
+    tidyr (>= 0.6.0),
+    h5 (>= 0.9.8)
 Suggests:
-    knitr,
-    rmarkdown,
-    ggplot2
+    knitr (>= 1.15.1),
+    rmarkdown (>= 1.2),
+    ggplot2 (>= 2.2.0)
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1

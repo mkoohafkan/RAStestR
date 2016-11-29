@@ -1,9 +1,8 @@
-
 {{ sprintf("## %s", section.label) }}
 
 
 #+ echo = FALSE
-d1 = read_standard(file1, section.label, type1, table.times.standard, 
+d1 = read_standard(file1, section.label, type1, table.times.standard,
   table.stations.standard)
 d2 = read_standard(file2, section.label, type2, table.times.standard,
   table.stations.standard)
@@ -18,8 +17,8 @@ txt = paste(
   "The largest total RMSE at a single time was %f on %s.",
   "The largest total RMSE at a single station was %f at %s."
 )
-res = sprintf(txt, section.label, d.diff$Diff[diffidx], d.diff$Station[diffidx], 
-  d.diff$Time[diffidx], d.rmse.time$RMSE[tidx], d.rmse.time$Time[tidx], 
+res = sprintf(txt, section.label, d.diff$Diff[diffidx], d.diff$Station[diffidx],
+  d.diff$Time[diffidx], d.rmse.time$RMSE[tidx], d.rmse.time$Time[tidx],
   d.rmse.station$RMSE[sidx], d.rmse.station$Station[sidx])
 
 #'
@@ -30,13 +29,13 @@ res = sprintf(txt, section.label, d.diff$Diff[diffidx], d.diff$Station[diffidx],
 d.diff %>% ggplot() + plot.theme +
   aes(x = Station, y = Diff) + geom_boxplot() +
   ylab("Difference") +
-  ggtitle(paste(section.label, "Differences at Stations"))
+  ggtitle(paste(section.label, "Differences at Stations"), subtitle = "all times")
 
 #+ echo = FALSE, fig.width = 12, dpi = 150
 d.rmse.station %>% ggplot() + plot.theme +
   aes(x = Station, y = RMSE) +
   geom_col(color = "black", fill = "white") + ylab("RMSE") +
-  ggtitle(paste(section.label, "RMSE at Stations"))
+  ggtitle(paste(section.label, "RMSE at Stations"), subtitle = " summed over time")
 
 #+ echo = FALSE, fig.width = 12, dpi = 150
 d.rmse.time %>% mutate(Time = as.POSIXct(Time, format = "%d%b%Y %M:%S",
@@ -44,4 +43,4 @@ d.rmse.time %>% mutate(Time = as.POSIXct(Time, format = "%d%b%Y %M:%S",
   aes(x = Time, y = RMSE) + geom_line() +
   scale_x_datetime(date_labels = "%b %Y") +
   ylab("RMSE") +
-  ggtitle(paste(section.label, "RMSE Through Time"))
+  ggtitle(paste(section.label, "RMSE Through Time"), subtitle = "summed over stations")
