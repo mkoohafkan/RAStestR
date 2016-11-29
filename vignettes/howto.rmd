@@ -1,3 +1,6 @@
+%\VignetteEngine{knitr} 
+%\VignetteIndexEntry{how-to}
+
 ---
 title: "How to use RAStestR"
 output: html_document
@@ -24,7 +27,7 @@ sediment output data file. The general the workflow is:
  4. Decide which output tables you want to analyze, and which stations, time stamps and/or grain size classes to analyze.
  5. Call `generate_report` from R and produce a pdf or html report.
 
-## Example use case: comparing RAS version outputs of a simple model 
+## Use case 1: comparing RAS version outputs of a simple model 
 
 Consider the quasi-unsteady model "Simple Sediment Transport Example" provided in the 
 [HEC-RAS example projects download](http://www.hec.usace.army.mil/software/hec-ras/downloads.aspx).
@@ -85,6 +88,25 @@ A few notes:
     The table "Long. Cum Mass Change" is recognized, but "Long Cum Mass Change"
     is not.
   - Time stamps, stations and grain classes must be specified as character values.
+
+
+## Use case 2: Sensitivity analysis of time step
+
+Another common scenario is evaluating the impact of temporal 
+discretization. This use case would proceed in the same manner
+as the previous section, except that the user can simply create
+a second plan in the HEC-RAS model rather than needing to copy
+the entire project folder.
+
+## Use case 3: Conversion from quasi-unsteady to fully-unsteady
+
+The package can also be used to test differences in model output 
+following a conversion from a quasi-unsteady model to a fully-unsteady 
+model. The most important difference is that the user must ensure that
+the output time series of the quasi-unsteady model and fully-unsteady
+model match. Provided this is done, the comparison can proceed as in
+the previous section, specifying a run type of "unsteady" or "quasi"
+where appropriate.
 
 ## Other functionality
 
