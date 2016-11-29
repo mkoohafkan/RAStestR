@@ -55,9 +55,20 @@ investigation od the third table to total mass on *01JUL1975 23:45:36*.
 ### Generate the report
 
 The R code below can be used to generate the report described in the 
-previous section.
+previous section. Note the following items:
 
-```
+ - In the HDF output file, grain size classes are assigned numeric 
+   indices, with the total mass table having no index. The table 
+   "Long. Cum Mass Change" refers to the total longitudinal cumulative
+   mass change, while e.g. "Long. Cum Mass Change 1" refers to the first
+   grain size class. To generate a report using the total mass, we specify
+   `which.grains = ""` in the `sediment.options` argument.
+ - Time stamps, stations and grain classes must be specified as character values.
+ - The table labels are not case sensitive, but they are punctuation sensitive.
+    The table "Long. Cum Mass Change" is recognized, but "Long Cum Mass Change"
+    is not.
+
+```r
 library(RAStestR)
 
 base.file = "C:/example/RAS_50/MBex.p04.hdf"
@@ -72,20 +83,6 @@ sediment.options = list(which.times = "01JUL1975 23:45:36", which.grains = "")
 generate_report(base.file, new.file, "quasi", "quasi", base.label, new.label,
   sediment.opts = sediment.options)
 ```
-
-A few notes:
-
- - In the HDF output file, grain size classes are assigned numeric 
-   indices, with the total mass table having no index. The table 
-   "Long. Cum Mass Change" refers to the total longitudinal cumulative
-   mass change, while e.g. "Long. Cum Mass Change 1" refers to the first
-   grain size class. To generate a report using the total mass, we specify
-   `which.grains = ""` in the `sediment.options` argument.
-  - The table labels are not case sensitive, but they are punctuation sensitive.
-    The table "Long. Cum Mass Change" is recognized, but "Long Cum Mass Change"
-    is not.
-  - Time stamps, stations and grain classes must be specified as character values.
-
 
 ## Use case 2: Sensitivity analysis of time step
 
@@ -115,7 +112,7 @@ function `rmse_table` can be used to compute RMSE. Table-sepcific helper functio
 also provided to streamline the process by assuming certain input and output structures. 
 For example, to generate the RMSE values for Water Surface at each station one can do:
 
-```
+```r
 d1 = read_water_surface(base.file, "quasi")
 d2 = read_water_surface(new.file, "quasi")
 d.diff = diff_water_surface(d1, d2)

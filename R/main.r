@@ -1,3 +1,14 @@
+#' Automated Testing of HEC-RAS
+#'
+#' This package is designed to provide an automated testing environment
+#' of HEC-RAS sediment transport model outputs. Functions are provided 
+#' for reading, analyzing and visualizing HDF5 output data and 
+#' generating test reports. See the vignette to get started.
+#' @name RAStestR-package
+#' @aliases RAStestR
+#' @docType package
+NULL
+
 #' Read Standard Table
 #'
 #' Read a standard (not grain class-specific) table.
