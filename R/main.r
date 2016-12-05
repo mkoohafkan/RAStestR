@@ -41,10 +41,8 @@ read_standard = function(f, tablelab, run.type, which.times = NULL,
       "Sediment", "Sediment Time Series", "Time Date Stamp")
   }
   res = read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_") 
-  if (!is.null(which.times)) {
-    Time = NULL
-    res = filter(res, Time %in% which.times)
-  }
+  if (!is.null(which.times))
+    res = res[res$Time %in% which.times,]
   if (!is.null(which.stations)) {
     othercols = !str_detect(names(res), "XS_")
     stationcols = names(res) %in% str_c("XS_", which.stations)
@@ -97,19 +95,11 @@ read_sediment = function(f, tablelab, run.type, which.times = NULL,
     which.grains = basename(tablepaths) %>% str_replace(tablelab, "") %>%
       str_trim()
   }
-  res = vector("list", length(tablepaths))
-  for (i in seq_along(tablepaths)) {
-    res[[i]] = read_hdtable(f, tablepaths[i], tspath, geompath,
-      run.type, "Time", "XS_")
-    if (!is.null(which.times)) {
-      Time = NULL
-      res[[i]] = filter(res[[i]], Time %in% which.times)
-    }
-    if (!is.null(which.stations)) {
-      othercols = !str_detect(names(res[[i]]), "XS_")
-      stationcols = names(res[[i]]) %in% str_c("XS_", which.stations)
-      res[[i]] = res[[i]][, which(othercols | stationcols)]
-    }
+  tablelabs = basename(tablepaths)
+  res = vector("list", length(tablelabs))
+  for (i in seq_along(tablelabs)) {
+    res[[i]] = read_standard(f, tablelabs[[i]], run.type, which.times, 
+      which.stations)
     res[[i]]["GrainClass"] = factor(which.grains[i], 
       levels = grain.levels, labels = grain.labels)
   }
