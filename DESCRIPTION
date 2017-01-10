@@ -19,7 +19,8 @@ Imports:
 Suggests:
     knitr (>= 1.15.1),
     rmarkdown (>= 1.2),
-    ggplot2 (>= 2.2.0)
+    ggplot2 (>= 2.2.0),
+    scales (>= 0.4.1)
 LazyData: true
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
