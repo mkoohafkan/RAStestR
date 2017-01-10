@@ -70,6 +70,8 @@ generate_report = function(model1.file, model2.file, model1.type,
   if (!requireNamespace("ggplot2"))
     stop("Package 'ggplot2' is required to generate RAStestR reports.")
 
+  model1.file = normalizePath(model1.file, winslash = "/")
+  model2.file = normalizePath(model2.file, winslash = "/")
   if (!(file.exists(model1.file)))
     stop("file ", model1.file, " could not be found.")
   if (!(file.exists(model2.file)))
