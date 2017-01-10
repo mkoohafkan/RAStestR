@@ -69,10 +69,12 @@ read_standard = function(f, tablelab, run.type, which.times = NULL,
 #' @export
 read_sediment = function(f, tablelab, run.type, which.times = NULL, 
   which.stations = NULL, which.grains = NULL) {
-  grain.levels = c("", paste(1:20))
-  grain.labels = c("ALL", paste("grain class", 1:20))
   x = h5file(f)
   on.exit(h5close(x))
+  grainpath = file.path("Event Conditions", "Sediment", 
+    "Grain Class Names")
+  grain.levels = c("", paste(1:20))
+  grain.labels = c("ALL", x[grainpath][])
   geompath = "Geometry/Cross Sections/River Stations"
   if (run.type == "unsteady") {
     tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
@@ -155,21 +157,29 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
 #'
 #' Compute a difference table.
 #'
-#' @param d1 The first dataframe.
-#' @param d2 The second dataframe.
+#' @param d1 The first dataframe, considered the "base" result.
+#' @param d2 The second dataframe, considered the "new" result.
 #' @param tcol The time column name.
 #' @param diffcol The name of the difference column to be created.
-#' @return A dataframe.
+#' @return A dataframe, with difference defined as \code{d2- d1}.
+#'   if \code{percent = TRUE}, the difference is defined as
+#'   \code{(d2 - d1)/(0.5*(d2 + d1))}
 #'
 #' @import dplyr
 #' @export
-diff_table = function(d1, d2, tcol, diffcol) {
+diff_table = function(d1, d2, tcol, diffcol, percent = FALSE) {
   Station = NULL # workaround for nse
   datcols = intersect(names(d1), names(d2))
   datcols = datcols[datcols != tcol]
   d1 = d1 %>% arrange_(tcol)
   d2 = d2 %>% arrange_(tcol)
-  as_data_frame(cbind(d1[tcol], d1[, datcols] - d2[, datcols])) %>%
+  if (percent)
+    fun = function(x1, x2)
+      2 * (x2 - x1) / (x2 + x1)
+    else
+      fun = function(x1, x2)
+        x2 - x1
+  as_data_frame(cbind(d1[tcol], fun(d1[, datcols], d2[, datcols]))) %>%
     gather_("Station", diffcol, gather_cols = datcols) %>%
     mutate(Station = factor(Station, levels = datcols))
 }
@@ -178,24 +188,32 @@ diff_table = function(d1, d2, tcol, diffcol) {
 #'
 #' Compute a difference table from sediment data.
 #'
-#' @param d1 The first dataframe.
-#' @param d2 The second dataframe.
+#' @param d1 The first dataframe, considered the "base" result.
+#' @param d2 The second dataframe, considered the "new" result.
 #' @param tcol the time column name.
 #' @param gcol the grain class column name.
 #' @param diffcol The name of the difference column to be created.
-#' @return A dataframe.
+#' @return A dataframe, with difference defined as \code{d2- d1}.
+#'   if \code{percent = TRUE}, the difference is defined as
+#'   \code{(d2 - d1)/d1}
 #'
 #' @import dplyr
 #' @import tidyr
 #' @export
-diff_sediment = function(d1, d2, tcol, gcol, diffcol) {
+diff_sediment = function(d1, d2, tcol, gcol, diffcol, percent = FALSE) {
   Station = NULL # workaround for nse
   datcols = intersect(names(d1), names(d2))
   datcols = datcols[datcols != tcol & datcols != gcol]
   gvals = intersect(unique(d1[[gcol]]), unique(d2[[gcol]]))
   d1 = d1[d1[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
   d2 = d2[d2[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
-  as_data_frame(cbind(d1[tcol], d1[gcol], d1[, datcols] - d2[, datcols])) %>%
+  if (percent)
+    fun = function(x1, x2) 
+      2 * (x2 - x1) / (x2 + x1)
+  else
+    fun = function(x1, x2) 
+      x2 - x1
+  as_data_frame(cbind(d1[tcol], d1[gcol], fun(d1[, datcols], d2[, datcols]))) %>%
     gather_("Station", diffcol, gather_cols = datcols) %>%
     mutate(Station = factor(Station, levels = datcols))
 }
