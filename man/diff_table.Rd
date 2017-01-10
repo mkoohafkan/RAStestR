@@ -50,7 +50,7 @@
 \alias{diff_water_surface}
 \title{Difference Table}
 \usage{
-diff_table(d1, d2, tcol, diffcol)
+diff_table(d1, d2, tcol, diffcol, percent = FALSE)
 
 diff_dredged_cum(d1, d2)
 
@@ -145,16 +145,18 @@ diff_d90_inactive(d1, d2)
 diff_d90_subsurface(d1, d2)
 }
 \arguments{
-\item{d1}{The first dataframe.}
+\item{d1}{The first dataframe, considered the "base" result.}
 
-\item{d2}{The second dataframe.}
+\item{d2}{The second dataframe, considered the "new" result.}
 
 \item{tcol}{The time column name.}
 
 \item{diffcol}{The name of the difference column to be created.}
 }
 \value{
-A dataframe.
+A dataframe, with difference defined as \code{d2- d1}.
+  if \code{percent = TRUE}, the difference is defined as
+  \code{(d2 - d1)/(0.5*(d1 + d2))}
 }
 \description{
 Compute a difference table.

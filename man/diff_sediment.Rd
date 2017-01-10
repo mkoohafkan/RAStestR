@@ -19,7 +19,7 @@
 \alias{diff_sediment}
 \title{Difference Table (Sediment)}
 \usage{
-diff_sediment(d1, d2, tcol, gcol, diffcol)
+diff_sediment(d1, d2, tcol, gcol, diffcol, percent = FALSE)
 
 diff_fall_velocity(d1, d2)
 
@@ -52,9 +52,9 @@ diff_mass_subsurface(d1, d2)
 diff_reduce_armor_factor(d1, d2)
 }
 \arguments{
-\item{d1}{The first dataframe.}
+\item{d1}{The first dataframe, considered the "base" result.}
 
-\item{d2}{The second dataframe.}
+\item{d2}{The second dataframe, considered the "new" result.}
 
 \item{tcol}{the time column name.}
 
@@ -63,7 +63,9 @@ diff_reduce_armor_factor(d1, d2)
 \item{diffcol}{The name of the difference column to be created.}
 }
 \value{
-A dataframe.
+A dataframe, with difference defined as \code{d2- d1}.
+  if \code{percent = TRUE}, the difference is defined as
+  \code{(d2 - d1)/d1}
 }
 \description{
 Compute a difference table from sediment data.
