@@ -65,6 +65,8 @@ generate_report = function(model1.file, model2.file, model1.type,
     stop("Package 'knitr' is required to generate RAStestR reports.")
   if (!requireNamespace("rmarkdown"))
     stop("Package 'rmarkdown' is required to generate RAStestR reports.")
+  if (!requireNamespace("scales"))
+    stop("Package 'scales' is required to generate RAStestR reports.")
   if (!requireNamespace("ggplot2"))
     stop("Package 'ggplot2' is required to generate RAStestR reports.")
 
@@ -178,7 +180,8 @@ list_tables = function() {
   )
   sediment = c(
     "Fall Velocity", "Lat Struc Mass Div",
-    "Long. Cum Mass Change", "Long. Cum Mass Moveable Limit",
+    "Long. Cum Mass Change", "Long. Cum Vol Change", 
+    "Long. Cum Mass Moveable Limit",
     "Mass Bed Change", "Mass Bed Change Cum",
     "Mass Capacity", "Mass Cover",
     "Mass In", "Mass Inactive", "Mass In Cum",
