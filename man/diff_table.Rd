@@ -152,11 +152,13 @@ diff_d90_subsurface(d1, d2)
 \item{tcol}{The time column name.}
 
 \item{diffcol}{The name of the difference column to be created.}
+
+\item{percent}{Logical: report differences as percent difference.}
 }
 \value{
 A dataframe, with difference defined as \code{d2- d1}.
   if \code{percent = TRUE}, the difference is defined as
-  \code{(d2 - d1)/(0.5*(d1 + d2))}
+  \code{(d2 - d1)/(0.5*(d2 + d1))}.
 }
 \description{
 Compute a difference table.

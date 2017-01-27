@@ -56,16 +56,18 @@ diff_reduce_armor_factor(d1, d2)
 
 \item{d2}{The second dataframe, considered the "new" result.}
 
-\item{tcol}{the time column name.}
+\item{tcol}{The time column name.}
 
 \item{gcol}{the grain class column name.}
 
 \item{diffcol}{The name of the difference column to be created.}
+
+\item{percent}{Logical: report differences as percent difference.}
 }
 \value{
 A dataframe, with difference defined as \code{d2- d1}.
   if \code{percent = TRUE}, the difference is defined as
-  \code{(d2 - d1)/d1}
+  \code{(d2 - d1)/(0.5*(d2 + d1))}
 }
 \description{
 Compute a difference table from sediment data.

@@ -23,6 +23,7 @@ NULL
 #' @return A dataframe with a column "Time" containing the Date Time 
 #'   Stamp data and columns "XS_####" where ### is the cross-section ID.
 #'
+#' @import stringr
 #' @export
 read_standard = function(f, tablelab, run.type, which.times = NULL, 
   which.stations = NULL) {
@@ -69,12 +70,8 @@ read_standard = function(f, tablelab, run.type, which.times = NULL,
 #' @export
 read_sediment = function(f, tablelab, run.type, which.times = NULL, 
   which.stations = NULL, which.grains = NULL) {
-  x = h5file(f)
-  on.exit(h5close(x))
-  grainpath = file.path("Event Conditions", "Sediment", 
-    "Grain Class Names")
   grain.levels = c("", paste(1:20))
-  grain.labels = c("ALL", x[grainpath][])
+  grain.labels = read_grains(f)
   geompath = "Geometry/Cross Sections/River Stations"
   if (run.type == "unsteady") {
     tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
@@ -88,7 +85,9 @@ read_sediment = function(f, tablelab, run.type, which.times = NULL,
     sedimentpath = file.path("Results", "Sediment", "Output Blocks",
     "Sediment", "Sediment Time Series", "Cross Sections", tablelab)
   }
-  alltables = str_subset(list.datasets(x), sedimentpath)
+  alltables = list_sediment(f, sedimentpath)
+  if (length(alltables) < 1)
+    stop('Table "', sedimentpath, '" could not be found.', call. = FALSE)
   if (!is.null(which.grains)) {
     whichtables = str_c(tablelab, which.grains, sep = " ") %>% str_trim()
     tablepaths = alltables[basename(alltables) %in% whichtables]
@@ -106,6 +105,39 @@ read_sediment = function(f, tablelab, run.type, which.times = NULL,
       levels = grain.levels, labels = grain.labels)
   }
   do.call(bind_rows, res)
+}
+
+#' Read Grain Class Table
+#'
+#' Read RAS sediment grain class labels.
+#'
+#' @inheritParams read_standard
+#' @return a vector of grain glass labels.
+#'
+#' @import h5
+read_grains = function(f) {
+  x = h5file(f)
+  on.exit(h5close(x))
+  grainpath = file.path("Event Conditions", "Sediment",
+    "Grain Class Names")
+  if (!existsDataSet(x, grainpath))
+    stop('Table "', grainpath, '" could not be found.', call. = FALSE)
+  c("ALL", x[grainpath][])
+}
+
+#' List Sediment Tables
+#'
+#' List grain class-specific tables of the specified type.
+#'
+#' @inheritParams read_standard
+#' @return a vector of grain glass labels.
+#'
+#' @import h5
+#' @import stringr
+list_sediment = function(f, tablelab) {
+  x = h5file(f)
+  on.exit(h5close(x))
+  str_subset(list.datasets(x), tablelab)
 }
 
 #' Generic Table Read Function
@@ -130,9 +162,11 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
   run.type, rowcolname, colprefix) {
   x = h5file(f)
   on.exit(h5close(x))
-  if (!existsDataSet(x, tablepath))
-    stop('Specified table could not be found. Check that argument "run.type" is correct.',
-      call. = FALSE)
+  for(pth in c(tablepath, rowtablepath, coltablepath))
+    if (!existsDataSet(x, pth))
+      stop('Table "', pth, '" could not be found. ',
+        'Check that argument "run.type" is correct.',
+        call. = FALSE)
   clabs = x[coltablepath][] %>% str_trim()
   rlabs = x[rowtablepath][] %>% str_trim()
   this = x[tablepath][] %>% as_data_frame()
@@ -161,9 +195,10 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
 #' @param d2 The second dataframe, considered the "new" result.
 #' @param tcol The time column name.
 #' @param diffcol The name of the difference column to be created.
+#' @param percent Logical: report differences as percent difference.
 #' @return A dataframe, with difference defined as \code{d2- d1}.
 #'   if \code{percent = TRUE}, the difference is defined as
-#'   \code{(d2 - d1)/(0.5*(d2 + d1))}
+#'   \code{(d2 - d1)/(0.5*(d2 + d1))}.
 #'
 #' @import dplyr
 #' @export
@@ -188,14 +223,11 @@ diff_table = function(d1, d2, tcol, diffcol, percent = FALSE) {
 #'
 #' Compute a difference table from sediment data.
 #'
-#' @param d1 The first dataframe, considered the "base" result.
-#' @param d2 The second dataframe, considered the "new" result.
-#' @param tcol the time column name.
+#' @inheritParams diff_table
 #' @param gcol the grain class column name.
-#' @param diffcol The name of the difference column to be created.
 #' @return A dataframe, with difference defined as \code{d2- d1}.
 #'   if \code{percent = TRUE}, the difference is defined as
-#'   \code{(d2 - d1)/d1}
+#'   \code{(d2 - d1)/(0.5*(d2 + d1))}
 #'
 #' @import dplyr
 #' @import tidyr
