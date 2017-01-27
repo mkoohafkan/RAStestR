@@ -16,7 +16,7 @@
 #'   \code{which.stations} and \code{which.grains} specifying the times,
 #'   stations and grain classes to output for sediment tables. See 
 #'   \code{\link{read_sediment}} for details.
-#' @param output.file The output filename, without an extension.
+#' @param output.name The output filename, without an extension.
 #' @param output.folder The folder to write out files to. Defaults to
 #'   the R temporary directory.
 #' @param output.type The file type to generate, either "html" or "pdf".
@@ -59,7 +59,7 @@
 generate_report = function(model1.file, model2.file, model1.type, 
   model2.type, model1.label = NULL, model2.label = NULL, sections, 
   standard.opts = list(), sediment.opts = list(),  
-  output.file = "report", output.folder = tempdir(), 
+  output.name, output.folder = tempdir(), 
   output.type = c("html", "pdf")) {
   if (!requireNamespace("knitr"))
     stop("Package 'knitr' is required to generate RAStestR reports.")
@@ -69,7 +69,10 @@ generate_report = function(model1.file, model2.file, model1.type,
     stop("Package 'scales' is required to generate RAStestR reports.")
   if (!requireNamespace("ggplot2"))
     stop("Package 'ggplot2' is required to generate RAStestR reports.")
-
+  
+  if(missing(output.name))
+    output.name = tempfile(tmpdir = output.folder)
+    
   model1.file = normalizePath(model1.file, winslash = "/")
   model2.file = normalizePath(model2.file, winslash = "/")
   if (!(file.exists(model1.file)))
@@ -110,7 +113,7 @@ generate_report = function(model1.file, model2.file, model1.type,
     pdf = "pdf_document",
     html = "html_document"
   )
-  output.file = str_c(output.file, ".", output.type)
+  output.name = str_c(output.name, ".", output.type)
 
   standard = list_tables()$standard
   sediment = list_tables()$sediment
@@ -138,10 +141,10 @@ generate_report = function(model1.file, model2.file, model1.type,
   assign("table.grains", which.grains, pos = doc.env)
 
   rmarkdown::render(basename(doc.template), output_format = spin.format,
-     output_file = output.file, output_dir = output.folder, 
+     output_file = output.name, output_dir = output.folder, 
      runtime = "static", envir = doc.env, quiet = TRUE)
-  shell.exec(file.path(output.folder, output.file))
-  file.path(output.folder, output.file)
+  shell.exec(file.path(output.folder, output.name))
+  file.path(output.folder, output.name)
 }
 
 

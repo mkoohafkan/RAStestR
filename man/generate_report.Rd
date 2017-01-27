@@ -6,7 +6,7 @@
 \usage{
 generate_report(model1.file, model2.file, model1.type, model2.type,
   model1.label = NULL, model2.label = NULL, sections,
-  standard.opts = list(), sediment.opts = list(), output.file = "report",
+  standard.opts = list(), sediment.opts = list(), output.name,
   output.folder = tempdir(), output.type = c("html", "pdf"))
 }
 \arguments{
@@ -33,7 +33,7 @@ for standard tables. See \code{\link{read_standard}} for details.}
 stations and grain classes to output for sediment tables. See 
 \code{\link{read_sediment}} for details.}
 
-\item{output.file}{The output filename, without an extension.}
+\item{output.name}{The output filename, without an extension.}
 
 \item{output.folder}{The folder to write out files to. Defaults to
 the R temporary directory.}
