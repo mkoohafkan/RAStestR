@@ -4,7 +4,7 @@
 \alias{station_to_distance}
 \title{Convert Stations To Distance}
 \usage{
-station_to_distance(ld, distance.col, station.col = "station",
+station_to_distance(ld, distance.col, station.col = "Station",
   metric = FALSE)
 }
 \arguments{

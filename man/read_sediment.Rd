@@ -5,6 +5,7 @@
 \alias{read_lat_struc_mass_div}
 \alias{read_long_cum_mass_change}
 \alias{read_long_cum_mass_moveable_limit}
+\alias{read_long_cum_vol_change}
 \alias{read_mass_bed_change}
 \alias{read_mass_bed_change_cum}
 \alias{read_mass_capacity}
@@ -29,6 +30,9 @@ read_lat_struc_mass_div(f, run.type, which.times = NULL,
   which.stations = NULL, which.grains = NULL)
 
 read_long_cum_mass_change(f, run.type, which.times = NULL,
+  which.stations = NULL, which.grains = NULL)
+
+read_long_cum_vol_change(f, run.type, which.times = NULL,
   which.stations = NULL, which.grains = NULL)
 
 read_long_cum_mass_moveable_limit(f, run.type, which.times = NULL,
@@ -99,6 +103,8 @@ Read the sediment data output for all grain classes.
 \item \code{read_lat_struc_mass_div}: Read the Lat Struc Mass Div data output.
 
 \item \code{read_long_cum_mass_change}: Read the Long. Cum Mass Change data output.
+
+\item \code{read_long_cum_vol_change}: Read the Long. Cum Vol Change data output.
 
 \item \code{read_long_cum_mass_moveable_limit}: Read the Long. Cum Mass Moveable Limit data output.
 

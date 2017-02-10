@@ -215,8 +215,7 @@ diff_table = function(d1, d2, tcol, diffcol, percent = FALSE) {
       fun = function(x1, x2)
         x2 - x1
   as_data_frame(cbind(d1[tcol], fun(d1[, datcols], d2[, datcols]))) %>%
-    gather_("Station", diffcol, gather_cols = datcols) %>%
-    mutate(Station = factor(Station, levels = datcols))
+    to_longtable(diffcol)
 }
 
 #' Difference Table (Sediment)
@@ -225,12 +224,11 @@ diff_table = function(d1, d2, tcol, diffcol, percent = FALSE) {
 #'
 #' @inheritParams diff_table
 #' @param gcol the grain class column name.
-#' @return A dataframe, with difference defined as \code{d2- d1}.
-#'   if \code{percent = TRUE}, the difference is defined as
-#'   \code{(d2 - d1)/(0.5*(d2 + d1))}
+#' @return A dataframe in long table format, with difference defined as 
+#'  \code{d2- d1}. If \code{percent = TRUE}, the difference is defined 
+#'  as \code{(d2 - d1)/(0.5*(d2 + d1))}
 #'
 #' @import dplyr
-#' @import tidyr
 #' @export
 diff_sediment = function(d1, d2, tcol, gcol, diffcol, percent = FALSE) {
   Station = NULL # workaround for nse
@@ -246,8 +244,7 @@ diff_sediment = function(d1, d2, tcol, gcol, diffcol, percent = FALSE) {
     fun = function(x1, x2) 
       x2 - x1
   as_data_frame(cbind(d1[tcol], d1[gcol], fun(d1[, datcols], d2[, datcols]))) %>%
-    gather_("Station", diffcol, gather_cols = datcols) %>%
-    mutate(Station = factor(Station, levels = datcols))
+    to_longtable(diffcol)
 }
 
 #' Root Mean Square Error Table

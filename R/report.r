@@ -71,7 +71,7 @@ generate_report = function(model1.file, model2.file, model1.type,
     stop("Package 'ggplot2' is required to generate RAStestR reports.")
   
   if(missing(output.name))
-    output.name = tempfile(tmpdir = output.folder)
+    output.name = basename(tempfile(tmpdir = output.folder))
     
   model1.file = normalizePath(model1.file, winslash = "/")
   model2.file = normalizePath(model2.file, winslash = "/")

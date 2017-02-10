@@ -5,6 +5,7 @@
 \alias{diff_lat_struc_mass_div}
 \alias{diff_long_cum_mass_change}
 \alias{diff_long_cum_mass_moveable_limit}
+\alias{diff_long_cum_vol_change}
 \alias{diff_mass_bed_change}
 \alias{diff_mass_bed_change_cum}
 \alias{diff_mass_capacity}
@@ -26,6 +27,8 @@ diff_fall_velocity(d1, d2)
 diff_lat_struc_mass_div(d1, d2)
 
 diff_long_cum_mass_change(d1, d2)
+
+diff_long_cum_vol_change(d1, d2)
 
 diff_long_cum_mass_moveable_limit(d1, d2)
 
@@ -65,9 +68,9 @@ diff_reduce_armor_factor(d1, d2)
 \item{percent}{Logical: report differences as percent difference.}
 }
 \value{
-A dataframe, with difference defined as \code{d2- d1}.
-  if \code{percent = TRUE}, the difference is defined as
-  \code{(d2 - d1)/(0.5*(d2 + d1))}
+A dataframe in long table format, with difference defined as 
+ \code{d2- d1}. If \code{percent = TRUE}, the difference is defined 
+ as \code{(d2 - d1)/(0.5*(d2 + d1))}
 }
 \description{
 Compute a difference table from sediment data.
@@ -79,6 +82,8 @@ Compute a difference table from sediment data.
 \item \code{diff_lat_struc_mass_div}: Compute a difference table for Lat Struc Mass Div data.
 
 \item \code{diff_long_cum_mass_change}: Compute a difference table for Long. Cum Mass Change data.
+
+\item \code{diff_long_cum_vol_change}: Compute a difference table for Long. Cum Vol Change data.
 
 \item \code{diff_long_cum_mass_moveable_limit}: Compute a difference table for Long. Cum Mass Moveable Limit data.
 

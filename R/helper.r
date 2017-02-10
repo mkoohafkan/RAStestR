@@ -11,7 +11,7 @@ diff_dredged_cum = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_dredged_cum = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_dredged_cum", "rmse_dredged_cum")
+  rmse_table(d, groupcol, "Diff_dredged_cum", "RMSE_dredged_cum")
 
 #' @describeIn read_standard Read the Effective Depth data output.
 #' @export
@@ -26,7 +26,7 @@ diff_effective_depth = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_effective_depth = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_effective_depth", "rmse_effective_depth")
+  rmse_table(d, groupcol, "Diff_effective_depth", "RMSE_effective_depth")
 
 #' @describeIn read_standard Read the Effective_Width data output.
 #' @export
@@ -41,7 +41,7 @@ diff_effective_width = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_effective_width = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_effective_width", "rmse_effective_width")
+  rmse_table(d, groupcol, "Diff_effective_width", "RMSE_effective_width")
 
 #' @describeIn read_standard Read the Flow data output.
 #' @export
@@ -56,7 +56,7 @@ diff_flow = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_flow = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_flow", "rmse_flow")
+  rmse_table(d, groupcol, "Diff_flow", "RMSE_flow")
 
 #' @describeIn read_standard Read the Froude Number Channel data output.
 #' @export
@@ -71,7 +71,7 @@ diff_froude_number_channel = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_froude_number_channel = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_froude_number_channel", "rmse_froude_number_channel")
+  rmse_table(d, groupcol, "Diff_froude_number_channel", "RMSE_froude_number_channel")
 
 #' @describeIn read_standard Read the Hydraulic Radius data output.
 #' @export
@@ -86,7 +86,7 @@ diff_hydraulic_radius = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_hydraulic_radius = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_hydraulic_radius", "rmse_hydraulic_radius")
+  rmse_table(d, groupcol, "Diff_hydraulic_radius", "RMSE_hydraulic_radius")
 
 #' @describeIn read_standard Read the Invert Change data output.
 #' @export
@@ -101,7 +101,7 @@ diff_invert_change = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_invert_change = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_invert_change", "rmse_invert_change")
+  rmse_table(d, groupcol, "Diff_invert_change", "RMSE_invert_change")
 
 #' @describeIn read_standard Read the Invert Elevation data output.
 #' @export
@@ -116,7 +116,7 @@ diff_invert_elevation = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_invert_elevation = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_invert_elevation", "rmse_invert_elevation")
+  rmse_table(d, groupcol, "Diff_invert_elevation", "RMSE_invert_elevation")
 
 #' @describeIn read_standard Read the Mannings n Channel data output.
 #' @export
@@ -131,7 +131,7 @@ diff_mannings_n_channel = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mannings_n_channel = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_mannings_n_channel", "rmse_mannings_n_channel")
+  rmse_table(d, groupcol, "Diff_mannings_n_channel", "RMSE_mannings_n_channel")
 
 #' @describeIn read_standard Read the Mean Effective Invert Change data output.
 #' @export
@@ -146,7 +146,7 @@ diff_mean_effective_invert_change = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mean_effective_invert_change = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_mean_effective_invert_change", "rmse_mean_effective_invert_change")
+  rmse_table(d, groupcol, "Diff_mean_effective_invert_change", "RMSE_mean_effective_invert_change")
 
 #' @describeIn read_standard Read the Mean Effective Invert Elevation data output.
 #' @export
@@ -161,7 +161,7 @@ diff_mean_effective_invert_elevation = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mean_effective_invert_elevation = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_mean_effective_invert_elevation", "rmse_mean_effective_invert_elevation")
+  rmse_table(d, groupcol, "Diff_mean_effective_invert_elevation", "RMSE_mean_effective_invert_elevation")
 
 #' @describeIn read_standard Read the Moveable Elv L data output.
 #' @export
@@ -176,7 +176,7 @@ diff_moveable_elv_l = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_moveable_elv_l = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_moveable_elv_l", "rmse_moveable_elv_l")
+  rmse_table(d, groupcol, "Diff_moveable_elv_l", "RMSE_moveable_elv_l")
 
 #' @describeIn read_standard Read the Moveable Elv R data output.
 #' @export
@@ -191,7 +191,7 @@ diff_moveable_elv_r = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_moveable_elv_r = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_moveable_elv_r", "rmse_moveable_elv_r")
+  rmse_table(d, groupcol, "Diff_moveable_elv_r", "RMSE_moveable_elv_r")
 
 #' @describeIn read_standard Read the Moveable Sta L data output.
 #' @export
@@ -206,7 +206,7 @@ diff_moveable_sta_l = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_moveable_sta_l = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_moveable_sta_l", "rmse_moveable_sta_l")
+  rmse_table(d, groupcol, "Diff_moveable_sta_l", "RMSE_moveable_sta_l")
 
 #' @describeIn read_standard Read the Moveable Sta R data output.
 #' @export
@@ -221,7 +221,7 @@ diff_moveable_sta_r = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_moveable_sta_r = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_moveable_sta_r", "rmse_moveable_sta_r")
+  rmse_table(d, groupcol, "Diff_moveable_sta_r", "RMSE_moveable_sta_r")
 
 #' @describeIn read_standard Read the Observed Data data output.
 #' @export
@@ -236,7 +236,7 @@ diff_observed_data = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_observed_data = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_observed_data", "rmse_observed_data")
+  rmse_table(d, groupcol, "Diff_observed_data", "RMSE_observed_data")
 
 #' @describeIn read_standard Read the Sediment Concentration data output.
 #' @export
@@ -251,7 +251,7 @@ diff_sediment_concentration = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_sediment_concentration = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_sediment_concentration", "rmse_sediment_concentration")
+  rmse_table(d, groupcol, "Diff_sediment_concentration", "RMSE_sediment_concentration")
 
 #' @describeIn read_standard Read the Shear Stress data output.
 #' @export
@@ -266,7 +266,7 @@ diff_shear_stress = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_shear_stress = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_shear_stress", "rmse_shear_stress")
+  rmse_table(d, groupcol, "Diff_shear_stress", "RMSE_shear_stress")
 
 #' @describeIn read_standard Read the Shear Velocity data output.
 #' @export
@@ -281,7 +281,7 @@ diff_shear_velocity = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_shear_velocity = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_shear_velocity", "rmse_shear_velocity")
+  rmse_table(d, groupcol, "Diff_shear_velocity", "RMSE_shear_velocity")
 
 #' @describeIn read_standard Read the Slope data output.
 #' @export
@@ -296,7 +296,7 @@ diff_slope = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_slope = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_slope", "rmse_slope")
+  rmse_table(d, groupcol, "Diff_slope", "RMSE_slope")
 
 #' @describeIn read_standard Read the Temperature data output.
 #' @export
@@ -311,7 +311,7 @@ diff_temperature = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_temperature = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_temperature", "rmse_temperature")
+  rmse_table(d, groupcol, "Diff_temperature", "RMSE_temperature")
 
 #' @describeIn read_standard Read the Thickness Cover data output.
 #' @export
@@ -326,7 +326,7 @@ diff_thickness_cover = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_thickness_cover = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_thickness_cover", "rmse_thickness_cover")
+  rmse_table(d, groupcol, "Diff_thickness_cover", "RMSE_thickness_cover")
 
 #' @describeIn read_standard Read the Thickness Inactive data output.
 #' @export
@@ -341,7 +341,7 @@ diff_thickness_inactive = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_thickness_inactive = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_thickness_inactive", "rmse_thickness_inactive")
+  rmse_table(d, groupcol, "Diff_thickness_inactive", "RMSE_thickness_inactive")
 
 #' @describeIn read_standard Read the Thickness Subsurface data output.
 #' @export
@@ -356,7 +356,7 @@ diff_thickness_subsurface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_thickness_subsurface = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_thickness_subsurface", "rmse_thickness_subsurface")
+  rmse_table(d, groupcol, "Diff_thickness_subsurface", "RMSE_thickness_subsurface")
 
 #' @describeIn read_standard Read the Velocity data output.
 #' @export
@@ -371,7 +371,7 @@ diff_velocity = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_velocity = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_velocity", "rmse_velocity")
+  rmse_table(d, groupcol, "Diff_velocity", "RMSE_velocity")
 
 #' @describeIn read_standard Read the Water Surface data output.
 #' @export
@@ -386,7 +386,7 @@ diff_water_surface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_water_surface = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_water_surface", "rmse_water_surface")
+  rmse_table(d, groupcol, "Diff_water_surface", "RMSE_water_surface")
 
 #' @describeIn read_standard Read the d10 Active data output.
 #' @export
@@ -401,7 +401,7 @@ diff_d10_active = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d10_active = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d10_active", "rmse_d10_active")
+  rmse_table(d, groupcol, "Diff_d10_active", "RMSE_d10_active")
 
 #' @describeIn read_standard Read the d10 Cover data output.
 #' @export
@@ -416,7 +416,7 @@ diff_d10_cover = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d10_cover = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d10_cover", "rmse_d10_cover")
+  rmse_table(d, groupcol, "Diff_d10_cover", "RMSE_d10_cover")
 
 #' @describeIn read_standard Read the d10 Inactive data output.
 #' @export
@@ -431,7 +431,7 @@ diff_d10_inactive = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d10_inactive = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d10_inactive", "rmse_d10_inactive")
+  rmse_table(d, groupcol, "Diff_d10_inactive", "RMSE_d10_inactive")
 
 #' @describeIn read_standard Read the d10 Subsurface data output.
 #' @export
@@ -446,7 +446,7 @@ diff_d10_subsurface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d10_subsurface = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d10_subsurface", "rmse_d10_subsurface")
+  rmse_table(d, groupcol, "Diff_d10_subsurface", "RMSE_d10_subsurface")
 
 #' @describeIn read_standard Read the d16 Active data output.
 #' @export
@@ -461,7 +461,7 @@ diff_d16_active = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d16_active = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d16_active", "rmse_d16_active")
+  rmse_table(d, groupcol, "Diff_d16_active", "RMSE_d16_active")
 
 #' @describeIn read_standard Read the d16 Cover data output.
 #' @export
@@ -476,7 +476,7 @@ diff_d16_cover = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d16_cover = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d16_cover", "rmse_d16_cover")
+  rmse_table(d, groupcol, "Diff_d16_cover", "RMSE_d16_cover")
 
 #' @describeIn read_standard Read the d16 Inactive data output.
 #' @export
@@ -491,7 +491,7 @@ diff_d16_inactive = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d16_inactive = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d16_inactive", "rmse_d16_inactive")
+  rmse_table(d, groupcol, "Diff_d16_inactive", "RMSE_d16_inactive")
 
 #' @describeIn read_standard Read the d16 Subsurface data output.
 #' @export
@@ -506,7 +506,7 @@ diff_d16_subsurface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d16_subsurface = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d16_subsurface", "rmse_d16_subsurface")
+  rmse_table(d, groupcol, "Diff_d16_subsurface", "RMSE_d16_subsurface")
 
 #' @describeIn read_standard Read the d50 Active data output.
 #' @export
@@ -521,7 +521,7 @@ diff_d50_active = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d50_active = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d50_active", "rmse_d50_active")
+  rmse_table(d, groupcol, "Diff_d50_active", "RMSE_d50_active")
 
 #' @describeIn read_standard Read the d50 Cover data output.
 #' @export
@@ -536,7 +536,7 @@ diff_d50_cover = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d50_cover = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d50_cover", "rmse_d50_cover")
+  rmse_table(d, groupcol, "Diff_d50_cover", "RMSE_d50_cover")
 
 #' @describeIn read_standard Read the d50 Inactive data output.
 #' @export
@@ -551,7 +551,7 @@ diff_d50_inactive = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d50_inactive = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d50_inactive", "rmse_d50_inactive")
+  rmse_table(d, groupcol, "Diff_d50_inactive", "RMSE_d50_inactive")
 
 #' @describeIn read_standard Read the d50 Subsurface data output.
 #' @export
@@ -566,7 +566,7 @@ diff_d50_subsurface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d50_subsurface = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d50_subsurface", "rmse_d50_subsurface")
+  rmse_table(d, groupcol, "Diff_d50_subsurface", "RMSE_d50_subsurface")
 
 #' @describeIn read_standard Read the d84 Active data output.
 #' @export
@@ -581,7 +581,7 @@ diff_d84_active = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d84_active = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d84_active", "rmse_d84_active")
+  rmse_table(d, groupcol, "Diff_d84_active", "RMSE_d84_active")
 
 #' @describeIn read_standard Read the d84 Cover data output.
 #' @export
@@ -596,7 +596,7 @@ diff_d84_cover = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d84_cover = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d84_cover", "rmse_d84_cover")
+  rmse_table(d, groupcol, "Diff_d84_cover", "RMSE_d84_cover")
 
 #' @describeIn read_standard Read the d84 Inactive data output.
 #' @export
@@ -611,7 +611,7 @@ diff_d84_inactive = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d84_inactive = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d84_inactive", "rmse_d84_inactive")
+  rmse_table(d, groupcol, "Diff_d84_inactive", "RMSE_d84_inactive")
 
 #' @describeIn read_standard Read the d84 Subsurface data output.
 #' @export
@@ -626,7 +626,7 @@ diff_d84_subsurface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d84_subsurface = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d84_subsurface", "rmse_d84_subsurface")
+  rmse_table(d, groupcol, "Diff_d84_subsurface", "RMSE_d84_subsurface")
 
 #' @describeIn read_standard Read the d90 Active data output.
 #' @export
@@ -641,7 +641,7 @@ diff_d90_active = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d90_active = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d90_active", "rmse_d90_active")
+  rmse_table(d, groupcol, "Diff_d90_active", "RMSE_d90_active")
 
 #' @describeIn read_standard Read the d90 Cover data output.
 #' @export
@@ -656,7 +656,7 @@ diff_d90_cover = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d90_cover = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d90_cover", "rmse_d90_cover")
+  rmse_table(d, groupcol, "Diff_d90_cover", "RMSE_d90_cover")
 
 #' @describeIn read_standard Read the d90 Inactive data output.
 #' @export
@@ -671,7 +671,7 @@ diff_d90_inactive = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d90_inactive = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d90_inactive", "rmse_d90_inactive")
+  rmse_table(d, groupcol, "Diff_d90_inactive", "RMSE_d90_inactive")
 
 #' @describeIn read_standard Read the d90 Subsurface data output.
 #' @export
@@ -686,7 +686,7 @@ diff_d90_subsurface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_d90_subsurface = function(d, groupcol = "Station")
-  rmse_table(d, groupcol, "diff_d90_subsurface", "rmse_d90_subsurface")
+  rmse_table(d, groupcol, "Diff_d90_subsurface", "RMSE_d90_subsurface")
 
 #' @describeIn read_sediment Read the Fall Velocity data output.
 #' @export
@@ -701,7 +701,7 @@ diff_fall_velocity = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_fall_velocity = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_fall_velocity", "rmse_fall_velocity")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_fall_velocity", "RMSE_fall_velocity")
 
 #' @describeIn read_sediment Read the Lat Struc Mass Div data output.
 #' @export
@@ -716,7 +716,7 @@ diff_lat_struc_mass_div = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_lat_struc_mass_div = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_lat_struc_mass_div", "rmse_lat_struc_mass_div")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_lat_struc_mass_div", "RMSE_lat_struc_mass_div")
 
 #' @describeIn read_sediment Read the Long. Cum Mass Change data output.
 #' @export
@@ -731,7 +731,22 @@ diff_long_cum_mass_change = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_long_cum_mass_change = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_long_cum_mass_change", "rmse_long_cum_mass_change")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_long_cum_mass_change", "RMSE_long_cum_mass_change")
+
+#' @describeIn read_sediment Read the Long. Cum Vol Change data output.
+#' @export
+read_long_cum_vol_change = function(f, run.type, which.times = NULL, which.stations = NULL, which.grains = NULL)
+  read_sediment(f, "Long. Cum Vol Change", run.type, which.times, which.stations, which.grains)
+
+#' @describeIn diff_sediment Compute a difference table for Long. Cum Vol Change data.
+#' @export
+diff_long_cum_vol_change = function(d1, d2)
+  diff_sediment(d1, d2, "Time", "GrainClass", "Diff_long_cum_vol_change")
+
+#' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
+#' @export
+rmse_long_cum_vol_change = function(d, groupcol = "Station")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_long_cum_vol_change", "RMSE_long_cum_vol_change")
 
 #' @describeIn read_sediment Read the Long. Cum Mass Moveable Limit data output.
 #' @export
@@ -746,7 +761,7 @@ diff_long_cum_mass_moveable_limit = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_long_cum_mass_moveable_limit = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_long_cum_mass_moveable_limit", "rmse_long_cum_mass_moveable_limit")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_long_cum_mass_moveable_limit", "RMSE_long_cum_mass_moveable_limit")
 
 #' @describeIn read_sediment Read the Mass Bed Change data output.
 #' @export
@@ -761,7 +776,7 @@ diff_mass_bed_change = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_bed_change = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_bed_change", "rmse_mass_bed_change")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_bed_change", "RMSE_mass_bed_change")
 
 #' @describeIn read_sediment Read the Mass Bed Change Cum data output.
 #' @export
@@ -776,7 +791,7 @@ diff_mass_bed_change_cum = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_bed_change_cum = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_bed_change_cum", "rmse_mass_bed_change_cum")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_bed_change_cum", "RMSE_mass_bed_change_cum")
 
 #' @describeIn read_sediment Read the Mass Capacity data output.
 #' @export
@@ -791,7 +806,7 @@ diff_mass_capacity = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_capacity = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_capacity", "rmse_mass_capacity")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_capacity", "RMSE_mass_capacity")
 
 #' @describeIn read_sediment Read the Mass Cover data output.
 #' @export
@@ -806,7 +821,7 @@ diff_mass_cover = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_cover = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_cover", "rmse_mass_cover")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_cover", "RMSE_mass_cover")
 
 #' @describeIn read_sediment Read the Mass In data output.
 #' @export
@@ -821,7 +836,7 @@ diff_mass_in = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_in = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_in", "rmse_mass_in")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_in", "RMSE_mass_in")
 
 #' @describeIn read_sediment Read the Mass Inactive data output.
 #' @export
@@ -836,7 +851,7 @@ diff_mass_inactive = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_inactive = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_inactive", "rmse_mass_inactive")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_inactive", "RMSE_mass_inactive")
 
 #' @describeIn read_sediment Read the Mass In Cum data output.
 #' @export
@@ -851,7 +866,7 @@ diff_mass_in_cum = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_in_cum = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_in_cum", "rmse_mass_in_cum")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_in_cum", "RMSE_mass_in_cum")
 
 #' @describeIn read_sediment Read the Mass Out data output.
 #' @export
@@ -866,7 +881,7 @@ diff_mass_out = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_out = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_out", "rmse_mass_out")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_out", "RMSE_mass_out")
 
 #' @describeIn read_sediment Read the Mass Out Cum data output.
 #' @export
@@ -881,7 +896,7 @@ diff_mass_out_cum = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_out_cum = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_out_cum", "rmse_mass_out_cum")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_out_cum", "RMSE_mass_out_cum")
 
 #' @describeIn read_sediment Read the Mass Subsurface data output.
 #' @export
@@ -896,7 +911,7 @@ diff_mass_subsurface = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_mass_subsurface = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_mass_subsurface", "rmse_mass_subsurface")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_mass_subsurface", "RMSE_mass_subsurface")
 
 #' @describeIn read_sediment Read the Reduce Armor Factor data output.
 #' @export
@@ -911,5 +926,5 @@ diff_reduce_armor_factor = function(d1, d2)
 #' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.
 #' @export
 rmse_reduce_armor_factor = function(d, groupcol = "Station")
-  rmse_table(d, c("GrainClass", groupcol), "diff_reduce_armor_factor", "rmse_reduce_armor_factor")
+  rmse_table(d, c("GrainClass", groupcol), "Diff_reduce_armor_factor", "RMSE_reduce_armor_factor")
 

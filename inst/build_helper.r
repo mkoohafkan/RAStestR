@@ -29,7 +29,7 @@ make_helper_standard = function(table){
     sprintf("#' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.", table),
     "#' @export",    
     sprintf('rmse_%s = function(d, groupcol = "Station")', tstring),
-    sprintf('  rmse_table(d, groupcol, "diff_%s", "rmse_%s")', tstring, tstring),
+    sprintf('  rmse_table(d, groupcol, "Diff_%s", "RMSE_%s")', tstring, tstring),
     sep = "\n"
   )
 
@@ -60,7 +60,7 @@ make_helper_sediment = function(table){
     sprintf("#' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.", table),
     "#' @export",    
     sprintf('rmse_%s = function(d, groupcol = "Station")', tstring),
-    sprintf('  rmse_table(d, c("GrainClass", groupcol), "diff_%s", "rmse_%s")', tstring, tstring),
+    sprintf('  rmse_table(d, c("GrainClass", groupcol), "Diff_%s", "RMSE_%s")', tstring, tstring),
     sep = "\n"
   )
 

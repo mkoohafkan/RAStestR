@@ -33,6 +33,7 @@
 \alias{rmse_lat_struc_mass_div}
 \alias{rmse_long_cum_mass_change}
 \alias{rmse_long_cum_mass_moveable_limit}
+\alias{rmse_long_cum_vol_change}
 \alias{rmse_mannings_n_channel}
 \alias{rmse_mass_bed_change}
 \alias{rmse_mass_bed_change_cum}
@@ -164,6 +165,8 @@ rmse_fall_velocity(d, groupcol = "Station")
 rmse_lat_struc_mass_div(d, groupcol = "Station")
 
 rmse_long_cum_mass_change(d, groupcol = "Station")
+
+rmse_long_cum_vol_change(d, groupcol = "Station")
 
 rmse_long_cum_mass_moveable_limit(d, groupcol = "Station")
 
@@ -307,6 +310,8 @@ Compute RMSE from a difference table.
 \item \code{rmse_lat_struc_mass_div}: Compute RMSE of Froude Number Channel outputs.
 
 \item \code{rmse_long_cum_mass_change}: Compute RMSE of Froude Number Channel outputs.
+
+\item \code{rmse_long_cum_vol_change}: Compute RMSE of Froude Number Channel outputs.
 
 \item \code{rmse_long_cum_mass_moveable_limit}: Compute RMSE of Froude Number Channel outputs.
 

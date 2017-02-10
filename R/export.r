@@ -9,25 +9,15 @@
 #' @param data.col The name of the new column holding data values.
 #' @param station.col The name of the new column holding station IDs. 
 #'   The prefix "XS_" will be stripped from the station IDs.
-#' @param keep.as.character If \code{FALSE}, station IDs will be
-#'   converted to numeric format and times will be converted to 
-#'   timestamp format. This generally improves visualization.
 #' @return The original data table in long format.
 #'
 #' @import tidyr
 #' @import dplyr
 #' @export
-to_longtable = function(d, data.col, station.col = "station",
-  keep.as.character = TRUE) {
+to_longtable = function(d, data.col, station.col = "Station") {
   gather.cols = names(d)[grepl("XS_", names(d))]
-  ld = gather_(d, station.col, data.col, gather.cols, convert = FALSE,
+  gather_(d, station.col, data.col, gather.cols, convert = FALSE,
     factor_key = TRUE)
-  ld[station.col] = gsub("XS_", "", as.character(ld[[station.col]]))
-  if (!keep.as.character) {
-    ld[station.col] = as.numeric(ld[[station.col]])
-    ld["Time"] = as.POSIXct(ld$Time, tz = "UTC", format = "%d%b%Y %H:%M:%S")
-  }
-  ld
 }
 
 #'Reformat As Wide Table
@@ -49,32 +39,6 @@ to_widetable = function(d, key.col, value.col, key.prefix) {
   if (!missing(key.prefix))
     d[key.col] = paste0(key.prefix, d[[key.col]])
   d %>% spread_(key.col, value.col)
-}
-
-#' Convert Stations To Distance
-#'
-#' Convert station values to distance upstream.
-#'
-#' @param ld The long-format data, i.e. output from 
-#'   \code{to_longtable}.
-#' @param distance.col The new column to hold distance values.
-#' @param station.col The column containing station values.
-#' @param metric If \code{TRUE}, stations are assumed to be in 
-#'   kilometers and distances are returned in meters. If \code{FALSE}, 
-#'   stations are assumed to be in miles and distances are returned in 
-#'   feet.
-#' @return The data table with an additional column of distances.
-#'
-#' @export
-station_to_distance = function(ld, distance.col, 
-  station.col = "station", metric = FALSE) {
-  if(metric)
-    ld[distance.col] = 1000 * (as.numeric(ld[[station.col]]) - 
-      min(as.numeric(ld[[station.col]])))
-  else
-    ld[distance.col] = 5280 * (as.numeric(ld[[station.col]]) - 
-      min(as.numeric(ld[[station.col]])))
-  ld
 }
 
 #' Combine Data Tables
@@ -125,4 +89,52 @@ data_to_clipboard = function(d) {
   writeClipboard(paste(readLines(tf), collapse = "\n"))
   message("Data copied to clipboard.")
   invisible(NULL)
+}
+
+#' Convert Stations To Distance
+#'
+#' Convert station values to distance upstream.
+#'
+#' @param ld The long-format data, i.e. output from 
+#'   \code{to_longtable}.
+#' @param distance.col The new column to hold distance values.
+#' @param station.col The column containing station values.
+#' @param metric If \code{TRUE}, stations are assumed to be in 
+#'   kilometers and distances are returned in meters. If \code{FALSE}, 
+#'   stations are assumed to be in miles and distances are returned in 
+#'   feet.
+#' @return The data table with an additional column of distances.
+#'
+#' @export
+station_to_distance = function(ld, distance.col,
+  station.col = "Station", metric = FALSE) {
+  if (metric)
+    ld[distance.col] = 1000 * (as.numeric(ld[[station.col]]) -
+      min(as.numeric(ld[[station.col]])))
+  else
+    ld[distance.col] = 5280 * (as.numeric(ld[[station.col]]) -
+      min(as.numeric(ld[[station.col]])))
+  ld
+}
+
+#' Reformat Standard Fields
+#'
+#' Reformat standard RAStestR fields as standard R data types.
+#'
+#' @param ld A data table.
+#' @param fields A list of fields to reformat.
+#' @return The data table with reformatted fields.
+#'
+#' @details If the "Time" field is specified, values in that column
+#'   will be formatted as R timestamps (POSIXct). If the "Station"
+#'   field is specified, stations will be converted to numeric values
+#'   (only applicable to long format tables).
+#' 
+#' @export
+reformat_fields = function(ld, fields = c("Time", "Station")) {
+  if ("Time" %in% fields)
+    ld["Time"] = as.POSIXct(ld$Time, tz = "UTC", format = "%d%b%Y %H:%M:%S")
+  if ("Station" %in% fields)
+    ld["Station"] = as.numeric(gsub("XS_", "", as.character(ld$Station)))
+  ld
 }

@@ -4,7 +4,7 @@
 \alias{to_longtable}
 \title{Reformat As Long Table}
 \usage{
-to_longtable(d, data.col, station.col = "station", keep.as.character = TRUE)
+to_longtable(d, data.col, station.col = "Station")
 }
 \arguments{
 \item{d}{The data table, i.e. output from \code{read_table} or
@@ -14,10 +14,6 @@ to_longtable(d, data.col, station.col = "station", keep.as.character = TRUE)
 
 \item{station.col}{The name of the new column holding station IDs. 
 The prefix "XS_" will be stripped from the station IDs.}
-
-\item{keep.as.character}{If \code{FALSE}, station IDs will be
-converted to numeric format and times will be converted to 
-timestamp format. This generally improves visualization.}
 }
 \value{
 The original data table in long format.
