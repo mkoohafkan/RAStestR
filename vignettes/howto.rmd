@@ -121,9 +121,9 @@ rmse_water_surface(d.diff, "Station")
 
 ## Exporting data from RAStestR
 
-For users who are not familiar with R, manipulating data with `RAStestR`
+For users who are not familiar with R, manipulating data with RAStestR
 can be daunting. This document describes how to export data from 
-`RAStestR` to other programs like Microsoft Excel.
+RAStestR to other programs like Microsoft Excel.
 
 By default, RAStestR maintains data according to the format in the HDF
 files, i.e. each station gets its own column. This format is often 
@@ -132,7 +132,7 @@ a useful format when working with data in Excel. For example, it may be
 easier to plot a longitudinal cumulative mass change curve if the 
 station IDs are in one column and the actual data is in a second 
 column. Tables in this format are referred to as key-value format or
-"long table" format. `RAStestR` provides the functions `to_longtable` 
+"long table" format. RAStestR provides the functions `to_longtable` 
 and `to_widetable` for converting between long table and wide table 
 formats. 
 
@@ -140,7 +140,7 @@ formats.
 
 Using the HDF files described in the previous section, this example 
 shows how to export water surface data in long format to Excel.
-The function `data_to_clipboard` copies the `RAStestR` data to the 
+The function `data_to_clipboard` copies the RAStestR data to the 
 clipboard, at which point the data can be pasted directly into Excel:
 
 ```r
@@ -159,7 +159,7 @@ format.
 
 A user may want to plot the results from multiple runs as separate 
 series on the same plot in Excel. While you could export multiple runs 
-to Excel individually and manually line them up in Excel, `RAStestR` 
+to Excel individually and manually line them up in Excel, RAStestR 
 provides the function `combine_data` to merge the results of 
 multiple runs into a single data table. You can combine this with
 the functions `to_longtable` and `to_widetable` to export data in a 
