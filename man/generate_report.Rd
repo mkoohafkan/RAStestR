@@ -81,4 +81,3 @@ Generating a report requires that the packages
 
 \link{read_sediment}
 }
-

@@ -1,8 +1,8 @@
 #' Automated Testing of HEC-RAS
 #'
 #' This package is designed to provide an automated testing environment
-#' of HEC-RAS sediment transport model outputs. Functions are provided 
-#' for reading, analyzing and visualizing HDF5 output data and 
+#' of HEC-RAS sediment transport model outputs. Functions are provided
+#' for reading, analyzing and visualizing HDF5 output data and
 #' generating test reports. See the vignette to get started.
 #' @name RAStestR-package
 #' @aliases RAStestR
@@ -20,12 +20,12 @@ NULL
 #'   NULL, all timestamps will be returned.
 #' @param which.stations Character vector of station numbers to extract. If
 #'   NULL, all stations will be returned.
-#' @return A dataframe with a column "Time" containing the Date Time 
+#' @return A dataframe with a column "Time" containing the Date Time
 #'   Stamp data and columns "XS_####" where ### is the cross-section ID.
 #'
 #' @import stringr
 #' @export
-read_standard = function(f, tablelab, run.type, which.times = NULL, 
+read_standard = function(f, tablelab, run.type, which.times = NULL,
   which.stations = NULL) {
   geompath = "Geometry/Cross Sections/River Stations"
   if (run.type == "unsteady") {
@@ -41,7 +41,7 @@ read_standard = function(f, tablelab, run.type, which.times = NULL,
     tspath = file.path("Results", "Sediment", "Output Blocks",
       "Sediment", "Sediment Time Series", "Time Date Stamp")
   }
-  res = read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_") 
+  res = read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_")
   if (!is.null(which.times))
     res = res[res$Time %in% which.times,]
   if (!is.null(which.stations)) {
@@ -54,24 +54,29 @@ read_standard = function(f, tablelab, run.type, which.times = NULL,
 
 #' Sediment By Grain Class Table
 #'
-#' Read the sediment data output for all grain classes. 
+#' Read the sediment data output for all grain classes.
 #'
 #' @inheritParams read_standard
-#' @param which.grains Grain class tables to extract. "" Corresponds to 
-#'   the totals, "1" is the first grain class, etc. If NULL, all grain
+#' @param which.grains Grain class tables to extract. Can accept either numeric
+#'   grain class IDs or grain class labels. Label "ALL" or "" corresponds to
+#'   the totals. If NULL, all grain
 #'   classes will be returned.
-#' @return A dataframe with a column "Time" containing the Date Time 
+#' @return A dataframe with a column "Time" containing the Date Time
 #'   Stamp data; columns "XS_####" where ### is the cross-section ID;
 #'   and column "GrainClass".
 #'
-#' @import h5 
-#' @import dplyr 
+#' @import h5
+#' @import dplyr
 #' @import stringr
 #' @export
-read_sediment = function(f, tablelab, run.type, which.times = NULL, 
+read_sediment = function(f, tablelab, run.type, which.times = NULL,
   which.stations = NULL, which.grains = NULL) {
+  which.grains = as.character(which.grains)
   grain.levels = c("", paste(1:20))
   grain.labels = read_grains(f)
+  if(any(which.grains %in% grain.labels))
+    which.grains[which.grains %in% grain.labels] = grain.levels[
+      match(which.grains[which.grains %in% grain.labels], grain.labels)]
   geompath = "Geometry/Cross Sections/River Stations"
   if (run.type == "unsteady") {
     tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
@@ -99,23 +104,25 @@ read_sediment = function(f, tablelab, run.type, which.times = NULL,
   tablelabs = basename(tablepaths)
   res = vector("list", length(tablelabs))
   for (i in seq_along(tablelabs)) {
-    res[[i]] = read_standard(f, tablelabs[[i]], run.type, which.times, 
+    res[[i]] = read_standard(f, tablelabs[[i]], run.type, which.times,
       which.stations)
-    res[[i]]["GrainClass"] = factor(which.grains[i], 
+    res[[i]]["GrainClass"] = factor(which.grains[i],
       levels = grain.levels, labels = grain.labels)
   }
   do.call(bind_rows, res)
 }
 
-#' Read Grain Class Table
-#'
-#' Read RAS sediment grain class labels.
-#'
-#' @inheritParams read_standard
-#' @return a vector of grain glass labels.
-#'
+# Read Grain Class Table
+#
+# Read RAS sediment grain class labels.
+#
+# @inheritParams read_standard
+# @return a vector of grain glass labels.
+#
 #' @import h5
 read_grains = function(f) {
+  if(!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
   x = h5file(f)
   on.exit(h5close(x))
   grainpath = file.path("Event Conditions", "Sediment",
@@ -125,24 +132,28 @@ read_grains = function(f) {
   c("ALL", x[grainpath][])
 }
 
-#' List Sediment Tables
-#'
-#' List grain class-specific tables of the specified type.
-#'
-#' @inheritParams read_standard
-#' @return a vector of grain glass labels.
-#'
+# List Sediment Tables
+#
+# List grain class-specific tables of the specified type.
+#
+# @inheritParams read_standard
+# @return a vector of grain glass labels.
+#
 #' @import h5
 #' @import stringr
-list_sediment = function(f, tablelab) {
+list_sediment = function(f, sedimentpath) {
+  if(!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
   x = h5file(f)
   on.exit(h5close(x))
-  str_subset(list.datasets(x), tablelab)
+  if(run.type == "unsteady")
+  str_subset(list.datasets(x, path = dirname(sedimentpath), recursive = FALSE),
+    sedimentpath)
 }
 
 #' Generic Table Read Function
 #'
-#' Read RAS sediment data output. 
+#' Read RAS sediment data output.
 #'
 #' @param f The h5 file to read.
 #' @param tablepath The table to read in.
@@ -150,16 +161,18 @@ list_sediment = function(f, tablelab) {
 #' @param coltablepath The table containing the column identifiers.
 #' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @param rowcolname The name to assign to the new row id column.
-#' @param colprefix A prefix to apply to the column IDs. 
+#' @param colprefix A prefix to apply to the column IDs.
 #' @return A dataframe.
 #'
 #' @importFrom utils head
 #' @importFrom utils tail
-#' @import h5 
-#' @import dplyr 
+#' @import h5
+#' @import dplyr
 #' @import stringr
 read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
   run.type, rowcolname, colprefix) {
+  if(!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
   x = h5file(f)
   on.exit(h5close(x))
   for(pth in c(tablepath, rowtablepath, coltablepath))
@@ -224,8 +237,8 @@ diff_table = function(d1, d2, tcol, diffcol, percent = FALSE) {
 #'
 #' @inheritParams diff_table
 #' @param gcol the grain class column name.
-#' @return A dataframe in long table format, with difference defined as 
-#'  \code{d2- d1}. If \code{percent = TRUE}, the difference is defined 
+#' @return A dataframe in long table format, with difference defined as
+#'  \code{d2- d1}. If \code{percent = TRUE}, the difference is defined
 #'  as \code{(d2 - d1)/(0.5*(d2 + d1))}
 #'
 #' @import dplyr
@@ -238,10 +251,10 @@ diff_sediment = function(d1, d2, tcol, gcol, diffcol, percent = FALSE) {
   d1 = d1[d1[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
   d2 = d2[d2[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
   if (percent)
-    fun = function(x1, x2) 
+    fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
   else
-    fun = function(x1, x2) 
+    fun = function(x1, x2)
       x2 - x1
   as_data_frame(cbind(d1[tcol], d1[gcol], fun(d1[, datcols], d2[, datcols]))) %>%
     to_longtable(diffcol)
@@ -254,7 +267,7 @@ diff_sediment = function(d1, d2, tcol, gcol, diffcol, percent = FALSE) {
 #' @param d The difference table.
 #' @param groupcol the column(s) to group differences by. For standard
 #'   tables, \code{groupcol} will typically be either \code{"Station"}
-#'    or \code{"Time"}. For sediment tables, \code{groupcol} will 
+#'    or \code{"Time"}. For sediment tables, \code{groupcol} will
 #'   typically be either \code{c("GrainClass", "Station")} or
 #'   \code{c("GrainClass", "Time")}.
 #' @param diffcol the column containing difference values.

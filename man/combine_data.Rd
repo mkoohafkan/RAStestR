@@ -28,4 +28,3 @@ Combine data tables into a single table. The tables must have
   data, provide explicit names to the tables to easily differentiate
   between variables.
 }
-

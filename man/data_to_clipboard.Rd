@@ -17,4 +17,3 @@ Writes the data table into the clipboard in tab-seperated
 Write RAS data to clipboard in comma-seperated format for pasting 
 into e.g. Microsoft Excel.
 }
-

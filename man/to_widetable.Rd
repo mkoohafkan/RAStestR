@@ -24,4 +24,3 @@ Reformat RAS data from long table format (i.e. output of
 \code{to_longtable}) to wide table format (key values are mapped to
 individual columns).
 }
-

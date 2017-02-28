@@ -4,12 +4,10 @@
 \alias{list_sediment}
 \title{List Sediment Tables}
 \usage{
-list_sediment(f, tablelab)
+list_sediment(f, sedimentpath)
 }
 \arguments{
 \item{f}{The h5 file to read.}
-
-\item{tablelab}{The table to read.}
 }
 \value{
 a vector of grain glass labels.
@@ -17,4 +15,3 @@ a vector of grain glass labels.
 \description{
 List grain class-specific tables of the specified type.
 }
-

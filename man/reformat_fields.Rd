@@ -23,4 +23,3 @@ If the "Time" field is specified, values in that column
   field is specified, stations will be converted to numeric values
   (only applicable to long format tables).
 }
-

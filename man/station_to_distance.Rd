@@ -26,4 +26,3 @@ The data table with an additional column of distances.
 \description{
 Convert station values to distance upstream.
 }
-

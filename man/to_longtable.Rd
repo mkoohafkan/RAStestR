@@ -23,4 +23,3 @@ Reformat RAS data from wide table format (stations are individual
 columns) to long table format (stations and data are collapsed to 
 key-value column format.
 }
-
