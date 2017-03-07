@@ -4,17 +4,17 @@
 \alias{read_hdtable}
 \title{Generic Table Read Function}
 \usage{
-read_hdtable(f, tablepath, rowtablepath, coltablepath, run.type, rowcolname,
-  colprefix)
+read_hdtable(f, table.path, row.table.path, col.table.path, run.type,
+  rowcolname, colprefix)
 }
 \arguments{
 \item{f}{The h5 file to read.}
 
-\item{tablepath}{The table to read in.}
+\item{table.path}{The table to read in.}
 
-\item{rowtablepath}{The table containing the row identifiers.}
+\item{row.table.path}{The table containing the row identifiers.}
 
-\item{coltablepath}{The table containing the column identifiers.}
+\item{col.table.path}{The table containing the column identifiers.}
 
 \item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 

@@ -4,12 +4,14 @@
 \alias{reformat_fields}
 \title{Reformat Standard Fields}
 \usage{
-reformat_fields(ld, fields = c("Time", "Station"))
+reformat_fields(ld, fields = list("Time", "Station"))
 }
 \arguments{
 \item{ld}{A data table.}
 
-\item{fields}{A list of fields to reformat.}
+\item{fields}{The fields to reformat. For non-default Station and Time
+columns, \code{fields} must be a named list identifying the actual names or
+positions of the "Time" and "Station" columns.}
 }
 \value{
 The data table with reformatted fields.

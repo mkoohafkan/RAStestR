@@ -50,7 +50,7 @@
 \alias{read_d90_subsurface}
 \title{Read Standard Table}
 \usage{
-read_standard(f, tablelab, run.type, which.times = NULL,
+read_standard(f, table.name, run.type, which.times = NULL,
   which.stations = NULL)
 
 read_dredged_cum(f, run.type, which.times = NULL, which.stations = NULL)
@@ -157,7 +157,7 @@ read_d90_subsurface(f, run.type, which.times = NULL, which.stations = NULL)
 \arguments{
 \item{f}{The h5 file to read.}
 
-\item{tablelab}{The table to read.}
+\item{table.name}{The table to read.}
 
 \item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 

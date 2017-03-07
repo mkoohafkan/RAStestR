@@ -20,7 +20,7 @@
 \alias{read_reduce_armor_factor}
 \title{Sediment By Grain Class Table}
 \usage{
-read_sediment(f, tablelab, run.type, which.times = NULL,
+read_sediment(f, table.name, run.type, which.times = NULL,
   which.stations = NULL, which.grains = NULL)
 
 read_fall_velocity(f, run.type, which.times = NULL, which.stations = NULL,
@@ -74,7 +74,7 @@ read_reduce_armor_factor(f, run.type, which.times = NULL,
 \arguments{
 \item{f}{The h5 file to read.}
 
-\item{tablelab}{The table to read.}
+\item{table.name}{The table to read.}
 
 \item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 

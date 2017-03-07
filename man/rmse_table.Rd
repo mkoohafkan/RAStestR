@@ -66,144 +66,144 @@
 \alias{rmse_reduce_armor_factor}
 \title{Root Mean Square Error Table}
 \usage{
-rmse_table(d, groupcol, diffcol, rmsecol)
+rmse_table(d, group.col, difference.col, rmse.col)
 
-rmse_dredged_cum(d, groupcol = "Station")
+rmse_dredged_cum(d, group.col = "Station")
 
-rmse_effective_depth(d, groupcol = "Station")
+rmse_effective_depth(d, group.col = "Station")
 
-rmse_effective_width(d, groupcol = "Station")
+rmse_effective_width(d, group.col = "Station")
 
-rmse_flow(d, groupcol = "Station")
+rmse_flow(d, group.col = "Station")
 
-rmse_froude_number_channel(d, groupcol = "Station")
+rmse_froude_number_channel(d, group.col = "Station")
 
-rmse_hydraulic_radius(d, groupcol = "Station")
+rmse_hydraulic_radius(d, group.col = "Station")
 
-rmse_invert_change(d, groupcol = "Station")
+rmse_invert_change(d, group.col = "Station")
 
-rmse_invert_elevation(d, groupcol = "Station")
+rmse_invert_elevation(d, group.col = "Station")
 
-rmse_mannings_n_channel(d, groupcol = "Station")
+rmse_mannings_n_channel(d, group.col = "Station")
 
-rmse_mean_effective_invert_change(d, groupcol = "Station")
+rmse_mean_effective_invert_change(d, group.col = "Station")
 
-rmse_mean_effective_invert_elevation(d, groupcol = "Station")
+rmse_mean_effective_invert_elevation(d, group.col = "Station")
 
-rmse_moveable_elv_l(d, groupcol = "Station")
+rmse_moveable_elv_l(d, group.col = "Station")
 
-rmse_moveable_elv_r(d, groupcol = "Station")
+rmse_moveable_elv_r(d, group.col = "Station")
 
-rmse_moveable_sta_l(d, groupcol = "Station")
+rmse_moveable_sta_l(d, group.col = "Station")
 
-rmse_moveable_sta_r(d, groupcol = "Station")
+rmse_moveable_sta_r(d, group.col = "Station")
 
-rmse_observed_data(d, groupcol = "Station")
+rmse_observed_data(d, group.col = "Station")
 
-rmse_sediment_concentration(d, groupcol = "Station")
+rmse_sediment_concentration(d, group.col = "Station")
 
-rmse_shear_stress(d, groupcol = "Station")
+rmse_shear_stress(d, group.col = "Station")
 
-rmse_shear_velocity(d, groupcol = "Station")
+rmse_shear_velocity(d, group.col = "Station")
 
-rmse_slope(d, groupcol = "Station")
+rmse_slope(d, group.col = "Station")
 
-rmse_temperature(d, groupcol = "Station")
+rmse_temperature(d, group.col = "Station")
 
-rmse_thickness_cover(d, groupcol = "Station")
+rmse_thickness_cover(d, group.col = "Station")
 
-rmse_thickness_inactive(d, groupcol = "Station")
+rmse_thickness_inactive(d, group.col = "Station")
 
-rmse_thickness_subsurface(d, groupcol = "Station")
+rmse_thickness_subsurface(d, group.col = "Station")
 
-rmse_velocity(d, groupcol = "Station")
+rmse_velocity(d, group.col = "Station")
 
-rmse_water_surface(d, groupcol = "Station")
+rmse_water_surface(d, group.col = "Station")
 
-rmse_d10_active(d, groupcol = "Station")
+rmse_d10_active(d, group.col = "Station")
 
-rmse_d10_cover(d, groupcol = "Station")
+rmse_d10_cover(d, group.col = "Station")
 
-rmse_d10_inactive(d, groupcol = "Station")
+rmse_d10_inactive(d, group.col = "Station")
 
-rmse_d10_subsurface(d, groupcol = "Station")
+rmse_d10_subsurface(d, group.col = "Station")
 
-rmse_d16_active(d, groupcol = "Station")
+rmse_d16_active(d, group.col = "Station")
 
-rmse_d16_cover(d, groupcol = "Station")
+rmse_d16_cover(d, group.col = "Station")
 
-rmse_d16_inactive(d, groupcol = "Station")
+rmse_d16_inactive(d, group.col = "Station")
 
-rmse_d16_subsurface(d, groupcol = "Station")
+rmse_d16_subsurface(d, group.col = "Station")
 
-rmse_d50_active(d, groupcol = "Station")
+rmse_d50_active(d, group.col = "Station")
 
-rmse_d50_cover(d, groupcol = "Station")
+rmse_d50_cover(d, group.col = "Station")
 
-rmse_d50_inactive(d, groupcol = "Station")
+rmse_d50_inactive(d, group.col = "Station")
 
-rmse_d50_subsurface(d, groupcol = "Station")
+rmse_d50_subsurface(d, group.col = "Station")
 
-rmse_d84_active(d, groupcol = "Station")
+rmse_d84_active(d, group.col = "Station")
 
-rmse_d84_cover(d, groupcol = "Station")
+rmse_d84_cover(d, group.col = "Station")
 
-rmse_d84_inactive(d, groupcol = "Station")
+rmse_d84_inactive(d, group.col = "Station")
 
-rmse_d84_subsurface(d, groupcol = "Station")
+rmse_d84_subsurface(d, group.col = "Station")
 
-rmse_d90_active(d, groupcol = "Station")
+rmse_d90_active(d, group.col = "Station")
 
-rmse_d90_cover(d, groupcol = "Station")
+rmse_d90_cover(d, group.col = "Station")
 
-rmse_d90_inactive(d, groupcol = "Station")
+rmse_d90_inactive(d, group.col = "Station")
 
-rmse_d90_subsurface(d, groupcol = "Station")
+rmse_d90_subsurface(d, group.col = "Station")
 
-rmse_fall_velocity(d, groupcol = "Station")
+rmse_fall_velocity(d, group.col = "Station")
 
-rmse_lat_struc_mass_div(d, groupcol = "Station")
+rmse_lat_struc_mass_div(d, group.col = "Station")
 
-rmse_long_cum_mass_change(d, groupcol = "Station")
+rmse_long_cum_mass_change(d, group.col = "Station")
 
-rmse_long_cum_vol_change(d, groupcol = "Station")
+rmse_long_cum_vol_change(d, group.col = "Station")
 
-rmse_long_cum_mass_moveable_limit(d, groupcol = "Station")
+rmse_long_cum_mass_moveable_limit(d, group.col = "Station")
 
-rmse_mass_bed_change(d, groupcol = "Station")
+rmse_mass_bed_change(d, group.col = "Station")
 
-rmse_mass_bed_change_cum(d, groupcol = "Station")
+rmse_mass_bed_change_cum(d, group.col = "Station")
 
-rmse_mass_capacity(d, groupcol = "Station")
+rmse_mass_capacity(d, group.col = "Station")
 
-rmse_mass_cover(d, groupcol = "Station")
+rmse_mass_cover(d, group.col = "Station")
 
-rmse_mass_in(d, groupcol = "Station")
+rmse_mass_in(d, group.col = "Station")
 
-rmse_mass_inactive(d, groupcol = "Station")
+rmse_mass_inactive(d, group.col = "Station")
 
-rmse_mass_in_cum(d, groupcol = "Station")
+rmse_mass_in_cum(d, group.col = "Station")
 
-rmse_mass_out(d, groupcol = "Station")
+rmse_mass_out(d, group.col = "Station")
 
-rmse_mass_out_cum(d, groupcol = "Station")
+rmse_mass_out_cum(d, group.col = "Station")
 
-rmse_mass_subsurface(d, groupcol = "Station")
+rmse_mass_subsurface(d, group.col = "Station")
 
-rmse_reduce_armor_factor(d, groupcol = "Station")
+rmse_reduce_armor_factor(d, group.col = "Station")
 }
 \arguments{
 \item{d}{The difference table.}
 
-\item{groupcol}{the column(s) to group differences by. For standard
-tables, \code{groupcol} will typically be either \code{"Station"}
- or \code{"Time"}. For sediment tables, \code{groupcol} will
+\item{group.col}{the column(s) to group differences by. For standard
+tables, \code{group.col} will typically be either \code{"Station"}
+ or \code{"Time"}. For sediment tables, \code{group.col} will
 typically be either \code{c("GrainClass", "Station")} or
 \code{c("GrainClass", "Time")}.}
 
-\item{diffcol}{the column containing difference values.}
+\item{difference.col}{the column containing difference values.}
 
-\item{rmsecol}{The output column containing RMSE values}
+\item{rmse.col}{The output column containing RMSE values}
 }
 \value{
 A dataframe.

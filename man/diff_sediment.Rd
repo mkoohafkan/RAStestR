@@ -20,7 +20,7 @@
 \alias{diff_reduce_armor_factor}
 \title{Difference Table (Sediment)}
 \usage{
-diff_sediment(d1, d2, tcol, gcol, diffcol, percent = FALSE)
+diff_sediment(d1, d2, time.col, grain.col, difference.col, percent = FALSE)
 
 diff_fall_velocity(d1, d2)
 
@@ -59,11 +59,11 @@ diff_reduce_armor_factor(d1, d2)
 
 \item{d2}{The second dataframe, considered the "new" result.}
 
-\item{tcol}{The time column name.}
+\item{time.col}{The time column name.}
 
-\item{gcol}{the grain class column name.}
+\item{grain.col}{the grain class column name.}
 
-\item{diffcol}{The name of the difference column to be created.}
+\item{difference.col}{The name of the difference column to be created.}
 
 \item{percent}{Logical: report differences as percent difference.}
 }

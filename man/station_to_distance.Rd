@@ -8,16 +8,16 @@ station_to_distance(ld, distance.col, station.col = "Station",
   metric = FALSE)
 }
 \arguments{
-\item{ld}{The long-format data, i.e. output from 
+\item{ld}{The long-format data, i.e. output from
 \code{to_longtable}.}
 
 \item{distance.col}{The new column to hold distance values.}
 
 \item{station.col}{The column containing station values.}
 
-\item{metric}{If \code{TRUE}, stations are assumed to be in 
-kilometers and distances are returned in meters. If \code{FALSE}, 
-stations are assumed to be in miles and distances are returned in 
+\item{metric}{If \code{TRUE}, stations are assumed to be in
+kilometers and distances are returned in meters. If \code{FALSE},
+stations are assumed to be in miles and distances are returned in
 feet.}
 }
 \value{

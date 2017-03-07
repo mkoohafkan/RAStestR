@@ -20,7 +20,7 @@ keys in \code{key.col}.}
 The original data table in wide format.
 }
 \description{
-Reformat RAS data from long table format (i.e. output of 
+Reformat RAS data from long table format (i.e. output of
 \code{to_longtable}) to wide table format (key values are mapped to
 individual columns).
 }

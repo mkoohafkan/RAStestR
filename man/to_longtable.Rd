@@ -12,14 +12,14 @@ to_longtable(d, data.col, station.col = "Station")
 
 \item{data.col}{The name of the new column holding data values.}
 
-\item{station.col}{The name of the new column holding station IDs. 
+\item{station.col}{The name of the new column holding station IDs.
 The prefix "XS_" will be stripped from the station IDs.}
 }
 \value{
 The original data table in long format.
 }
 \description{
-Reformat RAS data from wide table format (stations are individual 
-columns) to long table format (stations and data are collapsed to 
+Reformat RAS data from wide table format (stations are individual
+columns) to long table format (stations and data are collapsed to
 key-value column format.
 }

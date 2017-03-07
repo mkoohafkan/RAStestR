@@ -10,10 +10,10 @@ data_to_clipboard(d)
 \item{d}{The data table.}
 }
 \value{
-Writes the data table into the clipboard in tab-seperated 
+Writes the data table into the clipboard in tab-seperated
   format.
 }
 \description{
-Write RAS data to clipboard in comma-seperated format for pasting 
+Write RAS data to clipboard in comma-seperated format for pasting
 into e.g. Microsoft Excel.
 }

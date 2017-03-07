@@ -26,6 +26,9 @@ VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 Collate:
     'main.r'
+    'tablepaths.r'
     'helper.r'
     'report.r'
-	'export.r'
+    'export.r'
+    'fixes.r'
+    'xs.r'
