@@ -9,12 +9,61 @@
 #' @docType package
 NULL
 
+#' Drop Interpolated Cross Section Data
+#'
+#' Drop data from interpolated cross-sections.
+#'
+#' @param d A data table to drop interpolated cross section data from.
+#' @return The data frame \code{d} without rows or columns corresponding to
+#'   interpolated cross sections.
+#'
+#' @details Interpolated cross sections are identified by the presence of a
+#'   '*' in the column name or value of the "Station" column (for long-format
+#'   data).
+#' @import stringr
+#' @export
+drop_interpolated_xs = function(d) {
+  if (any(str_detect(names(d), "XS_")))
+    d[, !str_detect(names(d), "[*]")]
+  else if ("Station" %in% names(d))
+    d[!str_detect(d$Station, "[*]"),]
+  else
+    stop("Format of 'd' not recognized. Could not find 'XS_' columns or ",
+      "column 'Station'")
+}
+
+#' Rename Interpolated Cross Sections
+#'
+#' Rename the identifiers of interpolated cross sections.
+#'
+#' @param d A data table containing interpolated cross section data.
+#' @return The data frame \code{d} with reformatted identifiers for interpolated
+#'   cross sections.
+#'
+#' @details Interpolated cross sections are identified by the presence of a
+#'   '*' in the column name or value of the "Station" column (for long-format
+#'   data). The '*' symbol can interfere with certain selections or data
+#'   manipulations. This function removes the '*' symbol from the Station
+#'   identifiers.
+#'
+#' @import stringr
+#' @export
+rename_interpolated_xs = function(d){
+  if (any(str_detect(names(d), "XS_")))
+    names(d) = names(d) %>% str_replace("[*]", "")
+  else if ("Station" %in% names(d))
+    d["Station"] = d$Station %>% str_replace("[*]", "")
+  else
+    stop("Format of 'd' not recognized. Could not find 'XS_' columns or ",
+      "column 'Station'")
+  d
+}
 #' Read Standard Table
 #'
 #' Read a standard (not grain class-specific) table.
 #'
 #' @param f The h5 file to read.
-#' @param tablelab The table to read.
+#' @param table.name The table to read.
 #' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @param which.times Character vector of timestamps to extract. If
 #'   NULL, all timestamps will be returned.
@@ -25,28 +74,23 @@ NULL
 #'
 #' @import stringr
 #' @export
-read_standard = function(f, tablelab, run.type, which.times = NULL,
+read_standard = function(f, table.name, run.type, which.times = NULL,
   which.stations = NULL) {
-  geompath = "Geometry/Cross Sections/River Stations"
-  if (run.type == "unsteady") {
-    tblpath = file.path("Results", "Unsteady", "Output", "Output Blocks",
-      "Sediment", "Sediment Time Series", "Cross Sections",
-      tablelab)
-    tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
-      "Sediment", "Sediment Time Series", "Time Date Stamp")
-  } else if (run.type == "quasi") {
-    tblpath = file.path("Results", "Sediment", "Output Blocks",
-      "Sediment", "Sediment Time Series", "Cross Sections",
-      tablelab)
-    tspath = file.path("Results", "Sediment", "Output Blocks",
-      "Sediment", "Sediment Time Series", "Time Date Stamp")
-  }
+  geompath = get_station_table(run.type)
+  tblpath = file.path(get_output_block(run.type), table.name)
+  tspath = get_timestep_table(run.type)
+  if (is.numeric(which.stations))
+    which.stations = list_stations(f)[which.stations]
   res = read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_")
   if (!is.null(which.times))
     res = res[res$Time %in% which.times,]
+  if (nrow(res) < 1)
+    stop("No data matching 'which.times' was found")
   if (!is.null(which.stations)) {
     othercols = !str_detect(names(res), "XS_")
     stationcols = names(res) %in% str_c("XS_", which.stations)
+    if (length(stationcols) < 1)
+      stop("No data matching 'which.stations' was found")
     res = res[, which(othercols | stationcols)]
   }
   res
@@ -69,42 +113,32 @@ read_standard = function(f, tablelab, run.type, which.times = NULL,
 #' @import dplyr
 #' @import stringr
 #' @export
-read_sediment = function(f, tablelab, run.type, which.times = NULL,
+read_sediment = function(f, table.name, run.type, which.times = NULL,
   which.stations = NULL, which.grains = NULL) {
-  which.grains = as.character(which.grains)
   grain.levels = c("", paste(1:20))
-  grain.labels = read_grains(f)
-  if(any(which.grains %in% grain.labels))
-    which.grains[which.grains %in% grain.labels] = grain.levels[
-      match(which.grains[which.grains %in% grain.labels], grain.labels)]
-  geompath = "Geometry/Cross Sections/River Stations"
-  if (run.type == "unsteady") {
-    tspath = file.path("Results", "Unsteady", "Output", "Output Blocks",
-    "Sediment", "Sediment Time Series", "Time Date Stamp")
-    sedimentpath = file.path("Results", "Unsteady", "Output",
-    "Output Blocks", "Sediment", "Sediment Time Series",
-    "Cross Sections", tablelab)
-  } else if (run.type == "quasi") {
-    tspath = file.path("Results", "Sediment", "Output Blocks",
-    "Sediment", "Sediment Time Series", "Time Date Stamp")
-    sedimentpath = file.path("Results", "Sediment", "Output Blocks",
-    "Sediment", "Sediment Time Series", "Cross Sections", tablelab)
+  grain.labels = list_grains(f)
+  if (!is.null(which.grains)) {
+    which.grains = as.character(which.grains)
+    if (any(which.grains %in% grain.labels))
+      which.grains[which.grains %in% grain.labels] = grain.levels[
+        match(which.grains[which.grains %in% grain.labels], grain.labels)]
   }
+  sedimentpath = file.path(get_sediment_block(run.type), table.name)
   alltables = list_sediment(f, sedimentpath)
   if (length(alltables) < 1)
     stop('Table "', sedimentpath, '" could not be found.', call. = FALSE)
   if (!is.null(which.grains)) {
-    whichtables = str_c(tablelab, which.grains, sep = " ") %>% str_trim()
-    tablepaths = alltables[basename(alltables) %in% whichtables]
+    whichtables = str_c(table.name, which.grains, sep = " ") %>% str_trim()
+    table.paths = alltables[basename(alltables) %in% whichtables]
   } else {
-    tablepaths = alltables
-    which.grains = basename(tablepaths) %>% str_replace(tablelab, "") %>%
+    table.paths = alltables
+    which.grains = basename(table.paths) %>% str_replace(table.name, "") %>%
       str_trim()
   }
-  tablelabs = basename(tablepaths)
-  res = vector("list", length(tablelabs))
-  for (i in seq_along(tablelabs)) {
-    res[[i]] = read_standard(f, tablelabs[[i]], run.type, which.times,
+  table.names = basename(table.paths)
+  res = vector("list", length(table.names))
+  for (i in seq_along(table.names)) {
+    res[[i]] = read_standard(f, table.names[[i]], run.type, which.times,
       which.stations)
     res[[i]]["GrainClass"] = factor(which.grains[i],
       levels = grain.levels, labels = grain.labels)
@@ -112,53 +146,14 @@ read_sediment = function(f, tablelab, run.type, which.times = NULL,
   do.call(bind_rows, res)
 }
 
-# Read Grain Class Table
-#
-# Read RAS sediment grain class labels.
-#
-# @inheritParams read_standard
-# @return a vector of grain glass labels.
-#
-#' @import h5
-read_grains = function(f) {
-  if(!file.exists(f))
-    stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  grainpath = file.path("Event Conditions", "Sediment",
-    "Grain Class Names")
-  if (!existsDataSet(x, grainpath))
-    stop('Table "', grainpath, '" could not be found.', call. = FALSE)
-  c("ALL", x[grainpath][])
-}
-
-# List Sediment Tables
-#
-# List grain class-specific tables of the specified type.
-#
-# @inheritParams read_standard
-# @return a vector of grain glass labels.
-#
-#' @import h5
-#' @import stringr
-list_sediment = function(f, sedimentpath) {
-  if(!file.exists(f))
-    stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  if(run.type == "unsteady")
-  str_subset(list.datasets(x, path = dirname(sedimentpath), recursive = FALSE),
-    sedimentpath)
-}
-
 #' Generic Table Read Function
 #'
 #' Read RAS sediment data output.
 #'
 #' @param f The h5 file to read.
-#' @param tablepath The table to read in.
-#' @param rowtablepath The table containing the row identifiers.
-#' @param coltablepath The table containing the column identifiers.
+#' @param table.path The table to read in.
+#' @param row.table.path The table containing the row identifiers.
+#' @param col.table.path The table containing the column identifiers.
 #' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @param rowcolname The name to assign to the new row id column.
 #' @param colprefix A prefix to apply to the column IDs.
@@ -169,31 +164,29 @@ list_sediment = function(f, sedimentpath) {
 #' @import h5
 #' @import dplyr
 #' @import stringr
-read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
+read_hdtable = function(f, table.path, row.table.path, col.table.path,
   run.type, rowcolname, colprefix) {
-  if(!file.exists(f))
+  if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   x = h5file(f)
   on.exit(h5close(x))
-  for(pth in c(tablepath, rowtablepath, coltablepath))
+  for (pth in c(table.path, row.table.path, col.table.path))
     if (!existsDataSet(x, pth))
       stop('Table "', pth, '" could not be found. ',
         'Check that argument "run.type" is correct.',
         call. = FALSE)
-  clabs = x[coltablepath][] %>% str_trim()
-  rlabs = x[rowtablepath][] %>% str_trim()
-  this = x[tablepath][] %>% as_data_frame()
+  clabs = x[col.table.path][] %>% str_trim()
+  rlabs = x[row.table.path][] %>% str_trim()
+  this = x[table.path][] %>% as_data_frame()
   if (run.type == "unsteady") {
-    nr = nrow(this)
-    this = this %>% tail(-1) %>% head(-2)
-    rlabs = rlabs[c(1, 3:nr)]
-    rlabs = rlabs %>% tail(-1) %>% head(-1)
+    this = this %>% tail(-1) #%>% head(-1)
+#    rlabs[2] = rlabs[1]
+    rlabs = rlabs %>% tail(-1) #%>% head(-1)
   }
-  else if (run.type == "quasi") {
-    this = this %>% tail(-1)
-    rlabs = rlabs %>% tail(-1)
-
-  }
+#  else if (run.type == "quasi") {
+#    this = this %>% tail(-1)
+#    rlabs = rlabs %>% tail(-1)
+#  }
   clabs = str_c(colprefix, clabs)
   names(this) = clabs
   this[rowcolname] = rlabs
@@ -206,8 +199,8 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
 #'
 #' @param d1 The first dataframe, considered the "base" result.
 #' @param d2 The second dataframe, considered the "new" result.
-#' @param tcol The time column name.
-#' @param diffcol The name of the difference column to be created.
+#' @param time.col The time column name.
+#' @param difference.col The name of the difference column to be created.
 #' @param percent Logical: report differences as percent difference.
 #' @return A dataframe, with difference defined as \code{d2- d1}.
 #'   if \code{percent = TRUE}, the difference is defined as
@@ -215,20 +208,19 @@ read_hdtable = function(f, tablepath, rowtablepath, coltablepath,
 #'
 #' @import dplyr
 #' @export
-diff_table = function(d1, d2, tcol, diffcol, percent = FALSE) {
-  Station = NULL # workaround for nse
-  datcols = intersect(names(d1), names(d2))
-  datcols = datcols[datcols != tcol]
-  d1 = d1 %>% arrange_(tcol)
-  d2 = d2 %>% arrange_(tcol)
+diff_table = function(d1, d2, time.col, difference.col, percent = FALSE) {
+  datime.cols = intersect(names(d1), names(d2))
+  datime.cols = datime.cols[datime.cols != time.col]
+  d1 = d1 %>% arrange_(time.col)
+  d2 = d2 %>% arrange_(time.col)
   if (percent)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
     else
       fun = function(x1, x2)
         x2 - x1
-  as_data_frame(cbind(d1[tcol], fun(d1[, datcols], d2[, datcols]))) %>%
-    to_longtable(diffcol)
+  as_data_frame(cbind(d1[time.col], fun(d1[, datime.cols], d2[, datime.cols]))) %>%
+    to_longtable(difference.col)
 }
 
 #' Difference Table (Sediment)
@@ -236,28 +228,27 @@ diff_table = function(d1, d2, tcol, diffcol, percent = FALSE) {
 #' Compute a difference table from sediment data.
 #'
 #' @inheritParams diff_table
-#' @param gcol the grain class column name.
+#' @param grain.col the grain class column name.
 #' @return A dataframe in long table format, with difference defined as
 #'  \code{d2- d1}. If \code{percent = TRUE}, the difference is defined
 #'  as \code{(d2 - d1)/(0.5*(d2 + d1))}
 #'
 #' @import dplyr
 #' @export
-diff_sediment = function(d1, d2, tcol, gcol, diffcol, percent = FALSE) {
-  Station = NULL # workaround for nse
-  datcols = intersect(names(d1), names(d2))
-  datcols = datcols[datcols != tcol & datcols != gcol]
-  gvals = intersect(unique(d1[[gcol]]), unique(d2[[gcol]]))
-  d1 = d1[d1[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
-  d2 = d2[d2[[gcol]] %in% gvals,] %>% arrange_(tcol, gcol)
+diff_sediment = function(d1, d2, time.col, grain.col, difference.col, percent = FALSE) {
+  datime.cols = intersect(names(d1), names(d2))
+  datime.cols = datime.cols[datime.cols != time.col & datime.cols != grain.col]
+  gvals = intersect(unique(d1[[grain.col]]), unique(d2[[grain.col]]))
+  d1 = d1[d1[[grain.col]] %in% gvals,] %>% arrange_(time.col, grain.col)
+  d2 = d2[d2[[grain.col]] %in% gvals,] %>% arrange_(time.col, grain.col)
   if (percent)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
   else
     fun = function(x1, x2)
       x2 - x1
-  as_data_frame(cbind(d1[tcol], d1[gcol], fun(d1[, datcols], d2[, datcols]))) %>%
-    to_longtable(diffcol)
+  as_data_frame(cbind(d1[time.col], d1[grain.col], fun(d1[, datime.cols],
+    d2[, datime.cols]))) %>% to_longtable(difference.col)
 }
 
 #' Root Mean Square Error Table
@@ -265,20 +256,20 @@ diff_sediment = function(d1, d2, tcol, gcol, diffcol, percent = FALSE) {
 #' Compute RMSE from a difference table.
 #'
 #' @param d The difference table.
-#' @param groupcol the column(s) to group differences by. For standard
-#'   tables, \code{groupcol} will typically be either \code{"Station"}
-#'    or \code{"Time"}. For sediment tables, \code{groupcol} will
+#' @param group.col the column(s) to group differences by. For standard
+#'   tables, \code{group.col} will typically be either \code{"Station"}
+#'    or \code{"Time"}. For sediment tables, \code{group.col} will
 #'   typically be either \code{c("GrainClass", "Station")} or
 #'   \code{c("GrainClass", "Time")}.
-#' @param diffcol the column containing difference values.
-#' @param rmsecol The output column containing RMSE values
+#' @param difference.col the column containing difference values.
+#' @param rmse.col The output column containing RMSE values
 #' @return A dataframe.
 #'
 #' @importFrom stats setNames
 #' @import dplyr
 #' @import stringr
 #' @export
-rmse_table = function(d, groupcol, diffcol, rmsecol) {
-  d %>% group_by_(.dots = groupcol) %>% summarize_(
-    .dots = setNames(str_c("sqrt(mean(", diffcol, "^2))"), rmsecol))
+rmse_table = function(d, group.col, difference.col, rmse.col) {
+  d %>% group_by_(.dots = group.col) %>% summarize_(
+    .dots = setNames(str_c("sqrt(mean(", difference.col, "^2))"), rmse.col))
 }
