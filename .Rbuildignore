@@ -9,3 +9,5 @@ RAStestR.rxproj
 RAStestR.sln
 LICENSE
 inst/build_helper.r
+^.*\.Rproj$
+^\.Rproj\.user$
