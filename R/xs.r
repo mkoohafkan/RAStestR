@@ -16,10 +16,17 @@
 read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
   Station = NULL # workaround for nse
   tblblock = get_xsection_block(run.type)
-  xsoutputs = list_xsections(f, tblblock)
+  xsoutputs = list_xs(f, tblblock)
   if (is.null(which.times))
     which.times = str_split_fixed(xsoutputs, "[(.+)]", 3)[,2]
   xsoutputs = str_subset(xsoutputs, str_c(which.times, collapse = "|"))
+  times.found = unlist(lapply(which.times, function(x)
+    any(str_detect(xsoutputs, x))))
+  if (!all(times.found)) {
+    warning("The following times were not found in ", f, ": ",
+      str_c(which.times[!times.found], collapse = ", "))
+    which.times = which.times[times.found]
+  }
   stations = list_stations(f)
   x = h5file(f)
   on.exit(h5close(x))
@@ -93,6 +100,19 @@ xs_volume = function(f, run.type, which.times = NULL, which.stations = NULL){
 #'  @return A wide data table containing volume change. If \code{over.time} or
 #'    \code{longitudinal} are \code{TRUE}, data may be reordered.
 #'
+#' @details The \code{cumulative} and \code{longitudinal} arguments are simply
+#'   flags to call \code{accumulate_data} on the output data using the same
+#'   conventions as standard RAS output. If \code{cumulative} is \code{TRUE} and
+#'   \code{longitudinal} is \code{FALSE}, the output data will essentially match
+#'   Vol Bed Change Cum RAS output. If both \code{cumulative} and
+#'   \code{longitudinal} are \code{TRUE}, the output data will essentially match
+#'   the Long. Cum Vol Change RAS output.
+#'
+#'  There may be some significant differences between the volume change computed
+#'  by this function and the equivalent RAS output, depending on the cross
+#'  section update tolerances specified in RAS and whether bank failure
+#'  mechanisms (i.e. BSTEM) are incorporated into the model.
+#'
 #' @import dplyr
 #' @import tidyr
 #' @export
@@ -158,26 +178,3 @@ accumulate_data = function(d, time.col = "Time", over.time = TRUE,
   } else
     ordered.d
 }
-
-#' Cross Section Longitudinal Cumulative Volume Change
-#'
-#' Build a longitudinal cumulative volume change curve from cross section data.
-#'
-#' @param d The data table of cross section volumes, e.g. output from \code{xs_volume}
-#' @inheritParams xs_volume_to_change
-#' @inheritParams accumulate_data
-#' @return A data frame of longitudinal cumulative volume change in wide-table
-#'   format.
-#'
-#' @details This function is simply a wrapper that applies \code{xs_volume},
-#'   \code{xs_volume_to_change}, and \code{accumulate_data} to generate a
-#'   longitudinal cumulative volume change curve.
-#'
-#' @import dplyr
-#' @export
-xs_cumulative_change = function(d, station.col = "Station", time.col = "Time",
-  direction = "downstream"){
-  d %>% xs_volume_to_change(station.col, time.col) %>%
-    accumulate_data(time.col, over.time = TRUE, longitudinal = TRUE, direction)
-}
-
