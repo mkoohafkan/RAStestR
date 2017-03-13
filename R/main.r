@@ -179,13 +179,13 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
   rlabs = x[row.table.path][] %>% str_trim()
   this = x[table.path][] %>% as_data_frame()
   if (run.type == "unsteady") {
-    this = this %>% tail(-1) #%>% head(-1)
+    this = this %>% head(-1) #%>% tail(-1)
 #    rlabs[2] = rlabs[1]
-    rlabs = rlabs %>% tail(-1) #%>% head(-1)
+    rlabs = rlabs %>% head(-1) #%>% tail(-1)
   }
 #  else if (run.type == "quasi") {
-#    this = this %>% tail(-1)
-#    rlabs = rlabs %>% tail(-1)
+#    this = this %>% head(-1)
+#    rlabs = rlabs %>% head(-1)
 #  }
   clabs = str_c(colprefix, clabs)
   names(this) = clabs
@@ -209,6 +209,8 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
 #' @import dplyr
 #' @export
 diff_table = function(d1, d2, time.col, difference.col, percent = FALSE) {
+  if (missing(difference.col))
+    stop('argument "difference.col" is missing, with no default')
   datime.cols = intersect(names(d1), names(d2))
   datime.cols = datime.cols[datime.cols != time.col]
   d1 = d1 %>% arrange_(time.col)
