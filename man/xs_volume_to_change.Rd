@@ -25,3 +25,17 @@ xs_volume_to_change(d, station.col = "Station", time.col = "Time",
 \description{
 Compute cross-section volume change from volume data.
 }
+\details{
+The \code{cumulative} and \code{longitudinal} arguments are simply
+  flags to call \code{accumulate_data} on the output data using the same
+  conventions as standard RAS output. If \code{cumulative} is \code{TRUE} and
+  \code{longitudinal} is \code{FALSE}, the output data will essentially match
+  Vol Bed Change Cum RAS output. If both \code{cumulative} and
+  \code{longitudinal} are \code{TRUE}, the output data will essentially match
+  the Long. Cum Vol Change RAS output.
+
+ There may be some significant differences between the volume change computed
+ by this function and the equivalent RAS output, depending on the cross
+ section update tolerances specified in RAS and whether bank failure
+ mechanisms (i.e. BSTEM) are incorporated into the model.
+}
