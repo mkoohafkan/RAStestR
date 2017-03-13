@@ -7,6 +7,8 @@
 #' @param d The data table, i.e. output from \code{read_table} or
 #'   \code{read_sediment}.
 #' @param data.col The name of the new column holding data values.
+#' @param gather.cols The column names to gather data from. If not specified,
+#'   all columns with the prefix "XS_" will be used.
 #' @param station.col The name of the new column holding station IDs.
 #'   The prefix "XS_" will be stripped from the station IDs.
 #' @return The original data table in long format.
@@ -14,10 +16,11 @@
 #' @import tidyr
 #' @import dplyr
 #' @export
-to_longtable = function(d, data.col, station.col = "Station") {
-  gather.cols = names(d)[grepl("XS_", names(d))]
+to_longtable = function(d, data.col, gather.cols, station.col = "Station") {
+  if (missing(gather.cols))
+    gather.cols = names(d)[grepl("XS_", names(d))]
   gather_(d, station.col, data.col, gather.cols, convert = FALSE,
-    factor_key = TRUE)
+    factor_key = FALSE)
 }
 
 #'Reformat As Wide Table
@@ -80,13 +83,11 @@ combine_data = function(..., data.list, id.col = "table") {
 #' @return Writes the data table into the clipboard in tab-seperated
 #'   format.
 #'
-#' @importFrom utils write.table
+#' @import readr
 #' @importFrom utils writeClipboard
 #' @export
 data_to_clipboard = function(d) {
-  tf = tempfile(fileext = ".txt")
-  write.table(d, tf, sep = "\t")
-  writeClipboard(paste(readLines(tf), collapse = "\n"))
+  writeClipboard(format_tsv(d))
   message("Data copied to clipboard.")
   invisible(NULL)
 }
