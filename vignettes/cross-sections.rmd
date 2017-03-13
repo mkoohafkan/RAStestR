@@ -1,0 +1,43 @@
+%\VignetteEngine{knitr}
+%\VignetteIndexEntry{Working With Cross Section Data}
+
+# Working With Cross Section Data
+
+## Introduction
+
+RAStestR provides functionality for manipulating cross section data contained
+in the HDF sediment output files. This document illustrates how to work with 
+cross section data to generate a longitudinal cumulative volume change curve for
+verifying RAS outputs.
+
+## Longitudinal Cumulative Change in RAS
+
+
+
+
+## Loading Cross Section Data in RAStestR
+
+```
+library(RAStestR)
+library(dplyr)
+library(ggplot2)
+projpath = "C:/PROJECTS/Simple Sediment Transport Example/Simple_RAS_5.03"
+testplan = file.path(projpath, "MBex.p04.hdf")
+start.time = "01JUL1975 00:00:00"
+end.time = "02JUL1975 00:00:00"
+
+ras.lcvc = read_long_cum_vol_change(testplan, "quasi", which.times = end.time, 
+  which.grains = "ALL") %>% to_longtable(data.col = "LCVC") %>% 
+  reformat_fields()
+
+xs.volume = xs_volume(testplan, "quasi", which.times = c(start.time, end.time)) 
+xs.lcvc = xs.volume %>% 
+  xs_volume_to_change(cumulative = TRUE, longitudinal = TRUE) %>% 
+  filter(Time == end.time) %>% to_longtable(data.col = "LCVC") %>% 
+  reformat_fields()
+
+ggplot() + aes(x = Station, y = LCVC) + 
+  geom_line(data = ras.lcvc, color = "black") +
+  geom_line(data = xs.lcvc, color = "red")
+
+```

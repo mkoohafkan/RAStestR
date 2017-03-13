@@ -4,13 +4,16 @@
 \alias{to_longtable}
 \title{Reformat As Long Table}
 \usage{
-to_longtable(d, data.col, station.col = "Station")
+to_longtable(d, data.col, gather.cols, station.col = "Station")
 }
 \arguments{
 \item{d}{The data table, i.e. output from \code{read_table} or
 \code{read_sediment}.}
 
 \item{data.col}{The name of the new column holding data values.}
+
+\item{gather.cols}{The column names to gather data from. If not specified,
+all columns with the prefix "XS_" will be used.}
 
 \item{station.col}{The name of the new column holding station IDs.
 The prefix "XS_" will be stripped from the station IDs.}
