@@ -4,15 +4,30 @@
 \alias{xs_volume_to_change}
 \title{Cross Section Volume Change}
 \usage{
-xs_volume_to_change(d, station.col = "Station", time.col = "Time",
+xs_volume_to_change(d, data.col = "Volume", station.col = "Station",
+  time.col = "Time", region.col = "Region", region = NULL,
   cumulative = TRUE, longitudinal = TRUE)
 }
 \arguments{
 \item{d}{The volume data.}
 
+\item{data.col}{The column containing volume data.}
+
 \item{station.col}{The column containing Station IDs.}
 
 \item{time.col}{The column containing times.}
+
+\item{region.col}{The column containing region IDs. Ignored if
+\code{region} is \code{NULL}.}
+
+\item{region}{The region to compute volume change for. If multiple
+values are provided, the function will add the volumes of the specified
+regions before computing change. Results will be erroneous if overlapping
+regions are specified. If NULL, the function assumes the supplied
+data is for a single region only. If \code{region} is  not named, the
+function will assume the region column is named "Region". If \code{region}
+is named, the name will be used to identify the column containing region
+information.}
 
 \item{cumulative}{If \code{TRUE}, accumulate volume change over time.}
 

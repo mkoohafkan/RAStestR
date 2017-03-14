@@ -9,6 +9,11 @@ get_lengths_table = function(RAS.version = "5.0.3") {
 get_grain_class_table = function(RAS.version = "5.0.3") {
   file.path("Event Conditions", "Sediment", "Grain Class Names")
 }
+# bank station table path
+get_bank_stations_table = function(RAS.version = "5.0.3") {
+  file.path("Geometry", "Cross Sections", "Bank Stations")
+}
+
 # output interval table path
 get_timestep_table = function(run.type, RAS.version = "5.0.3"){
   run.type = match.arg(run.type, c("unsteady", "quasi"))
@@ -58,6 +63,7 @@ get_xsection_block = function(run.type, RAS.version = "5.0.3"){
 #' @return a vector of grain glass labels.
 #'
 #' @import h5
+#' @import stringr
 list_grains = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
@@ -66,8 +72,29 @@ list_grains = function(f) {
   grainpath = get_grain_class_table()
   if (!existsDataSet(x, grainpath))
     stop('Table "', grainpath, '" could not be found.', call. = FALSE)
-  c("ALL", x[grainpath][])
+  c("ALL", x[grainpath][]) %>% str_trim()
 }
+
+#' List Time Steps
+#'
+#' Get list of output times.
+#'
+#' @inheritParams read_standard
+#' @return a vector of cross section lengths.
+#'
+#' @import h5
+#' @import stringr
+list_output_times = function(f, run.type) {
+  if (!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
+  x = h5file(f)
+  on.exit(h5close(x))
+  timespath = get_timestep_table(run.type)
+  if (!existsDataSet(x, timespath))
+    stop('Table "', timespath, '" could not be found.', call. = FALSE)
+  x[timespath][] %>% str_trim()
+}
+
 
 #' List Cross Section Lengths
 #'
@@ -88,9 +115,28 @@ list_lengths = function(f) {
   x[lengthpath][]
 }
 
-#' Read River Station Table
+#' List Bank Stations
 #'
-#' Read RAS river station labels.
+#' Get list of bank stations
+#'
+#' @inheritParams read_standard
+#' @return a vector of bank stations
+#'
+#' @import h5
+list_bank_stations = function(f){
+  if (!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
+  x = h5file(f)
+  on.exit(h5close(x))
+  bankpath = get_bank_stations_table()
+  if (!existsDataSet(x, bankpath))
+    stop('Table "', bankpath, '" could not be found.', call. = FALSE)
+  x[bankpath][]
+}
+
+#' List River Stations
+#'
+#' List RAS river station labels.
 #'
 #' @inheritParams read_standard
 #' @return a vector of river station labels.
@@ -146,3 +192,5 @@ list_xs = function(f, xs.block) {
   list.datasets(x, path = xs.block, recursive = FALSE) %>% basename() %>%
     str_subset("info") %>% str_replace("info", "") %>% str_trim()
 }
+
+
