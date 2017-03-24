@@ -15,8 +15,7 @@ to_longtable(d, data.col, gather.cols, station.col = "Station")
 \item{gather.cols}{The column names to gather data from. If not specified,
 all columns with the prefix "XS_" will be used.}
 
-\item{station.col}{The name of the new column holding station IDs.
-The prefix "XS_" will be stripped from the station IDs.}
+\item{station.col}{The name of the new column holding station IDs.}
 }
 \value{
 The original data table in long format.

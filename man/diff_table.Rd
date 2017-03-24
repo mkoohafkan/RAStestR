@@ -50,99 +50,99 @@
 \alias{diff_d90_subsurface}
 \title{Difference Table}
 \usage{
-diff_table(d1, d2, time.col, difference.col, percent = FALSE)
+diff_table(d1, d2, time.col, difference.col, relative = FALSE)
 
-diff_dredged_cum(d1, d2)
+diff_dredged_cum(d1, d2, relative = FALSE)
 
-diff_effective_depth(d1, d2)
+diff_effective_depth(d1, d2, relative = FALSE)
 
-diff_effective_width(d1, d2)
+diff_effective_width(d1, d2, relative = FALSE)
 
-diff_flow(d1, d2)
+diff_flow(d1, d2, relative = FALSE)
 
-diff_froude_number_channel(d1, d2)
+diff_froude_number_channel(d1, d2, relative = FALSE)
 
-diff_hydraulic_radius(d1, d2)
+diff_hydraulic_radius(d1, d2, relative = FALSE)
 
-diff_invert_change(d1, d2)
+diff_invert_change(d1, d2, relative = FALSE)
 
-diff_invert_elevation(d1, d2)
+diff_invert_elevation(d1, d2, relative = FALSE)
 
-diff_mannings_n_channel(d1, d2)
+diff_mannings_n_channel(d1, d2, relative = FALSE)
 
-diff_mean_effective_invert_change(d1, d2)
+diff_mean_effective_invert_change(d1, d2, relative = FALSE)
 
-diff_mean_effective_invert_elevation(d1, d2)
+diff_mean_effective_invert_elevation(d1, d2, relative = FALSE)
 
-diff_moveable_elv_l(d1, d2)
+diff_moveable_elv_l(d1, d2, relative = FALSE)
 
-diff_moveable_elv_r(d1, d2)
+diff_moveable_elv_r(d1, d2, relative = FALSE)
 
-diff_moveable_sta_l(d1, d2)
+diff_moveable_sta_l(d1, d2, relative = FALSE)
 
-diff_moveable_sta_r(d1, d2)
+diff_moveable_sta_r(d1, d2, relative = FALSE)
 
-diff_observed_data(d1, d2)
+diff_observed_data(d1, d2, relative = FALSE)
 
-diff_sediment_concentration(d1, d2)
+diff_sediment_concentration(d1, d2, relative = FALSE)
 
-diff_shear_stress(d1, d2)
+diff_shear_stress(d1, d2, relative = FALSE)
 
-diff_shear_velocity(d1, d2)
+diff_shear_velocity(d1, d2, relative = FALSE)
 
-diff_slope(d1, d2)
+diff_slope(d1, d2, relative = FALSE)
 
-diff_temperature(d1, d2)
+diff_temperature(d1, d2, relative = FALSE)
 
-diff_thickness_cover(d1, d2)
+diff_thickness_cover(d1, d2, relative = FALSE)
 
-diff_thickness_inactive(d1, d2)
+diff_thickness_inactive(d1, d2, relative = FALSE)
 
-diff_thickness_subsurface(d1, d2)
+diff_thickness_subsurface(d1, d2, relative = FALSE)
 
-diff_velocity(d1, d2)
+diff_velocity(d1, d2, relative = FALSE)
 
-diff_water_surface(d1, d2)
+diff_water_surface(d1, d2, relative = FALSE)
 
-diff_d10_active(d1, d2)
+diff_d10_active(d1, d2, relative = FALSE)
 
-diff_d10_cover(d1, d2)
+diff_d10_cover(d1, d2, relative = FALSE)
 
-diff_d10_inactive(d1, d2)
+diff_d10_inactive(d1, d2, relative = FALSE)
 
-diff_d10_subsurface(d1, d2)
+diff_d10_subsurface(d1, d2, relative = FALSE)
 
-diff_d16_active(d1, d2)
+diff_d16_active(d1, d2, relative = FALSE)
 
-diff_d16_cover(d1, d2)
+diff_d16_cover(d1, d2, relative = FALSE)
 
-diff_d16_inactive(d1, d2)
+diff_d16_inactive(d1, d2, relative = FALSE)
 
-diff_d16_subsurface(d1, d2)
+diff_d16_subsurface(d1, d2, relative = FALSE)
 
-diff_d50_active(d1, d2)
+diff_d50_active(d1, d2, relative = FALSE)
 
-diff_d50_cover(d1, d2)
+diff_d50_cover(d1, d2, relative = FALSE)
 
-diff_d50_inactive(d1, d2)
+diff_d50_inactive(d1, d2, relative = FALSE)
 
-diff_d50_subsurface(d1, d2)
+diff_d50_subsurface(d1, d2, relative = FALSE)
 
-diff_d84_active(d1, d2)
+diff_d84_active(d1, d2, relative = FALSE)
 
-diff_d84_cover(d1, d2)
+diff_d84_cover(d1, d2, relative = FALSE)
 
-diff_d84_inactive(d1, d2)
+diff_d84_inactive(d1, d2, relative = FALSE)
 
-diff_d84_subsurface(d1, d2)
+diff_d84_subsurface(d1, d2, relative = FALSE)
 
-diff_d90_active(d1, d2)
+diff_d90_active(d1, d2, relative = FALSE)
 
-diff_d90_cover(d1, d2)
+diff_d90_cover(d1, d2, relative = FALSE)
 
-diff_d90_inactive(d1, d2)
+diff_d90_inactive(d1, d2, relative = FALSE)
 
-diff_d90_subsurface(d1, d2)
+diff_d90_subsurface(d1, d2, relative = FALSE)
 }
 \arguments{
 \item{d1}{The first dataframe, considered the "base" result.}
@@ -153,11 +153,11 @@ diff_d90_subsurface(d1, d2)
 
 \item{difference.col}{The name of the difference column to be created.}
 
-\item{percent}{Logical: report differences as percent difference.}
+\item{relative}{Logical: report differences as relative difference.}
 }
 \value{
 A dataframe, with difference defined as \code{d2- d1}.
-  if \code{percent = TRUE}, the difference is defined as
+  if \code{relative = TRUE}, the difference is defined as
   \code{(d2 - d1)/(0.5*(d2 + d1))}.
 }
 \description{

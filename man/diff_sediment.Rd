@@ -20,39 +20,39 @@
 \alias{diff_reduce_armor_factor}
 \title{Difference Table (Sediment)}
 \usage{
-diff_sediment(d1, d2, time.col, grain.col, difference.col, percent = FALSE)
+diff_sediment(d1, d2, time.col, grain.col, difference.col, relative = FALSE)
 
-diff_fall_velocity(d1, d2)
+diff_fall_velocity(d1, d2, relative = FALSE)
 
-diff_lat_struc_mass_div(d1, d2)
+diff_lat_struc_mass_div(d1, d2, relative = FALSE)
 
-diff_long_cum_mass_change(d1, d2)
+diff_long_cum_mass_change(d1, d2, relative = FALSE)
 
-diff_long_cum_vol_change(d1, d2)
+diff_long_cum_vol_change(d1, d2, relative = FALSE)
 
-diff_long_cum_mass_moveable_limit(d1, d2)
+diff_long_cum_mass_moveable_limit(d1, d2, relative = FALSE)
 
-diff_mass_bed_change(d1, d2)
+diff_mass_bed_change(d1, d2, relative = FALSE)
 
-diff_mass_bed_change_cum(d1, d2)
+diff_mass_bed_change_cum(d1, d2, relative = FALSE)
 
-diff_mass_capacity(d1, d2)
+diff_mass_capacity(d1, d2, relative = FALSE)
 
-diff_mass_cover(d1, d2)
+diff_mass_cover(d1, d2, relative = FALSE)
 
-diff_mass_in(d1, d2)
+diff_mass_in(d1, d2, relative = FALSE)
 
-diff_mass_inactive(d1, d2)
+diff_mass_inactive(d1, d2, relative = FALSE)
 
-diff_mass_in_cum(d1, d2)
+diff_mass_in_cum(d1, d2, relative = FALSE)
 
-diff_mass_out(d1, d2)
+diff_mass_out(d1, d2, relative = FALSE)
 
-diff_mass_out_cum(d1, d2)
+diff_mass_out_cum(d1, d2, relative = FALSE)
 
-diff_mass_subsurface(d1, d2)
+diff_mass_subsurface(d1, d2, relative = FALSE)
 
-diff_reduce_armor_factor(d1, d2)
+diff_reduce_armor_factor(d1, d2, relative = FALSE)
 }
 \arguments{
 \item{d1}{The first dataframe, considered the "base" result.}
@@ -65,11 +65,11 @@ diff_reduce_armor_factor(d1, d2)
 
 \item{difference.col}{The name of the difference column to be created.}
 
-\item{percent}{Logical: report differences as percent difference.}
+\item{relative}{Logical: report differences as relative difference.}
 }
 \value{
 A dataframe in long table format, with difference defined as
- \code{d2- d1}. If \code{percent = TRUE}, the difference is defined
+ \code{d2- d1}. If \code{relative = TRUE}, the difference is defined
  as \code{(d2 - d1)/(0.5*(d2 + d1))}
 }
 \description{

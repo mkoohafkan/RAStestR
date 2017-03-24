@@ -4,14 +4,15 @@
 \alias{data_to_clipboard}
 \title{Write Data To Clipboard}
 \usage{
-data_to_clipboard(d)
+data_to_clipboard(d, header = TRUE)
 }
 \arguments{
 \item{d}{The data table.}
+
+\item{header}{If \code{TRUE}, write the column names to the first row.}
 }
 \value{
-Writes the data table into the clipboard in tab-seperated
-  format.
+Writes the data table to the clipboard in tab-seperated format.
 }
 \description{
 Write RAS data to clipboard in comma-seperated format for pasting
