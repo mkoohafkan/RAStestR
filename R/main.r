@@ -201,21 +201,21 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
 #' @param d2 The second dataframe, considered the "new" result.
 #' @param time.col The time column name.
 #' @param difference.col The name of the difference column to be created.
-#' @param percent Logical: report differences as percent difference.
+#' @param relative Logical: report differences as relative difference.
 #' @return A dataframe, with difference defined as \code{d2- d1}.
-#'   if \code{percent = TRUE}, the difference is defined as
+#'   if \code{relative = TRUE}, the difference is defined as
 #'   \code{(d2 - d1)/(0.5*(d2 + d1))}.
 #'
 #' @import dplyr
 #' @export
-diff_table = function(d1, d2, time.col, difference.col, percent = FALSE) {
+diff_table = function(d1, d2, time.col, difference.col, relative = FALSE) {
   if (missing(difference.col))
     stop('argument "difference.col" is missing, with no default')
   datime.cols = intersect(names(d1), names(d2))
   datime.cols = datime.cols[datime.cols != time.col]
   d1 = d1 %>% arrange_(time.col)
   d2 = d2 %>% arrange_(time.col)
-  if (percent)
+  if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
     else
@@ -232,18 +232,19 @@ diff_table = function(d1, d2, time.col, difference.col, percent = FALSE) {
 #' @inheritParams diff_table
 #' @param grain.col the grain class column name.
 #' @return A dataframe in long table format, with difference defined as
-#'  \code{d2- d1}. If \code{percent = TRUE}, the difference is defined
+#'  \code{d2- d1}. If \code{relative = TRUE}, the difference is defined
 #'  as \code{(d2 - d1)/(0.5*(d2 + d1))}
 #'
 #' @import dplyr
 #' @export
-diff_sediment = function(d1, d2, time.col, grain.col, difference.col, percent = FALSE) {
+diff_sediment = function(d1, d2, time.col, grain.col, difference.col,
+  relative = FALSE) {
   datime.cols = intersect(names(d1), names(d2))
   datime.cols = datime.cols[datime.cols != time.col & datime.cols != grain.col]
   gvals = intersect(unique(d1[[grain.col]]), unique(d2[[grain.col]]))
   d1 = d1[d1[[grain.col]] %in% gvals,] %>% arrange_(time.col, grain.col)
   d2 = d2[d2[[grain.col]] %in% gvals,] %>% arrange_(time.col, grain.col)
-  if (percent)
+  if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
   else
@@ -274,4 +275,97 @@ diff_sediment = function(d1, d2, time.col, grain.col, difference.col, percent = 
 rmse_table = function(d, group.col, difference.col, rmse.col) {
   d %>% group_by_(.dots = group.col) %>% summarize_(
     .dots = setNames(str_c("sqrt(mean(", difference.col, "^2))"), rmse.col))
+}
+
+#' Accumulate Data Over Time and/or Space
+#'
+#' Accumulate data from a table over time and/or longitudinally.
+#'
+#' @param d A wide-format table containing values to accumulate.
+#' @inheritParams diff_table
+#' @param over.time If \code{TRUE}, accumulate data across time steps. This
+#'   is generally valid only for data output at the computation time step.
+#' @param longitudinal If \code{TRUE}, accumulate data along the reach. This
+#'   is generally only valid when all cross sections are included in \code{d}.
+#' @param direction Accumulate data in the downstream (descending order of cross
+#'   section IDs) or upstream (ascending order) direction. Ignored if
+#'   \code{longitudinal} is \code{FALSE}.
+#' @return A data frame containing the accumulated data from \code{d}. Note
+#'   that \code{d} may be reordered in time and by cross-section.
+#'
+#' @import dplyr
+#' @import stringr
+#' @export
+cumulative_table = function(d, time.col = "Time", over.time = TRUE,
+  longitudinal = TRUE, direction = c("upstream", "downstream")){
+  # nse workaround
+  . = NULL
+  time.order = d %>% reformat_fields(time.col) %>% `[[`(time.col) %>% order()
+  xs.order = names(d) %>% str_subset("XS_") %>% data_frame(Station = .) %>%
+    reformat_fields("Station") %>% `[[`("Station") %>% order()
+  ordered.xs = names(d) %>% str_subset("XS_") %>% `[`(xs.order)
+  ordered.d = d[time.order, c("Time", ordered.xs)]
+  if (over.time)
+    for (oxs in ordered.xs)
+      ordered.d[oxs] = cumsum(ordered.d[[oxs]])
+  if (longitudinal) {
+    direction = match.arg(direction, c("upstream", "downstream"))
+    if (direction == "downstream")
+      lon.fun = rev
+    else
+      lon.fun = identity
+    cum.d = as.matrix(ordered.d[ordered.xs])
+    for (i in seq(nrow(cum.d)))
+      cum.d[i,] = lon.fun(cumsum(lon.fun(cum.d[i,])))
+    bind_cols(ordered.d[time.col], as_data_frame(cum.d))
+  } else
+    ordered.d
+}
+
+#' Accumulate Sediment Data Over Time and/or Space
+#'
+#' Accumulate data from a sediment table over time and/or longitudinally.
+#'
+#' @param d A wide-format table containing values to accumulate.
+#' @inheritParams diff_sediment
+#' @inheritParams cumulative_table
+#' @return A data frame containing the accumulated data from \code{d}. Note
+#'   that \code{d} may be reordered in time and by cross-section and grain
+#'   class.
+#'
+#' @import dplyr
+#' @import stringr
+#' @export
+cumulative_sediment = function(d, time.col = "Time", grain.col = "GrainClass",
+  over.time = TRUE, longitudinal = TRUE,
+  direction = c("upstream", "downstream")){
+  # nse workaround
+  . = NULL
+  time.order = d %>% reformat_fields(time.col) %>% `[[`(time.col) %>% order()
+  xs.order = names(d) %>% str_subset("XS_") %>% data_frame(Station = .) %>%
+    reformat_fields("Station") %>% `[[`("Station") %>% order()
+  ordered.xs = names(d) %>% str_subset("XS_") %>% `[`(xs.order)
+  grain.classes = unique(d[[grain.col]])
+  gc.d = vector("list", length = grain.classes)
+  for (j in seq_along(gc.d)) {
+    this.d = d[d[[grain.col]] == grain.classes[j],]
+    ordered.d = this.d[time.order, c(time.col, grain.col, ordered.xs)]
+    if (over.time)
+      for (oxs in ordered.xs)
+        ordered.d[oxs] = cumsum(ordered.d[[oxs]])
+    if (longitudinal) {
+      direction = match.arg(direction, c("upstream", "downstream"))
+      if (direction == "downstream")
+        lon.fun = rev
+      else
+        lon.fun = identity
+      cum.d = as.matrix(ordered.d[ordered.xs])
+      for (i in seq(nrow(cum.d)))
+        cum.d[i,] = lon.fun(cumsum(lon.fun(cum.d[i,])))
+      gc.d[[j]] = bind_cols(ordered.d[c(time.col, grain.col)],
+        as_data_frame(cum.d))
+    } else
+      gc.d[[j]] = ordered.d
+  }
+  bind_rows(gc.d)
 }
