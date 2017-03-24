@@ -10,7 +10,6 @@
 #' @param gather.cols The column names to gather data from. If not specified,
 #'   all columns with the prefix "XS_" will be used.
 #' @param station.col The name of the new column holding station IDs.
-#'   The prefix "XS_" will be stripped from the station IDs.
 #' @return The original data table in long format.
 #'
 #' @import tidyr
@@ -80,14 +79,14 @@ combine_data = function(..., data.list, id.col = "table") {
 #' into e.g. Microsoft Excel.
 #'
 #' @param d The data table.
-#' @return Writes the data table into the clipboard in tab-seperated
-#'   format.
+#' @param header If \code{TRUE}, write the column names to the first row.
+#' @return Writes the data table to the clipboard in tab-seperated format.
 #'
 #' @import readr
 #' @importFrom utils writeClipboard
 #' @export
-data_to_clipboard = function(d) {
-  writeClipboard(format_tsv(d))
+data_to_clipboard = function(d, header = TRUE) {
+  writeClipboard(format_tsv(d, col_names = header))
   message("Data copied to clipboard.")
   invisible(NULL)
 }
