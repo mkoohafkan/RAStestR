@@ -20,8 +20,8 @@ make_helper_standard = function(table){
   diff = paste(
     sprintf("#' @describeIn diff_table Compute a difference table for %s data.", table),
     "#' @export",
-    sprintf('diff_%s = function(d1, d2)', tstring),
-    sprintf('  diff_table(d1, d2, "Time", "Diff_%s")', tstring),
+    sprintf('diff_%s = function(d1, d2, relative = FALSE)', tstring),
+    sprintf('  diff_table(d1, d2, "Time", "Diff_%s", relative)', tstring),
     sep = '\n'
   )
 
@@ -51,8 +51,8 @@ make_helper_sediment = function(table){
   diff = paste(
     sprintf("#' @describeIn diff_sediment Compute a difference table for %s data.", table),
     "#' @export",
-    sprintf("diff_%s = function(d1, d2)", tstring),
-    sprintf('  diff_sediment(d1, d2, "Time", "GrainClass", "Diff_%s")', tstring),
+    sprintf("diff_%s = function(d1, d2, relative = FALSE)", tstring),
+    sprintf('  diff_sediment(d1, d2, "Time", "GrainClass", "Diff_%s", relative)', tstring),
     sep = "\n"
   )
 
