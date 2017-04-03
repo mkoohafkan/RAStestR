@@ -70,12 +70,10 @@ read_bed_limits = function(f, run.type) {
   # get bank station data
   lob = read_standard(f, "Moveable Sta L", run.type)
   rob = read_standard(f, "Moveable Sta R", run.type)
-  # get starting bank stations
-  starting.banks = list_bank_stations(f)
   # insert starting bank station data
   station.cols = names(lob) %>% str_detect("XS_")
-  lob[1, station.cols] = starting.banks[,1]
-  rob[1, station.cols] = starting.banks[,2]
+  lob[1, station.cols] = lob[2, station.cols]
+  rob[1, station.cols] = rob[2, station.cols]
 
   list(LOB = lob, ROB = rob) %>%
     lapply(to_longtable, data.col = "Distance") %>%
@@ -124,6 +122,8 @@ read_station_lengths = function(f) {
 #'   (horizontal) values.
 #' @param elevation.col The column in \code{d} containing the elevation
 #'   (vertical) values.
+#' @param subtract If \code{TRUE}, values in \code{shift.table} will be
+#'   subtracted from \code{d}; if \code{FALSE}, values will be added.
 #' @return The data frame \code{d} with cross sections shifted according to
 #'   \code{shift.table}
 #'
@@ -132,33 +132,50 @@ read_station_lengths = function(f) {
 #' @export
 xs_shift = function(d, what = c("horizontal", "vertical"), shift.table,
   station.col = "Station", distance.col = "Distance",
-  elevation.col = "Elevation") {
+  elevation.col = "Elevation", subtract = TRUE) {
   d.names = names(d)
   if (!all(what %in% c("horizontal", "vertical")))
     stop('Value of argument "what" not recognized')
-  if (ncol(shift.table) == 2L)
+  if (ncol(shift.table) == 2L) {
     if (what == "horizontal")
       names(shift.table) = c("Station", "horizontal")
     else
       names(shift.table) = c("Station", "vertical")
-    else
+  } else {
       names(shift.table) = c("Station", "horizontal", "vertical")
-    mutate.strings = list()
-    if ("horizontal" %in% what)
-      mutate.strings[[distance.col]] = sprintf("%s - horizontal", distance.col)
-    if ("vertical" %in% what)
-      mutate.strings[[elevation.col]] = sprintf("%s - vertical", elevation.col)
-    d %>% left_join(shift.table, by = setNames("Station", station.col)) %>%
-      mutate_(.dots = mutate.strings) %>% select_(.dots = d.names)
+  }
+  if (subtract)
+    op = "-"
+  else
+    op = "+"
+  d.join = d %>% left_join(shift.table, by = setNames("Station", station.col))
+  mutate.strings = list()
+  if ("horizontal" %in% what) {
+    mutate.strings[[distance.col]] = sprintf("%s %s horizontal", distance.col,
+      op)
+    d.join["horizontal"] = ifelse(is.na(d.join$horizontal), 0,
+      d.join$horizontal)
+  }
+  if ("vertical" %in% what) {
+    mutate.strings[[elevation.col]] = sprintf("%s %s vertical", elevation.col,
+      op)
+    d.join["vertical"] = ifelse(is.na(d.join$vertical), 0,
+      d.join$vertical)
+  }
+  # apply shift
+  d.join %>% mutate_(.dots = mutate.strings) %>% select_(.dots = d.names)
 }
 
 #' Compute Cross Section Lengths
 #'
 #' Compute cross section lengths from the river station lengths table.
 #'
-#' @param d A data frame with columns "Station", "LOB", "Channel" and "ROB",
-#'   i.e. output of \code{read_station_lengths}.
-#' @param station.list Optional list of stations to extract. If stations are
+#' @param stations A list of stations to compute lengths for.
+#' @param station.lengths A data frame containing station lengths, i.e. output
+#'   of \code{read_station_lengths}. Must include columns "Station" and
+#'   "Channel".
+#' @param station.col The column in \code{d} containing the cross section
+#'   stations.
 #' @return a dataframe with columns "Station" and "Length", where column
 #' "Length" lists the cross section length.
 #'
@@ -171,28 +188,29 @@ xs_shift = function(d, what = c("horizontal", "vertical"), shift.table,
 #' @import dplyr
 #' @import stringr
 #' @export
-xs_lengths = function(d, station.list = NULL) {
+xs_lengths = function(stations, station.lengths, station.col = "Station") {
   # nse workaround
-  Station = NULL; Channel = NULL; Length = NULL; Length.Cum = NULL
-  Length.New = NULL; upstream = NULL; downstream = NULL
-  d = d %>% transmute(Station, Length = Channel) %>% arrange(desc(Station))
-  if (is.null(station.list))
-    station.list = unique(d$Station)
-  else
-    message("The following stations will be dropped: ",
-      str_c(setdiff(d$Station, station.list), collapse = ", "))
-  if (!(d$Station[1] %in% station.list))
-    warning('Upstream-most station is not in "station.list". Total channel ',
-    "length will be reduced")
-  if (!(d$Station[nrow(d)] %in% station.list))
-    warning('Downstream-most station is not in "station.list". Total channel ',
-      "length will be reduced.")
-   d %>% mutate(Length.Cum = cumsum(Length)) %>%
-     filter(Station %in% station.list) %>%
-     mutate(Length.New = Length.Cum - lag(Length.Cum, default = 0)) %>%
-    mutate(downstream = 0.5*Length.New,
-      upstream = 0.5*lag(Length.New, default = 0)) %>%
-    transmute(Station, Length = upstream + downstream)
+  Station = NULL; Channel = NULL; ds.dist = NULL; us.dist = NULL
+  us.station = max(stations)
+  ds.station = min(stations)
+  if (ds.station != min(station.lengths$Station))
+    message("Ignoring stations downstream of ", ds.station)
+  if (us.station != max(station.lengths$Station))
+    message("Ignoring stations upstream of ", us.station)
+  dropped.stations = station.lengths %>% filter(!(Station %in% stations),
+    Station >= ds.station, Station <= us.station) %>%
+    `[[`("Station") %>% unique()
+  if (length(dropped.stations) > 0L)
+    message("The following stations will be dropped: ", str_c(dropped.stations,
+      collapse = ", "))
+  station.lengths %>%
+    filter(Station >= ds.station, Station <= us.station) %>%
+    arrange(Station) %>%
+    transmute(Station, ds.dist = cumsum(Channel)) %>%
+    filter(Station %in% stations) %>%
+    transmute(Station, ds.dist = ds.dist - lag(ds.dist, default = 0)) %>%
+    mutate(us.dist = lead(ds.dist, default = 0)) %>%
+    transmute(Station, Length = 0.5*(ds.dist + us.dist))
 }
 
 #' Read Bank Stations
@@ -212,6 +230,27 @@ read_bank_stations = function(f){
   river.stations = list_stations(f)
   data_frame(Station = str_c("XS_", river.stations),
     LOB = bank.stations[,1], ROB = bank.stations[,2])
+}
+
+#' Cross Section Extents
+#'
+#' Compute the coincident extents of a cross section
+#'
+#' @inheritParams xs_area
+#' @return A dataframe with columns "Station", "LE" and "RE", where "LE" and
+#'   "RE" are the left and right extents, respectively.
+#'
+#' @import dplyr
+#' @export
+xs_extents = function(d, station.col = "Station", time.col = "Time",
+  distance.col = "Distance") {
+  # nse workaround
+  Station = NULL; Time = NULL; LE = NULL; RE = NULL; Distance = NULL;
+  d %>% select_(Station = station.col, Time = time.col,
+    Distance = distance.col) %>%
+    group_by(Station, Time) %>%
+    summarize(LE = min(Distance), RE = max(Distance)) %>%
+    summarize(LE = max(LE), RE = min(RE))
 }
 
 # area of a cross section
@@ -238,7 +277,8 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
   if (is.na(left.bank)) {
     left.bank = min(dist)
   } else if (left.bank < min(dist)) {
-    warning("Left bank is outside of cross section extent. Returning NA")
+    warning("Left bank is outside of cross section extent. Returning NA",
+      call. = FALSE)
   } else if (!any(abs(left.bank - dist) < 0.1)) {
     elev = c(elev, approx(dist, elev, xout = left.bank)$y)
     dist = c(dist, left.bank)
@@ -246,7 +286,8 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
   if (is.na(right.bank)) {
     right.bank = max(dist)
   } else if (right.bank > max(dist)) {
-    warning("Right bank is outside of cross section extent. Returning NA")
+    warning("Right bank is outside of cross section extent. Returning NA",
+      call. = FALSE)
   } else if (!any(abs(right.bank - dist) < 0.1)) {
     elev = c(elev, approx(dist, elev, xout = right.bank)$y)
     dist = c(dist, right.bank)
@@ -268,8 +309,10 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
     to = which.min(abs(new.dist - new.right.bank)),
     by = 1L
   ), -1)
-  if (length(idx) < 2L)
-    stop("Not enough points in cross section")
+  if (length(idx) < 2L) {
+    warning("Not enough points in cross section. Area is zero.")
+    return(0)
+  }
   traps = 0.5 * (tail(new.dist, -1) - head(new.dist, -1)) *
     (head(new.elev, -1) + tail(new.elev, -1))
   area.under = sum(traps[idx])
@@ -318,14 +361,13 @@ xs_area = function(d, time.col = "Time", station.col = "Station",
   reference.elevation = NULL) {
   # nse workaround
   Time = NULL; Station = NULL; Distance = NULL; Elevation = NULL
-  LOB = NULL; ROB = NULL; RefElev = NULL
+  LOB = NULL; ROB = NULL; RefElev = NULL; LE = NULL; RE = NULL
   # identify stations present at all times
   d = d %>% transmute_(Station = station.col, Time = time.col,
     Distance = distance.col, Elevation = elevation.col)
   # check station data
-  xs.limits = d %>% group_by(Station, Time) %>%
-    summarize(LOB = min(Distance), ROB = max(Distance)) %>%
-    summarize(LOB = max(LOB), ROB = min(ROB))
+  xs.limits = xs_extents(d, station.col, time.col) %>%
+    select(Station, LOB = LE, ROB = RE)
   if (any(is.na(xs.limits)))
     stop('Cross section data contains NA values. Check contents of "d"')
   # check bank stations
@@ -338,7 +380,7 @@ xs_area = function(d, time.col = "Time", station.col = "Station",
       # not time-dependent
       if (!all(names(bank.stations) %in% c("Station", "LOB", "ROB"))) {
         warning('Names of argument "bank.stations" not recognized. ',
-          "Assuming column order is 'Station', 'LOB', 'ROB'")
+          "Default column order is 'Station', 'LOB', 'ROB'")
         names(bank.stations) = c("Station", "LOB", "ROB")
       }
       d = d %>% left_join(bank.stations, by = "Station")
@@ -346,7 +388,7 @@ xs_area = function(d, time.col = "Time", station.col = "Station",
     # time-dependent
     if (!all(names(bank.stations) %in% c("Time", "Station", "LOB", "ROB"))) {
       warning('Names of argument "bank.stations" not recognized. ',
-        "Assuming column order is 'Time', 'Station', 'LOB', 'ROB'")
+        "Default column order is 'Time', 'Station', 'LOB', 'ROB'")
       names(bank.stations) = c("Time", "Station", "LOB", "ROB")
     }
     d = d %>% left_join(bank.stations, by = c("Time", "Station"))
@@ -356,10 +398,10 @@ xs_area = function(d, time.col = "Time", station.col = "Station",
   # check if bank stations are defined for all cross sections
   if (any(is.na(d$LOB)))
     warning("LOB not defined for stations ",
-      str_c(d$Stations[is.na(d$LOB)]))
+      str_c(unique(d$Station[is.na(d$LOB)]), collapse = ", "))
   if (any(is.na(d$ROB)))
     warning("ROB not defined for stations ",
-      str_c(bank.stations$Stations[is.na(d$ROB)]))
+      str_c(unique(d$Station[is.na(d$ROB)]), collapse = ", "))
   # check reference elevation
   if (is.null(reference.elevation)) {
     reference.elevation = d %>% group_by(Station) %>%
@@ -370,7 +412,7 @@ xs_area = function(d, time.col = "Time", station.col = "Station",
   } else if (ncol(reference.elevation) == 2L) {
     if (!all(names(reference.elevation) %in% c("Station", "RefElev"))) {
       warning('Names of argument "reference.elevation" not recognized. ',
-        "Assuming column order is 'Station', 'RefElev'")
+        "Default column order is 'Station', 'RefElev'")
       names(bank.stations) = c("Station", "RefElev")
     }
     d = d %>% left_join(reference.elevation, by = "Station")
@@ -410,7 +452,7 @@ area_to_volume = function(d, time.col = "Time", station.lengths = NULL) {
   d = to_longtable(d, "Area", station.col = "Station")
   # Check station lengths
   if (is.null(station.lengths)) {
-    warning("No station lengths provided. Assuming unit length")
+    warning("No station lengths provided. Default is unit length")
     d["Length"] = 1
   } else if (is.numeric(station.lengths)) {
     d["Length"] = station.lengths
@@ -418,7 +460,7 @@ area_to_volume = function(d, time.col = "Time", station.lengths = NULL) {
     # not time-dependent
     if (!all(names(station.lengths) %in% c("Station", "Length"))) {
       warning('Names of argument "station.lengths" not recognized. ',
-        "Assuming column order is 'Station', 'Length'")
+        "Default column order is 'Station', 'Length'")
       names(station.lengths) = c("Station", "length")
     }
     d = d %>% left_join(station.lengths, by = "Station")
@@ -429,7 +471,7 @@ area_to_volume = function(d, time.col = "Time", station.lengths = NULL) {
     # time-dependent
     if (!all(names(station.lengths) %in% c("Time", "Station", "Length"))) {
       warning('Names of argument "station.lengths" not recognized. ',
-        "Assuming column order is 'Time', 'Station', 'Length'")
+        "Default column order is 'Time', 'Station', 'Length'")
       names(station.lengths) = c("Time", "Station", "Length")
     }
     d = d %>% left_join(station.lengths, by = c("Time", "Station"))
@@ -444,43 +486,18 @@ area_to_volume = function(d, time.col = "Time", station.lengths = NULL) {
     spread_("Station", "Volume", fill = NA)
 }
 
-#' Volume to Change
-#'
-#' Compute volume change over time.
-#'
-#' @param d The volume data, e.g. output of \code{area_to_volume}.
-#' @inheritParams area_to_volume
-#' @return A wide-format table of cross section volume change. A change value of
-#'   \code{NA} is assigned to all cross section for the first time step.
-#'
-#' @import dplyr
-#' @import tidyr
-volume_to_change = function(d, time.col = "Time") {
-  # nse workaround
-  Volume = NULL; ftime = NULL; Station = NULL
-  vol.d = d %>% to_longtable("Volume", station.col = "Station") %>%
-    mutate_(.dots = list(ftime = time.col)) %>%
-    reformat_fields(list("Time" = "ftime")) %>%
-    arrange(ftime) %>%
-    group_by(Station) %>%
-    mutate(Change = lag(Volume) - Volume)
-  vol.d[vol.d$ftime == min(vol.d$ftime), "Change"] = 0
-  vol.d %>% select_(time.col, "Station", "Change") %>%
-    spread_("Station", "Change", fill = NA)
-}
-
 #' Cross Section Cumulative Change
 #'
 #' Compute cumulative cross section change directy from cross section data.
 #'
 #' @inheritParams xs_area
 #' @inheritParams area_to_volume
-#' @inheritParams volume_to_change
+#' @inheritParams change_table
 #' @inheritParams cumulative_table
 #'
 #' @details This is essentially a wrapper for processing cross section data
 #'   through the sequence \code{xs_area} --> \code{area_to_volume} -->
-#'   \code{volume_to_change} --> cumulative_table.
+#'   \code{change_table} --> \code{cumulative_table.}
 #'
 #' @import dplyr
 #' @export
@@ -491,8 +508,8 @@ xs_cumulative_change = function(d, time.col = "Time", station.col = "Station",
   d %>% xs_area(time.col, station.col, distance.col, elevation.col,
       bank.stations, reference.elevation) %>%
     area_to_volume(time.col, station.lengths) %>%
-    volume_to_change(time.col) %>%
-    cumulative_table(time.col, TRUE, TRUE, "downstream")
+    change_table(time.col) %>%
+    cumulative_table(time.col, over.time, longitudinal, direction)
 }
 
 #' Cross Section Region Area
@@ -540,18 +557,18 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
   } else if (is.numeric(bank.stations)) {
     bank.stations = data_frame(Station = d[[station.col]],
       LOB = bank.stations[[1]], ROB = bank.stations[[2]])
-  } else if (ncol(bank.stations == 3L)) {
+  } else if (ncol(bank.stations) == 3L) {
     # not time-dependent
     if (!all(names(bank.stations) %in% c("Station", "LOB", "ROB"))) {
       warning('Names of argument "bank.stations" not recognized. ',
-        "Assuming column order is 'Station', 'LOB', 'ROB'")
+        "Default column order is 'Station', 'LOB', 'ROB'")
       names(bank.stations) = c("Station", "LOB", "ROB")
     }
   } else if (ncol(bank.stations == 4L)) {
     # time-dependent
     if (!all(names(bank.stations) %in% c("Time", "Station", "LOB", "ROB"))) {
       warning('Names of argument "bank.stations" not recognized. ',
-        "Assuming column order is 'Time', 'Station', 'LOB', 'ROB'")
+        "Default column order is 'Time', 'Station', 'LOB', 'ROB'")
       names(bank.stations) = c("Time", "Station", "LOB", "ROB")
     }
   } else {
@@ -560,7 +577,7 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
   # check edge stations
   if (any(region %in% c("LOB", "ROB") && is.null(extent.stations))) {
     warning('Argument "extent.stations" not defined. ',
-      'Assuming coincident cross section extents')
+      'Default is coincident cross section extents')
     extent.stations = d %>%
       transmute_(Station = station.col, Time = time.col,
         Distance = distance.col, Elevation = elevation.col) %>%
@@ -573,31 +590,88 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
   } else if (ncol(extent.stations == 3L)) {
     if (!all(names(extent.stations) %in% c("Station", "LE", "RE"))) {
       warning('Names of argument "extent.stations" not recognized. ',
-        "Assuming column order is 'Station', 'LE', 'RE'")
+        "Default column order is 'Station', 'LE', 'RE'")
       names(extent.stations) = c("Station", "LE", "RE")
     } else {
       stop('Format of argument "extent.stations" not recognized')
     }
   }
+  all.stations = lob.stations = bank.stations %>%
+    left_join(extent.stations, by = "Station")
   region.list = vector("list", length(region))
   names(region.list) = region
-  if ("channel" %in% region) {
-    region.list[["channel"]] = xs_area(d, time.col, station.col,
-      distance.col, elevation.col, bank.stations, reference.elevation)
+  if ("Channel" %in% region) {
+    if ("Time" %in% names(all.stations))
+      channel.stations = all.stations %>% select(Time, Station, LOB, ROB)
+    else
+      channel.stations = all.stations %>% select(Station, LOB, ROB)
+    region.list[["Channel"]] = xs_area(d, time.col, station.col,
+      distance.col, elevation.col, channel.stations, reference.elevation)
   }
   if ("LOB" %in% region) {
-    lob.stations = bank.stations %>% select(-ROB) %>% rename(ROB = LOB) %>%
-      left_join(extent.stations, by = "Station") %>%
-      rename(LOB = LE) %>% select(-RE)
+    if ("Time" %in% names(all.stations))
+      lob.stations = all.stations %>%
+        select(Time, Station, LOB = LE, ROB = LOB)
+    else
+      lob.stations = all.stations %>%
+        select(Station, LOB = LE, ROB = LOB)
     region.list[["LOB"]] = xs_area(d, time.col, station.col,
       distance.col, elevation.col, lob.stations, reference.elevation)
   }
   if ("ROB" %in% region) {
-    rob.stations = bank.stations %>% select(-LOB) %>% rename(LOB = ROB) %>%
-      left_join(extent.stations, by = "Station") %>%
-      rename(ROB = RE) %>% select(-LE)
+    if ("Time" %in% names(all.stations))
+      rob.stations = all.stations %>%
+        select(Time, Station, LOB = ROB, ROB = RE)
+    else
+      rob.stations = all.stations %>%
+        select(Station, LOB = ROB, ROB = RE)
     region.list[["ROB"]] = xs_area(d, time.col, station.col,
       distance.col, elevation.col, rob.stations, reference.elevation)
   }
   bind_rows(region.list, .id = "Region")
+}
+
+#' Region Area to Volume
+#'
+#' Compute cross section volumes by region.
+#'
+#' @inheritParams area_to_volume
+#' @param region.col The name of the column containing the Region identifier.
+#' @return A wide-format table of cross section region volumes.
+#'
+#' @import dplyr
+#' @export
+region_to_volume = function(d, time.col = "Time", region.col = "Region",
+  station.lengths = NULL){
+  # nse workaround
+  . = NULL
+  d %>% group_by_(region.col) %>% do(area_to_volume(., time.col,
+    station.lengths))
+}
+
+#' Cross Section Region Cumulative Change
+#'
+#' Compute cumulative cross section change by region directy from cross section
+#' data.
+#'
+#' @inheritParams xs_cumulative_change
+#' @inheritParams xs_regions
+#'
+#' @details This is essentially a wrapper for processing cross section data
+#'   through the sequence \code{xs_regions} --> \code{region_to_volume} -->
+#'   \code{change_sediment} --> \code{cumulative_sediment}.
+#'
+#' @import dplyr
+#' @export
+xs_region_cumulative_change = function(d, time.col = "Time",
+  station.col = "Station", distance.col = "Distance",
+  elevation.col = "Elevation", bank.stations, extent.stations = NULL,
+  reference.elevation = NULL, region = c("LOB", "Channel", "ROB"),
+  station.lengths = NULL, over.time = TRUE, longitudinal = TRUE,
+  direction = "downstream"){
+  d %>% xs_regions(time.col, station.col, distance.col, elevation.col,
+    bank.stations, extent.stations, reference.elevation, region) %>%
+    region_to_volume(time.col, "Region", station.lengths) %>%
+    change_sediment(time.col, "Region") %>%
+    cumulative_sediment(time.col, "Region", TRUE, TRUE, "downstream")
 }
