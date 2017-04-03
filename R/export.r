@@ -95,10 +95,11 @@ data_to_clipboard = function(d, header = TRUE) {
 #'
 #' Convert station values to distance upstream.
 #'
-#' @param ld The long-format data, i.e. output from
+#' @param d The long-format data, i.e. output from
 #'   \code{to_longtable}.
 #' @param distance.col The new column to hold distance values.
 #' @param station.col The column containing station values.
+#' @param direction Compute distance \code{upstream} or \code{downstream}.
 #' @param metric If \code{TRUE}, stations are assumed to be in
 #'   kilometers and distances are returned in meters. If \code{FALSE},
 #'   stations are assumed to be in miles and distances are returned in
@@ -106,15 +107,21 @@ data_to_clipboard = function(d, header = TRUE) {
 #' @return The data table with an additional column of distances.
 #'
 #' @export
-station_to_distance = function(ld, distance.col,
-  station.col = "Station", metric = FALSE) {
+station_to_distance = function(d, distance.col, station.col = "Station",
+  direction = c("downstream", "upstream"), metric = FALSE) {
+  direction = match.arg(direction, c("downstream", "upstream"))
+  ld = reformat_fields(d, list(Station = station.col))
   if (metric)
     ld[distance.col] = 1000 * (as.numeric(ld[[station.col]]) -
       min(as.numeric(ld[[station.col]])))
   else
     ld[distance.col] = 5280 * (as.numeric(ld[[station.col]]) -
       min(as.numeric(ld[[station.col]])))
-  ld
+  if (direction == "upstream")
+    d[distance.col] = ld[[distance.col]]
+  else
+    d[distance.col] = rev(ld[[distance.col]])
+  d
 }
 
 #' Reformat Standard Fields
