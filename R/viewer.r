@@ -214,22 +214,145 @@ offset_xsviewer_long_change = function(d, offset.station,
     mutate_(.dots = mutate.offset)
 }
 
+#' Survey To Cross Section Data
+#'
+#' Reformat survey data to match the cross section data format of RAStestR,
+#' e.g. the output of \code{read_xs}.
+#'
+#' @param d The survey data to reformat, i.e. output of \code{read_survey}.
+#' @inheritParams read_survey
+#'
+#' @import stringr
+#' @import dplyr
+#' @export
+survey_to_xs = function(d, viewer.version = "1.1.56.0"){
+  # nse workaround
+  Elevation = NULL; Station = NULL; RiverMile = NULL; Date = NULL; Time = NULL
+  Distance = NULL
+  if (viewer.version == "1.1.56.0") {
+    d %>% transmute(Elevation, Distance = Station,
+        Station = str_c("XS_", RiverMile),
+        Time = str_c(str_to_upper(strftime(Date, "%d%b%Y")),
+          " 00:00:00")) %>%
+      select(Time, Station, Distance, Elevation)
+  } else
+    stop("Viewer version ", viewer.version, " is not supported")
+}
+
 #' Survey Longitudinal Change
 #'
-#' Compute longitudinal cumulative change from survey data.
+#' Compute (longitudinal) (cumulative) change from survey data.
 #'
-#' @inheritParams area_to_volume
+#' @inheritParams xs_cumulative_change
+#' @return A wide-format table of (accumulated) change. The output data
+#'   will contain NA values where stations are missing from surveys, but the
+#'   change
 #'
-#' @details This function performs similarly to \code{cumulative_table} but is
-#'   designed to work with survey data rather than RAS outputs. The primary
+#' @details This function performs similarly to \code{xs_cumulative_change} but
+#' is designed to work with survey data rather than RAS outputs. The primary
 #'   difference is that this function allows the computation of longitudinal
 #'   cumulative change when some surveys are incomplete. The function recomputes
 #'   the station lengths for each survey based on what cross sections are
 #'   present in the survey. The longitudinal cumulative volume is then computed
-#'   with missing stations omitted from the data. The longitudinal volume curves
-#'   are then linearly interpolated across the missing stations prior to
-#'   computing longitudinal change.
+#'   with missing stations omitted from the data.
 #'
-survey_change = function(d, station.lengths){
+#' @import dplyr
+#' @importFrom stats na.omit
+#' @export
+survey_change = function(d, time.col = "Time", station.col = "Station",
+  distance.col = "Distance", elevation.col = "Elevation", bank.stations = NULL,
+  reference.elevation = NULL, station.lengths = NULL, over.time = TRUE,
+  longitudinal = TRUE, direction = "downstream"){
+  direction = match.arg(direction, c("upstream", "downstream"))
+  # station lengths
+  if (is.null(station.lengths))
+    station.lengths = data_frame(Station = unique(d$Station), LOB = 1,
+      Channel = 1, ROB = 1)
+  # compute area
+  d.area = d %>% select_(time.col, station.col, distance.col, elevation.col) %>%
+    xs_area(time.col, station.col, distance.col, elevation.col,
+      bank.stations, reference.elevation)
+  # interpolate over time
+  d = survey_interp(d)
+
+  station.cols = names(d.area)[str_detect(names(d.area), "XS_")]
+  drop.stations = NULL
+  for (sc in station.cols) {
+    if (all(is.na(d.area[[sc]]))) {
+      drop.stations = c(drop.stations, sc)
+      next
+    }
+    area.dat = d.area[[sc]]
+    naidx = is.na(area.dat)
+    interpdat = approx(which(!naidx), area.dat[!naidx], which(naidx))
+    d.area[interpdat$x, sc] = interpdat$y
+    # interpolation not acheived
+    if (any(is.na(d.area[[sc]])))
+      drop.stations = c(drop.stations, sc)
+  }
+  # drop missing stations
+  if (!is.null(drop.stations))
+    warning("Could not interpolate some stations. The following stations will ",
+      "be dropped: ", str_c(drop.stations, collapse = ", "))
+  # compute volume
+  keep.cols = c(time.col, setdiff(station.cols, drop.stations))
+  new.lengths = xs_lengths(setdiff(station.cols, drop.stations),
+    station.lengths)
+  d.area[keep.cols] %>%
+    area_to_volume(time.col, new.lengths) %>%
+    change_table(time.col) %>%
+    cumulative_table(time.col, over.time, longitudinal, direction)
+}
+
+
+#' Interpolate Survey Stations
+#'
+#' Interpolate data over stations. Useful for working with surveys that have
+#' partial overlap.
+#'
+#' @param d A wide-format table of processed data, e.g. output of
+#'   \code{xs_area}.
+#' @param drop.stations Logical: Drop stations that cannot be interpolated.
+#' @return The data frame \code{d} with some or all \code{NA} values filled in.
+#'
+#' @import dplyr
+#' @import stringr
+#' @importFrom stats approx spline
+#' @export
+survey_interp = function(d, drop.stations = FALSE) {
+  station.cols = names(d)[str_detect(names(d), "XS_")]
+  missing.stations = NULL
+  incomplete.stations = NULL
+  for (sc in station.cols) {
+    this.dat = d[[sc]]
+    naidx = is.na(this.dat)
+    if (all(naidx)) {
+      missing.stations = c(missing.stations, sc)
+      next
+    }
+    interpdat = approx(which(!naidx), this.dat[!naidx], which(naidx))
+    d[interpdat$x, sc] = interpdat$y
+    # interpolation not acheived
+    if (any(is.na(d[[sc]])))
+      incomplete.stations = c(incomplete.stations, sc)
+  }
+  # drop missing stations
+  if (!is.null(missing.stations))
+    warning("No data available at stations ",
+      str_c(missing.stations, collapse = ", "))
+  if (!is.null(incomplete.stations))
+    warning("Some missing values remain at stations ",
+      str_c(incomplete.stations, collapse = ", "))
+  if (drop.stations) {
+    keep.cols = setdiff(names(d), c(drop.stations, incomplete.stations))
+    d[keep.cols]
+  } else
+    d
+}
+
+
+
+survey_region_change = function(){
+
 
 }
