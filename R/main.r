@@ -322,7 +322,7 @@ cumulative_table = function(d, time.col = "Time", over.time = TRUE,
     ordered.d
 }
 
-#' Accumulate Sediment Data Over Time and/or Space
+#' Accumulate Data Over Time and/or Space (Sediment)
 #'
 #' Accumulate data from a sediment table over time and/or longitudinally.
 #'
@@ -341,31 +341,53 @@ cumulative_sediment = function(d, time.col = "Time", grain.col = "GrainClass",
   direction = c("upstream", "downstream")){
   # nse workaround
   . = NULL
-  time.order = d %>% reformat_fields(time.col) %>% `[[`(time.col) %>% order()
-  xs.order = names(d) %>% str_subset("XS_") %>% data_frame(Station = .) %>%
-    reformat_fields("Station") %>% `[[`("Station") %>% order()
-  ordered.xs = names(d) %>% str_subset("XS_") %>% `[`(xs.order)
-  grain.classes = unique(d[[grain.col]])
-  gc.d = vector("list", length = grain.classes)
-  for (j in seq_along(gc.d)) {
-    this.d = d[d[[grain.col]] == grain.classes[j],]
-    ordered.d = this.d[time.order, c(time.col, grain.col, ordered.xs)]
-    if (over.time)
-      for (oxs in ordered.xs)
-        ordered.d[oxs] = cumsum(ordered.d[[oxs]])
-    if (longitudinal) {
-      direction = match.arg(direction, c("upstream", "downstream"))
-      if (direction == "downstream")
-        lon.fun = rev
-      else
-        lon.fun = identity
-      cum.d = as.matrix(ordered.d[ordered.xs])
-      for (i in seq(nrow(cum.d)))
-        cum.d[i,] = lon.fun(cumsum(lon.fun(cum.d[i,])))
-      gc.d[[j]] = bind_cols(ordered.d[c(time.col, grain.col)],
-        as_data_frame(cum.d))
-    } else
-      gc.d[[j]] = ordered.d
-  }
-  bind_rows(gc.d)
+  d %>% group_by_(grain.col) %>% do(cumulative_table(., time.col, over.time,
+    longitudinal, direction))
 }
+
+#' Change Over Time
+#'
+#' Compute change over time from a table.
+#'
+#' @param d A wide format data table containing values to compute change
+#'   over time.
+#' @inheritParams cumulative_table
+#' @return A wide-format table of change over time. A value of 0 is assigned to
+#'   the first time step.
+#'
+#' @import dplyr
+#' @import tidyr
+#' @export
+change_table = function(d, time.col = "Time") {
+  # nse workaround
+  Value = NULL; ftime = NULL; Station = NULL
+  vol.d = d %>% to_longtable("Value", station.col = "Station") %>%
+    mutate_(.dots = list(ftime = time.col)) %>%
+    reformat_fields(list("Time" = "ftime")) %>%
+    arrange(ftime) %>%
+    group_by(Station) %>%
+    mutate(Change = lag(Value) - Value)
+  vol.d[vol.d$ftime == min(vol.d$ftime), "Change"] = 0
+  vol.d %>% select_(time.col, "Station", "Change") %>%
+    spread_("Station", "Change", fill = NA)
+}
+
+#' Change Over Time (Sediment)
+#'
+#' Compute change over time from a sediment data table.
+#'
+#' @param d A wide format data table containing values to compute change
+#'   over time.
+#' @inheritParams cumulative_sediment
+#' @return A wide-format table of change over time. A value of 0 is assigned to
+#'   the first time step.
+#'
+#' @import dplyr
+#' @import tidyr
+#' @export
+change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
+  # nse workaround
+  . = NULL
+  d %>% group_by_(grain.col) %>% do(change_table(., time.col = time.col))
+}
+
