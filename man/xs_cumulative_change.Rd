@@ -48,5 +48,5 @@ Compute cumulative cross section change directy from cross section data.
 \details{
 This is essentially a wrapper for processing cross section data
   through the sequence \code{xs_area} --> \code{area_to_volume} -->
-  \code{volume_to_change} --> cumulative_table.
+  \code{change_table} --> \code{cumulative_table.}
 }

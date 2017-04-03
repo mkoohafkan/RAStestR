@@ -4,16 +4,18 @@
 \alias{station_to_distance}
 \title{Convert Stations To Distance}
 \usage{
-station_to_distance(ld, distance.col, station.col = "Station",
-  metric = FALSE)
+station_to_distance(d, distance.col, station.col = "Station",
+  direction = c("downstream", "upstream"), metric = FALSE)
 }
 \arguments{
-\item{ld}{The long-format data, i.e. output from
+\item{d}{The long-format data, i.e. output from
 \code{to_longtable}.}
 
 \item{distance.col}{The new column to hold distance values.}
 
 \item{station.col}{The column containing station values.}
+
+\item{direction}{Compute distance \code{upstream} or \code{downstream}.}
 
 \item{metric}{If \code{TRUE}, stations are assumed to be in
 kilometers and distances are returned in meters. If \code{FALSE},

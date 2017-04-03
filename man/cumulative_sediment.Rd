@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.r
 \name{cumulative_sediment}
 \alias{cumulative_sediment}
-\title{Accumulate Sediment Data Over Time and/or Space}
+\title{Accumulate Data Over Time and/or Space (Sediment)}
 \usage{
 cumulative_sediment(d, time.col = "Time", grain.col = "GrainClass",
   over.time = TRUE, longitudinal = TRUE, direction = c("upstream",

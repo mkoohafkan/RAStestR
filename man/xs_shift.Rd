@@ -6,7 +6,7 @@
 \usage{
 xs_shift(d, what = c("horizontal", "vertical"), shift.table,
   station.col = "Station", distance.col = "Distance",
-  elevation.col = "Elevation")
+  elevation.col = "Elevation", subtract = TRUE)
 }
 \arguments{
 \item{d}{The cross section data.}
@@ -31,6 +31,9 @@ stations.}
 
 \item{elevation.col}{The column in \code{d} containing the elevation
 (vertical) values.}
+
+\item{subtract}{If \code{TRUE}, values in \code{shift.table} will be
+subtracted from \code{d}; if \code{FALSE}, values will be added.}
 }
 \value{
 The data frame \code{d} with cross sections shifted according to

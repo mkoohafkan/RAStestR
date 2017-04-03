@@ -4,13 +4,17 @@
 \alias{xs_lengths}
 \title{Compute Cross Section Lengths}
 \usage{
-xs_lengths(d, station.list = NULL)
+xs_lengths(stations, station.lengths, station.col = "Station")
 }
 \arguments{
-\item{d}{A data frame with columns "Station", "LOB", "Channel" and "ROB",
-i.e. output of \code{read_station_lengths}.}
+\item{stations}{A list of stations to compute lengths for.}
 
-\item{station.list}{Optional list of stations to extract. If stations are}
+\item{station.lengths}{A data frame containing station lengths, i.e. output
+of \code{read_station_lengths}. Must include columns "Station" and
+"Channel".}
+
+\item{station.col}{The column in \code{d} containing the cross section
+stations.}
 }
 \value{
 a dataframe with columns "Station" and "Length", where column
