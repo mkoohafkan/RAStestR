@@ -19,6 +19,8 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
   xsoutputs = list_xs(f, tblblock)
   if (is.null(which.times))
     which.times = str_split_fixed(xsoutputs, "[(.+)]", 3)[,2]
+  else if (any(nchar(which.times) != 18L))
+    stop('Format of argument "which.times" not recognized')
   xsoutputs = str_subset(xsoutputs, str_c(which.times, collapse = "|"))
   times.found = unlist(lapply(which.times, function(x)
     any(str_detect(xsoutputs, x))))
@@ -578,12 +580,7 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
   if (any(region %in% c("LOB", "ROB") && is.null(extent.stations))) {
     warning('Argument "extent.stations" not defined. ',
       'Default is coincident cross section extents')
-    extent.stations = d %>%
-      transmute_(Station = station.col, Time = time.col,
-        Distance = distance.col, Elevation = elevation.col) %>%
-      group_by(Station, Time) %>%
-      summarize(LE = min(Distance), RE = max(Distance)) %>%
-      summarize(LE = max(LE), RE = min(RE))
+    extent.stations = xs_extents(d, station.col, time.col, distance.col)
   } else if (is.numeric(extent.stations)) {
     extent.stations = data_frame(Station = d[[station.col]],
       LE = extent.stations[[1]], RE = extent.stations[[2]])
@@ -596,7 +593,7 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
       stop('Format of argument "extent.stations" not recognized')
     }
   }
-  all.stations = lob.stations = bank.stations %>%
+  all.stations = bank.stations %>%
     left_join(extent.stations, by = "Station")
   region.list = vector("list", length(region))
   names(region.list) = region
