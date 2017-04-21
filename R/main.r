@@ -208,7 +208,11 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
 #'
 #' @import dplyr
 #' @export
-diff_table = function(d1, d2, time.col, difference.col, relative = FALSE) {
+diff_table = function(d1, d2, difference.col, time.col = "Time",
+  relative = FALSE) {
+  ####
+  # MODIFY TO OUTPUT WIDE TABLE
+  ####
   if (missing(difference.col))
     stop('argument "difference.col" is missing, with no default')
   datime.cols = intersect(names(d1), names(d2))
@@ -239,6 +243,9 @@ diff_table = function(d1, d2, time.col, difference.col, relative = FALSE) {
 #' @export
 diff_sediment = function(d1, d2, time.col, grain.col, difference.col,
   relative = FALSE) {
+  ####
+  # MODIFY TO OUTPUT WIDE TABLE
+  ####
   datime.cols = intersect(names(d1), names(d2))
   datime.cols = datime.cols[datime.cols != time.col & datime.cols != grain.col]
   gvals = intersect(unique(d1[[grain.col]]), unique(d2[[grain.col]]))
@@ -273,6 +280,10 @@ diff_sediment = function(d1, d2, time.col, grain.col, difference.col,
 #' @import stringr
 #' @export
 rmse_table = function(d, group.col, difference.col, rmse.col) {
+  ####
+  # MODIFY TO TAKE WIDE TABLE AS INPUT
+  # SPLIT INTO RMSE_TABLE AND RMSE_SEDIMENT
+  ####
   d %>% group_by_(.dots = group.col) %>% summarize_(
     .dots = setNames(str_c("sqrt(mean(", difference.col, "^2))"), rmse.col))
 }
