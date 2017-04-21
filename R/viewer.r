@@ -350,9 +350,100 @@ survey_interp = function(d, drop.stations = FALSE) {
     d
 }
 
+#' Extend Survey Cross Section
+#'
+#' Extend survey cross sections to the specified extents.
+#'
+#' @param d The survey data in cross section format.
+#' @inheritParams survey_change
+#' @param mode Extend cross sections by using data from prior cross section
+#' (lag) or future cross section (lead).
+#' @return The extended cross section data.
+#'
+#' @import dplyr
+#' @export
+survey_extend = function(d, station.col = "Station", time.col = "Time",
+  distance.col = "Distance", mode = c("lag", "lead")) {
+  # nse workaround
+  Station = NULL; Time = NULL; Distance = NULL
+  d = d %>% rename_(Station = station.col, Time = time.col,
+    Distance = distance.col)
+  station.order = sort(unique(d$Station))
+  time.order = d %>% mutate(time.char = Time) %>%
+    reformat_fields("Time") %>% arrange(Time) %>%
+    `[[`("time.char") %>% unique()
+  if (mode == "lead")
+    time.order = rev(time.order)
+  # loop through cross sections. For each cross section, loop through time
+  # and successively append data from next cross section time
+  d.list = d %>% split(d$Station) %>% lapply(function(x) split(x, x$Time))
+  for (i in seq_along(station.order)) {
+    this.station = station.order[i]
+    for (j in 2:length(time.order)) {
+      # get current time
+      this.time = time.order[j]
+      this.data = d.list[[this.station]][[this.time]]
+      # get last available time
+      for (jj in (j - 1):1) {
+        prior.time = time.order[jj]
+        prior.data = d.list[[this.station]][[prior.time]]
+        if (!is.null(prior.data))
+          break
+      }
+      # skip if current or prior time is not available
+      if (is.null(this.data) || is.null(prior.data))
+        next
+      # extract data from prior time that is outside of current extents
+      this.re = max(this.data$Distance)
+      this.le = min(this.data$Distance)
+      new.xs.data =  prior.data %>% filter(
+          (Distance > this.re) | (Distance < this.le)
+        ) %>%
+        mutate(Time = this.time)
+      # merge prior and current data
+      d.list[[this.station]][[this.time]] = bind_rows(this.data, new.xs.data)
+    }
+  }
+  # return data
+  select.cols = list("Station", "Time", "Distance")
+  names(select.cols) = c(station.col, time.col, distance.col)
+  lapply(d.list, bind_rows) %>% bind_rows %>% rename_(.dots = select.cols)
+}
 
-
-survey_region_change = function(){
-
-
+#' Clip Survey Cross Section
+#'
+#' Clip survey cross sections to a set of specified extent stations.
+#'
+#' @inheritParams survey_extend
+#' @inheritParams xs_regions
+#' @return The clipped cross section data.
+#'
+#' @import dplyr
+survey_clip = function(d, extent.stations, station.col = "Station", time.col = "Time",
+  distance.col = "Distance"){
+  stop("not finished")
+  # nse workaround
+  Station = NULL; Time = NULL; Distance = NULL; LE = NULL; RE= NULL;
+  LE.old = NULL; RE.old = NULL; LE.new = NULL; RE.new = NULL
+  # check edge stations
+  if (is.numeric(extent.stations)) {
+    extent.stations = data_frame(Station = d[[station.col]],
+      LE = extent.stations[[1]], RE = extent.stations[[2]])
+  } else if (ncol(extent.stations) == 3L) {
+    if (!all(names(extent.stations) %in% c("Station", "LE", "RE"))) {
+      warning('Names of argument "extent.stations" not recognized. ',
+        "Default column order is 'Station', 'LE', 'RE'")
+      names(extent.stations) = c("Station", "LE", "RE")
+    }
+  } else {
+    stop('Format of argument "extent.stations" not recognized')
+  }
+  extent.stations = xs_extents(d) %>% left_join(extent.stations, by = "Station",
+    suffix = c(".old", ".new")) %>% mutate(
+      LE.new = ifelse(is.na(LE.new), LE.old, LE.new),
+      RE.new = ifelse(is.na(RE.new), RE.old, RE.new)
+    ) %>% select(Station, LE = LE.new, RE = RE.new)
+  d = d %>% rename_(Station = station.col, Time = time.col,
+    Distance = distance.col) %>% left_join(extent.stations, by = "Station") %>%
+    filter(Distance >= LE | Distance <= RE)
 }
