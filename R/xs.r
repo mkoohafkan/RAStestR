@@ -466,7 +466,7 @@ area_to_volume = function(d, time.col = "Time", station.lengths = NULL) {
       names(station.lengths) = c("Station", "length")
     }
     d = d %>% left_join(station.lengths, by = "Station")
-  } else if (ncol(station.lengths == 3L)) {
+  } else if (ncol(station.lengths) == 3L) {
     if (all(names(station.lengths) %in% c("Station", "LOB", "Channel", "ROB")))
       stop('Argument "station.lengths" has not been processed. ',
         'Process with function xs_lengths()')
@@ -566,7 +566,7 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
         "Default column order is 'Station', 'LOB', 'ROB'")
       names(bank.stations) = c("Station", "LOB", "ROB")
     }
-  } else if (ncol(bank.stations == 4L)) {
+  } else if (ncol(bank.stations) == 4L) {
     # time-dependent
     if (!all(names(bank.stations) %in% c("Time", "Station", "LOB", "ROB"))) {
       warning('Names of argument "bank.stations" not recognized. ',
@@ -584,14 +584,14 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
   } else if (is.numeric(extent.stations)) {
     extent.stations = data_frame(Station = d[[station.col]],
       LE = extent.stations[[1]], RE = extent.stations[[2]])
-  } else if (ncol(extent.stations == 3L)) {
+  } else if (ncol(extent.stations) == 3L) {
     if (!all(names(extent.stations) %in% c("Station", "LE", "RE"))) {
       warning('Names of argument "extent.stations" not recognized. ',
         "Default column order is 'Station', 'LE', 'RE'")
       names(extent.stations) = c("Station", "LE", "RE")
-    } else {
-      stop('Format of argument "extent.stations" not recognized')
     }
+  } else {
+      stop('Format of argument "extent.stations" not recognized')
   }
   all.stations = bank.stations %>%
     left_join(extent.stations, by = "Station")
