@@ -183,14 +183,16 @@ list_sediment = function(f, table.name) {
 #' @import h5
 #' @import stringr
 list_xs = function(f, xs.block) {
+  # nse workaround
+  . = NULL
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   x = h5file(f)
   on.exit(h5close(x))
-  #tblpath = file.path(dirname(xs.block), "Time Date Stamp")
-  #x[tblpath][] %>% str_trim() %>% sprintf("Station Elevation (%s)", .)
-  list.datasets(x, path = xs.block, recursive = FALSE) %>% basename() %>%
-    str_subset("info") %>% str_replace("info", "") %>% str_trim()
+  tblpath = file.path(dirname(xs.block), "Time Date Stamp")
+  x[tblpath][] %>% str_trim() %>% sprintf("Station Elevation (%s)", .)
+  #list.datasets(x, path = xs.block, recursive = FALSE) %>% basename() %>%
+  #  str_subset("info") %>% str_replace("info", "") %>% str_trim()
 }
 
 
