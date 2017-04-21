@@ -50,7 +50,7 @@
 \alias{diff_d90_subsurface}
 \title{Difference Table}
 \usage{
-diff_table(d1, d2, time.col, difference.col, relative = FALSE)
+diff_table(d1, d2, difference.col, time.col = "Time", relative = FALSE)
 
 diff_dredged_cum(d1, d2, relative = FALSE)
 
@@ -149,9 +149,9 @@ diff_d90_subsurface(d1, d2, relative = FALSE)
 
 \item{d2}{The second dataframe, considered the "new" result.}
 
-\item{time.col}{The time column name.}
-
 \item{difference.col}{The name of the difference column to be created.}
+
+\item{time.col}{The time column name.}
 
 \item{relative}{Logical: report differences as relative difference.}
 }
