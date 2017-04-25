@@ -72,7 +72,7 @@ list_grains = function(f) {
   grainpath = get_grain_class_table()
   if (!existsDataSet(x, grainpath))
     stop('Table "', grainpath, '" could not be found.', call. = FALSE)
-  c("ALL", readDataSet(openDataSet(x, grainpath, "character"))) %>% str_trim()
+  c("ALL", get_dataset(x, grainpath, "character")) %>% str_trim()
 }
 
 #' List Time Steps
@@ -92,7 +92,7 @@ list_output_times = function(f, run.type) {
   timespath = get_timestep_table(run.type)
   if (!existsDataSet(x, timespath))
     stop('Table "', timespath, '" could not be found.', call. = FALSE)
-  readDataSet(openDataSet(x, timespath, "character")) %>% str_trim()
+  get_dataset(x, timespath, "character") %>% str_trim()
 }
 
 
@@ -112,7 +112,7 @@ list_lengths = function(f) {
   lengthpath = get_lengths_table()
   if (!existsDataSet(x, lengthpath))
     stop('Table "', lengthpath, '" could not be found.', call. = FALSE)
-  readDataSet(openDataSet(x, lengthpath, "double"))
+  get_dataset(x, lengthpath, "double")
 }
 
 #' List Bank Stations
@@ -131,7 +131,7 @@ list_bank_stations = function(f){
   bankpath = get_bank_stations_table()
   if (!existsDataSet(x, bankpath))
     stop('Table "', bankpath, '" could not be found.', call. = FALSE)
-  readDataSet(openDataSet(x, bankpath, "double"))
+  get_dataset(x, bankpath, "double")
 }
 
 #' List River Stations
@@ -151,7 +151,7 @@ list_stations = function(f) {
   stationpath = get_station_table()
   if (!existsDataSet(x, stationpath))
     stop('Table "', stationpath, '" could not be found.', call. = FALSE)
-  readDataSet(openDataSet(x, stationpath, "character")) %>% str_trim()
+  get_dataset(x, stationpath, "character") %>% str_trim()
 }
 
 #' List Sediment Tables
@@ -190,7 +190,7 @@ list_xs = function(f, xs.block) {
   x = h5file(f)
   on.exit(h5close(x))
   tblpath = file.path(dirname(xs.block), "Time Date Stamp")
-  readDataSet(openDataSet(x, tblpath, "character")) %>% str_trim() %>%
+  get_dataset(x, tblpath, "character") %>% str_trim() %>%
     sprintf("Station Elevation (%s)", .) %>% unique()
 }
 

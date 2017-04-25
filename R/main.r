@@ -9,6 +9,22 @@
 #' @docType package
 NULL
 
+#' Read HDF Table
+#'
+#' Safely read in a specific HDF table. This function is used internally and
+#' should not be called directly by the user.
+#'
+#' @param x an HDF object, e.g. output of \code{h5file()}.
+#' @param path The table path.
+#' @param type The type of data contained in the table. Can be one of "double",
+#' "integer", or "character".
+#' @import h5
+get_dataset = function(x, path, type){
+  g = openDataSet(x, path, type)
+  on.exit(h5close(g))
+  readDataSet(g)
+}
+
 #' Drop Interpolated Cross Section Data
 #'
 #' Drop data from interpolated cross-sections.
@@ -146,9 +162,10 @@ read_sediment = function(f, table.name, run.type, which.times = NULL,
   do.call(bind_rows, res)
 }
 
-#' Generic Table Read Function
+#' Read RAS Table
 #'
-#' Read RAS sediment data output.
+#' Read RAS sediment data output. This function is used internally and should
+#' not be called directly by the user.
 #'
 #' @param f The h5 file to read.
 #' @param table.path The table to read in.
@@ -175,9 +192,9 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
       stop('Table "', pth, '" could not be found. ',
         'Check that argument "run.type" is correct.',
         call. = FALSE)
-  clabs = readDataSet(openDataSet(x, col.table.path, "character")) %>% str_trim()
-  rlabs = readDataSet(openDataSet(x, row.table.path, "character")) %>% str_trim()
-  this = readDataSet(openDataSet(x, table.path, "double")) %>% as_data_frame()
+  clabs = get_dataset(x, col.table.path, "character") %>% str_trim()
+  rlabs = get_dataset(x, row.table.path, "character") %>% str_trim()
+  this = get_dataset(x, table.path, "double") %>% as_data_frame()
   if (run.type == "unsteady") {
     this = this %>% head(-1) #%>% tail(-1)
 #    rlabs[2] = rlabs[1]
