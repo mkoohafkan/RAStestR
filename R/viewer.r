@@ -304,7 +304,6 @@ survey_change = function(d, time.col = "Time", station.col = "Station",
     cumulative_table(time.col, over.time, longitudinal, direction)
 }
 
-
 #' Interpolate Survey Stations
 #'
 #' Interpolate data over stations. Useful for working with surveys that have
@@ -312,14 +311,38 @@ survey_change = function(d, time.col = "Time", station.col = "Station",
 #'
 #' @param d A wide-format table of processed data, e.g. output of
 #'   \code{xs_area}.
-#' @param drop.stations Logical: Drop stations that cannot be interpolated.
+#' @param by Interpolate survey data over \code{space} or \code{time}.
+#' @param time.col The time column name.
 #' @return The data frame \code{d} with some or all \code{NA} values filled in.
 #'
+#' @details If \code{by = "space"}, survey data will be interpolated linearly
+#'   between adjacent cross sections at each separate time. If
+#'   \code{by = "time"}, survey data will be interpolated linearly at each
+#'   separate station. Note that in either case \code{d} will be reordered.
+#'
 #' @import dplyr
-#' @import stringr
-#' @importFrom stats approx spline
+#' @importFrom stringr str_detect
+#' @importFrom stats approx
 #' @export
-survey_interp = function(d, drop.stations = FALSE) {
+survey_interp = function(d, by = c("space", "time"), time.col = "Time") {
+  if (!all(by %in% c("space", "time")))
+    stop('Value of argument "by" not recognized')
+  new.d = order_table(d, time.col)
+  for (b in by)
+    if (b == "space")
+      new.d = survey_interp_space(new.d)
+    else
+      new.d = survey_interp_time(new.d)
+  new.d
+}
+
+# Interpolate Survey Stations (Time)
+#
+# Interpolate survey stations over time. Interpolates linearly at each station
+# between adjacent times.
+#
+# @inheritParams survey_interp
+survey_interp_time = function(d) {
   station.cols = names(d)[str_detect(names(d), "XS_")]
   missing.stations = NULL
   incomplete.stations = NULL
@@ -343,11 +366,26 @@ survey_interp = function(d, drop.stations = FALSE) {
   if (!is.null(incomplete.stations))
     warning("Some missing values remain at stations ",
       str_c(incomplete.stations, collapse = ", "))
-  if (drop.stations) {
-    keep.cols = setdiff(names(d), c(drop.stations, incomplete.stations))
-    d[keep.cols]
-  } else
-    d
+  d
+}
+
+# Interpolate Survey Stations (Space)
+#
+# Interpolate survey stations over space. Interpolates linearly between
+# adjacent stations.
+#
+# @inheritParams survey_interp
+survey_interp_space = function(d) {
+  station.cols =  which(str_detect(names(d), "XS_"))
+  new.d = d
+  for (i in 1:nrow(d)) {
+    nacols = is.na(d[i, station.cols])
+    xdat = station.cols[which(!nacols)]
+    ydat = d[i, xdat]
+    approxdat = approx(xdat, ydat, xout = station.cols)
+    new.d[i,station.cols] = approxdat$y
+  }
+  new.d
 }
 
 #' Extend Survey Cross Section
@@ -419,12 +457,12 @@ survey_extend = function(d, station.col = "Station", time.col = "Time",
 #' @return The clipped cross section data.
 #'
 #' @import dplyr
-survey_clip = function(d, extent.stations, station.col = "Station", time.col = "Time",
-  distance.col = "Distance"){
-  stop("not finished")
+#' @export
+survey_clip = function(d, extent.stations, station.col = "Station",
+  time.col = "Time", distance.col = "Distance", elevation.col = "Elevation"){
   # nse workaround
-  Station = NULL; Time = NULL; Distance = NULL; LE = NULL; RE= NULL;
-  LE.old = NULL; RE.old = NULL; LE.new = NULL; RE.new = NULL
+  Station = NULL; Time = NULL; Distance = NULL; LE = NULL; RE = NULL;
+  LE.old = NULL; RE.old = NULL; LE.new = NULL; RE.new = NULL; . = NULL
   # check edge stations
   if (is.numeric(extent.stations)) {
     extent.stations = data_frame(Station = d[[station.col]],
@@ -443,7 +481,33 @@ survey_clip = function(d, extent.stations, station.col = "Station", time.col = "
       LE.new = ifelse(is.na(LE.new), LE.old, LE.new),
       RE.new = ifelse(is.na(RE.new), RE.old, RE.new)
     ) %>% select(Station, LE = LE.new, RE = RE.new)
-  d = d %>% rename_(Station = station.col, Time = time.col,
-    Distance = distance.col) %>% left_join(extent.stations, by = "Station") %>%
-    filter(Distance >= LE | Distance <= RE)
+  d.list = d %>% rename_(Station = station.col, Time = time.col,
+    Distance = distance.col, Elevation = elevation.col) %>%
+    left_join(extent.stations, by = "Station") %>%
+    split(.$Station) %>%
+    lapply(function(x) split(x, x$Time))
+  for (i in seq_along(d.list)) {
+    for (j in seq_along(d.list[[i]])) {
+      this.d = d.list[[i]][[j]]
+      if ((min(this.d$Distance) > unique(this.d$LE)) ||
+          (max(this.d$Distance) < unique(this.d$RE))) {
+        warning(sprintf("Extent of %s on %s is smaller than specified limits.",
+          names(d.list)[i], names(d.list[[i]])[j]),
+          " No clipping performed")
+        next
+      }
+      approx.d = approx(this.d$Distance, this.d$Elevation,
+        xout = unique(c(this.d$LE, this.d$RE)))
+      d.list[[i]][[j]] = bind_rows(this.d, data_frame(
+        Time = rep(unique(this.d$Time), 2),
+        Station = rep(unique(this.d$Station), 2),
+        Distance = approx.d$x, Elevation = approx.d$y,
+        LE = unique(this.d$LE), RE = unique(this.d$RE))) %>%
+        filter(Distance >= LE, Distance <= RE) %>% unique()
+    }
+  }
+  select.cols = list("Station", "Time", "Distance", "Elevation")
+  names(select.cols) = c(station.col, time.col, distance.col, elevation.col)
+  unlist(d.list, recursive = FALSE) %>% bind_rows %>%
+    rename_(.dots = select.cols)
 }
