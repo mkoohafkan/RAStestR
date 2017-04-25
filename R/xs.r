@@ -42,8 +42,8 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
       stop("multiple tables named ", xs)
     index.table = file.path(tblblock, str_c(xs, " info"))
     values.table = file.path(tblblock, str_c(xs, " values"))
-    xs.indices = rep(stations, readDataSet(openDataSet(x, index.table, "integer"))[,2])
-    xs.table = as_data_frame(readDataSet(openDataSet(x, values.table, "double")))
+    xs.indices = rep(stations, get_dataset(x, index.table, "integer")[,2])
+    xs.table = as_data_frame(get_dataset(x, values.table, "double"))
     names(xs.table) = c("Distance", "Elevation")
     xs.table["Station"] = str_c("XS_", xs.indices)
     xs.table["Time"] = this.time
@@ -677,5 +677,5 @@ xs_region_cumulative_change = function(d, time.col = "Time",
     bank.stations, extent.stations, reference.elevation, region) %>%
     region_to_volume(time.col, "Region", station.lengths) %>%
     change_sediment(time.col, "Region") %>%
-    cumulative_sediment(time.col, "Region", TRUE, TRUE, "downstream")
+    cumulative_sediment(time.col, "Region", over.time, longitudinal, direction)
 }

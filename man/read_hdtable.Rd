@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.r
 \name{read_hdtable}
 \alias{read_hdtable}
-\title{Generic Table Read Function}
+\title{Read RAS Table}
 \usage{
 read_hdtable(f, table.path, row.table.path, col.table.path, run.type,
   rowcolname, colprefix)
@@ -26,5 +26,6 @@ read_hdtable(f, table.path, row.table.path, col.table.path, run.type,
 A dataframe.
 }
 \description{
-Read RAS sediment data output.
+Read RAS sediment data output. This function is used internally and should
+not be called directly by the user.
 }
