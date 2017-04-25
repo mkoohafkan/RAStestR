@@ -175,9 +175,9 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
       stop('Table "', pth, '" could not be found. ',
         'Check that argument "run.type" is correct.',
         call. = FALSE)
-  clabs = x[col.table.path][] %>% str_trim()
-  rlabs = x[row.table.path][] %>% str_trim()
-  this = x[table.path][] %>% as_data_frame()
+  clabs = readDataSet(openDataSet(x, col.table.path, "character")) %>% str_trim()
+  rlabs = readDataSet(openDataSet(x, row.table.path, "character")) %>% str_trim()
+  this = readDataSet(openDataSet(x, table.path, "double")) %>% as_data_frame()
   if (run.type == "unsteady") {
     this = this %>% head(-1) #%>% tail(-1)
 #    rlabs[2] = rlabs[1]
@@ -394,7 +394,6 @@ change_table = function(d, time.col = "Time") {
 #'   the first time step.
 #'
 #' @import dplyr
-#' @import tidyr
 #' @export
 change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
   # nse workaround
@@ -402,3 +401,27 @@ change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
   d %>% group_by_(grain.col) %>% do(change_table(., time.col = time.col))
 }
 
+#' Order Table
+#'
+#' Reorder a table by time and cross section.
+#'
+#' @param d A wide-format table.
+#' @param time.col The time column name.
+#' @return the data frame \code{d}, ordered by time and cross section.
+#'
+#' @import stringr
+#' @import dplyr
+#' @export
+order_table = function(d, time.col = "Time") {
+  # nse workaround
+  . = NULL; time.order = NULL; Station = NULL; station.num = NULL
+  col.names = names(d)
+  station.cols = col.names %>% `[`(str_detect(., "XS_")) %>%
+    data_frame(Station = .) %>% mutate(station.num = Station) %>%
+    reformat_fields(list(Station = "station.num")) %>%
+    arrange(station.num) %>% `[[`("Station")
+  other.cols = setdiff(col.names, station.cols)
+  d["time.order"] = d[[time.col]]
+  d %>% reformat_fields(list(Time = "time.order")) %>% arrange(time.order) %>%
+    `[`(c(other.cols, station.cols))
+}

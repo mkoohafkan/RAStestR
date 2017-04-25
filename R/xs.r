@@ -21,13 +21,15 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
     which.times = str_split_fixed(xsoutputs, "[(.+)]", 3)[,2]
   else if (any(nchar(which.times) != 18L))
     stop('Format of argument "which.times" not recognized')
-  xsoutputs = str_subset(xsoutputs, str_c(which.times, collapse = "|"))
-  times.found = unlist(lapply(which.times, function(x)
-    any(str_detect(xsoutputs, x))))
-  if (!all(times.found)) {
-    warning("The following times were not found in ", f, ": ",
-      str_c(which.times[!times.found], collapse = ", "))
-    which.times = which.times[times.found]
+  else {
+    xsoutputs = str_subset(xsoutputs, str_c(which.times, collapse = "|"))
+    timeoutputs = xsoutputs %>% str_sub(20, 37)
+    times.found = which.times %in% timeoutputs
+    if (!all(times.found)) {
+      warning("The following times were not found in ", f, ": ",
+        str_c(which.times[!times.found], collapse = ", "))
+      which.times = which.times[times.found]
+    }
   }
   stations = list_stations(f)
   x = h5file(f)
@@ -36,19 +38,21 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
   for (i in seq_along(which.times)) {
     this.time = which.times[i]
     xs = xsoutputs %>% str_subset(this.time)
+    if (length(xs) != 1L)
+      stop("multiple tables named ", xs)
     index.table = file.path(tblblock, str_c(xs, " info"))
     values.table = file.path(tblblock, str_c(xs, " values"))
-    xs.indices = rep(stations, x[index.table][][,2])
-    xs.table = as_data_frame(x[values.table][])
+    xs.indices = rep(stations, readDataSet(openDataSet(x, index.table, "integer"))[,2])
+    xs.table = as_data_frame(readDataSet(openDataSet(x, values.table, "double")))
     names(xs.table) = c("Distance", "Elevation")
     xs.table["Station"] = str_c("XS_", xs.indices)
     xs.table["Time"] = this.time
-    dlist[[i]] = xs.table
+    if (!is.null(which.stations))
+      dlist[[i]] = filter(xs.table, Station %in% str_c("XS_", which.stations))
+    else
+      dlist[[i]] = xs.table
   }
-  res = do.call(bind_rows, dlist)[c("Time", "Station", "Distance", "Elevation")]
-  if (!is.null(which.stations))
-    res = filter(res, Station %in% str_c("XS_", which.stations))
-  res
+  do.call(bind_rows, dlist)[c("Time", "Station", "Distance", "Elevation")]
 }
 
 #' Read Bed Limits
@@ -68,10 +72,13 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
 #' @import stringr
 #' @import dplyr
 #' @export
-read_bed_limits = function(f, run.type) {
+read_bed_limits = function(f, run.type, which.stations = NULL,
+  which.times = NULL) {
   # get bank station data
-  lob = read_standard(f, "Moveable Sta L", run.type)
-  rob = read_standard(f, "Moveable Sta R", run.type)
+  lob = read_standard(f, "Moveable Sta L", run.type, which.times = which.times,
+    which.stations = which.stations)
+  rob = read_standard(f, "Moveable Sta R", run.type, which.times = which.times,
+    which.stations = which.stations)
   # insert starting bank station data
   station.cols = names(lob) %>% str_detect("XS_")
   lob[1, station.cols] = lob[2, station.cols]
