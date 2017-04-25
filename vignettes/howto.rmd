@@ -1,7 +1,12 @@
-%\VignetteEngine{knitr}
-%\VignetteIndexEntry{How to use RAStestR}
-
-# How to use RAStestR
+---
+author: "Michael Koohafkan"
+title: "How to use RAStestR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How to use RAStestR} 
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
 ## Introduction
 

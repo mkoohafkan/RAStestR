@@ -1,7 +1,12 @@
-%\VignetteEngine{knitr}
-%\VignetteIndexEntry{Working With Cross Section Data}
-
-# Working With Cross Section Data
+---
+author: "Michael Koohafkan"
+title: "Working With Cross Section Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Working With Cross Section Data} 
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
 ## Introduction
 
@@ -17,7 +22,7 @@ verifying RAS outputs.
 
 ## Loading Cross Section Data in RAStestR
 
-```
+```{r eval = FALSE}
 library(RAStestR)
 library(dplyr)
 library(ggplot2)

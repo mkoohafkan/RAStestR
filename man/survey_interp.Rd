@@ -4,13 +4,15 @@
 \alias{survey_interp}
 \title{Interpolate Survey Stations}
 \usage{
-survey_interp(d, drop.stations = FALSE)
+survey_interp(d, by = c("space", "time"), time.col = "Time")
 }
 \arguments{
 \item{d}{A wide-format table of processed data, e.g. output of
 \code{xs_area}.}
 
-\item{drop.stations}{Logical: Drop stations that cannot be interpolated.}
+\item{by}{Interpolate survey data over \code{space} or \code{time}.}
+
+\item{time.col}{The time column name.}
 }
 \value{
 The data frame \code{d} with some or all \code{NA} values filled in.
@@ -18,4 +20,10 @@ The data frame \code{d} with some or all \code{NA} values filled in.
 \description{
 Interpolate data over stations. Useful for working with surveys that have
 partial overlap.
+}
+\details{
+If \code{by = "space"}, survey data will be interpolated linearly
+  between adjacent cross sections at each separate time. If
+  \code{by = "time"}, survey data will be interpolated linearly at each
+  separate station. Note that in either case \code{d} will be reordered.
 }
