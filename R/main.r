@@ -83,7 +83,7 @@ rename_interpolated_xs = function(d){
 #' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @param which.times Character vector of timestamps to extract. If
 #'   NULL, all timestamps will be returned.
-#' @param which.stations Character vector of station numbers to extract. If
+#' @param which.stations Character vector of stations to extract. If
 #'   NULL, all stations will be returned.
 #' @return A dataframe with a column "Time" containing the Date Time
 #'   Stamp data and columns "XS_####" where ### is the cross-section ID.
@@ -92,24 +92,30 @@ rename_interpolated_xs = function(d){
 #' @export
 read_standard = function(f, table.name, run.type, which.times = NULL,
   which.stations = NULL) {
+  # argument checks
+  if (is.null(which.times))
+    which.times = list_output_times(f, run.type)
+  if (!any(which.times %in% list_output_times(f, run.type)))
+    stop("No data matching 'which.times' was found")
+  if (is.null(which.stations))
+    which.stations = str_c("XS_", list_stations(f))
+  else if (is.numeric(which.stations))
+    which.stations = str_c("XS_", list_stations(f)[which.stations])
+  else if (is.character(which.stations))
+    which.stations = str_c("XS_", str_replace(which.stations, "XS_", ""))
+  if (!any(which.stations %in% str_c("XS_", list_stations(f))))
+    stop("No data matching 'which.stations' was found")
+  # specify tables
   geompath = get_station_table(run.type)
   tblpath = file.path(get_output_block(run.type), table.name)
   tspath = get_timestep_table(run.type)
-  if (is.numeric(which.stations))
-    which.stations = list_stations(f)[which.stations]
+  # read data
   res = read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_")
-  if (!is.null(which.times))
-    res = res[res$Time %in% which.times,]
-  if (nrow(res) < 1)
-    stop("No data matching 'which.times' was found")
-  if (!is.null(which.stations)) {
-    othercols = !str_detect(names(res), "XS_")
-    stationcols = names(res) %in% str_c("XS_", which.stations)
-    if (length(stationcols) < 1)
-      stop("No data matching 'which.stations' was found")
-    res = res[, which(othercols | stationcols)]
-  }
-  res
+  # filter by time/station
+  res = res[res$Time %in% which.times,]
+  othercols = !str_detect(names(res), "XS_")
+  stationcols = names(res) %in%  which.stations
+  res[, which(othercols | stationcols)]
 }
 
 #' Sediment By Grain Class Table
@@ -441,4 +447,100 @@ order_table = function(d, time.col = "Time") {
   d["time.order"] = d[[time.col]]
   d %>% reformat_fields(list(Time = "time.order")) %>% arrange(time.order) %>%
     `[`(c(other.cols, station.cols))
+}
+
+#' Order Table (Sediment)
+#'
+#' Reorder a sediment data table by time and cross section.
+#'
+#' @inheritParams order_table
+#' @inheritParams change_sediment
+#' @return the data frame \code{d}, ordered by time, cross section and grain class.
+#'
+#' @import stringr
+#' @import dplyr
+#' @export
+order_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
+  # nse workaround
+  . = NULL
+  d %>% arrange_(grain.col) %>% group_by_(grain.col) %>%
+    do(order_table(., time.col = time.col))
+}
+
+#' Table Operations
+#'
+#' Combine tables via an operation, e.g. addition or multiplication.
+#'
+#' @param ... Arbitrary number of wide-format data tables to combine.
+#' @param fun A function to apply.
+#' @inheritParams order_table
+#' @return A single table.
+#'
+#' @import dplyr
+#' @export
+operate_table = function(..., fun = "+", time.col = "Time") {
+  dots = list(...)
+  # check column names
+  if (length(setdiff(
+    Reduce(function(...) union(...), lapply(dots, names)),
+    Reduce(function(...) intersect(...), lapply(dots, names))
+  )) > 0L)
+    stop('Tables in "..." do not have matching columns')
+  # check time stamps
+  if (length(setdiff(
+    Reduce(function(...) union(...), lapply(dots, function(x) x[[time.col]])),
+    Reduce(function(...) intersect(...), lapply(dots, function(x) x[[time.col]]))
+  )) > 0L)
+    stop('Tables in "..." do not have matching time stamps')
+  # get data columns
+  datime.cols = Reduce(function(...) intersect(...), lapply(dots, names))
+  datime.cols = datime.cols[datime.cols != time.col]
+  # arrange data
+  for (i in seq_along(dots))
+    dots[[i]] = order_table(dots[[i]], time.col)
+  # apply function
+  as_data_frame(cbind(dots[[1]][time.col],
+    Reduce(fun, lapply(dots, function(x) x[, datime.cols]))))
+}
+
+#' Table Operations (Sediment)
+#'
+#' Combine sediment tables via an operation, e.g. addition or multiplication.
+#'
+#' @inheritParams operate_table
+#' @inheritParams order_sediment
+#' @return A single sediment table.
+#'
+#' @import dplyr
+#' @export
+operate_sediment = function(..., fun = "+", time.col = "Time",
+  grain.col = "GrainClass") {
+  dots = list(...)
+  # check grain classes
+  if (length(setdiff(
+    Reduce(function(...) union(...), lapply(dots, function(x) unique(x[[grain.col]]))),
+    Reduce(function(...) intersect(...), lapply(dots, function(x) unique(x[[grain.col]])))
+  )) > 0L)
+    stop('Tables in "..." do not have matching grain classes')
+  # check column names
+  if (length(setdiff(
+    Reduce(function(...) union(...), lapply(dots, names)),
+    Reduce(function(...) intersect(...), lapply(dots, names))
+  )) > 0L)
+    stop('Tables in "..." do not have matching columns')
+  # check time stamps
+  if (length(setdiff(
+    Reduce(function(...) union(...), lapply(dots, function(x) x[[time.col]])),
+    Reduce(function(...) intersect(...), lapply(dots, function(x) x[[time.col]]))
+  )) > 0L)
+    stop('Tables in "..." do not have matching time stamps')
+  # get data columns
+  datime.cols = Reduce(function(...) intersect(...), lapply(dots, names))
+  datime.cols = datime.cols[!(datime.cols %in% c(time.col, grain.col))]
+  # arrange data
+  for (i in seq_along(dots))
+    dots[[i]] = order_sediment(dots[[i]], time.col, grain.col)
+  # apply function
+  as_data_frame(cbind(dots[[1]][c(time.col, grain.col)],
+    Reduce(fun, lapply(dots, function(x) x[, datime.cols]))))
 }
