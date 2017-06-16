@@ -47,9 +47,10 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
     names(xs.table) = c("Distance", "Elevation")
     xs.table["Station"] = str_c("XS_", xs.indices)
     xs.table["Time"] = this.time
-    if (!is.null(which.stations))
-      dlist[[i]] = filter(xs.table, Station %in% str_c("XS_", which.stations))
-    else
+    if (!is.null(which.stations)) {
+      dlist[[i]] = filter(xs.table,
+        Station %in% str_c("XS_", str_replace(which.stations, "XS_", "")))
+    } else
       dlist[[i]] = xs.table
   }
   do.call(bind_rows, dlist)[c("Time", "Station", "Distance", "Elevation")]
@@ -61,7 +62,7 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
 #'
 #' @inheritParams read_standard
 #' @return a dataframe with columns "Time", "Station", "LOB" and "ROB", where
-#'   columns "LOB" and "ROB" list the left and right bank stations,
+#'   columns "LOB" and "ROB" list the left and right moveable bed stations,
 #'   respectively.
 #'
 #' @details The moveable bed limits will change over time in models that use
@@ -79,17 +80,43 @@ read_bed_limits = function(f, run.type, which.stations = NULL,
     which.stations = which.stations)
   rob = read_standard(f, "Moveable Sta R", run.type, which.times = which.times,
     which.stations = which.stations)
-  # insert starting bank station data
-  station.cols = names(lob) %>% str_detect("XS_")
-  lob[1, station.cols] = lob[2, station.cols]
-  rob[1, station.cols] = rob[2, station.cols]
-
   list(LOB = lob, ROB = rob) %>%
     lapply(to_longtable, data.col = "Distance") %>%
     bind_rows(.id = "section") %>%
     to_widetable("section", "Distance") %>%
     arrange_("Time", "desc(Station)")
 }
+
+#' Read Bed Limit Elevations
+#'
+#' Read the elevations of the moveable bed limit stations.
+#'
+#' @inheritParams read_standard
+#' @return a dataframe with columns "Time", "Station", "LOB" and "ROB", where
+#'   columns "LOB" and "ROB" list the left and right moveable bed limit
+#'   elevations, respectively.
+#'
+#' @details The moveable bed limit elevations will change over time, both due
+#'   to channel change and due to lateral movement in models that use
+#'   BSTEM.
+#'
+#' @import stringr
+#' @import dplyr
+#' @export
+read_bed_limits_elev = function(f, run.type, which.stations = NULL,
+  which.times = NULL) {
+  # get bank station data
+  lob = read_standard(f, "Moveable Elv L", run.type, which.times = which.times,
+    which.stations = which.stations)
+  rob = read_standard(f, "Moveable Elv R", run.type, which.times = which.times,
+    which.stations = which.stations)
+  list(LOB = lob, ROB = rob) %>%
+    lapply(to_longtable, data.col = "Elevation") %>%
+    bind_rows(.id = "section") %>%
+    to_widetable("section", "Elevation") %>%
+    arrange_("Time", "desc(Station)")
+}
+
 
 #' Read River Station Lengths
 #'
@@ -268,19 +295,57 @@ xs_extents = function(d, station.col = "Station", time.col = "Time",
 #
 # @param distance The lateral cross section stations.
 # @param elevation The cross section elevations at each station.
-# @param left.bank The left bank station.
-# @param right.bank The right bank station.
+# @param left.bank The left bank station. If \code{NA}, the minimum distance
+#   will be used.
+# @param right.bank The right bank station. If \code{NA}, the minimum distance
+#   will be used.
 # @param reference.elevation The reference elevation to use for computing
-#   volume. If \code{NULL}, the maximum elevation of the cross section will be
-#   used.
+#   volume. Note that specifying a reference elevation lower than the maximum
+#   elevation of the cross section can introduce some error in the volume
+#   computation if the cross section data is not dense. If \code{NA}, the
+#   maximum elevation of the cross section will be used.
+# @param bottom.elevation Minimum elevation below which to ignore cross section
+#   volume; effectively flattens the cross section. Note that specifying a
+#   bottom elevation higher than the minimum elevation of the cross section
+#   can introduce some error in the volume computation if the cross section data
+#   is not dense. If \code{NA}, the minimum elevation of the cross section will
+#   be used.
 # @return The flow area of the cross section. The maximum elevation is used as
 #   the upper boundary.
+#
+# @example
+# test = data.frame(
+#   Distance = c(100, 120, 130, 150, 160, 180, 190, 210, 220, 240),
+#   Elevation = c(100, 100, 80, 80, 60, 60, 80, 80, 100, 100)
+# )
+# test.dens = data.frame(
+#   Distance = approx(test$Distance, test$Distance, xout = seq(100, 240))$y,
+#   Elevation = approx(test$Distance, test$Elevation, xout = seq(100, 240))$y
+# )
+# trap_area = function(a,b,h) 0.5*(a + b)*h
+# calc_area(test$Distance, test$Elevation)
+# trap_area(100, 80, 20) + trap_area(40, 20, 20)
+# calc_area(test.dens$Distance, test.dens$Elevation)
+# trap_area(100, 80, 20) + trap_area(40, 20, 20)
+# calc_area(test$Distance, test$Elevation,
+#   left.bank = 160, right.bank = 180)
+# calc_area(test.dens$Distance, test.dens$Elevation,
+#   left.bank = 160, right.bank = 180)
+# trap_area(20, 20, 40)
+# calc_area(test.dens$Distance, test.dens$Elevation, right.bank = 150)
+# trap_area(30, 20, 20)
+# calc_area(test.dens$Distance, test.dens$Elevation, left.bank = 210)
+# trap_area(10, 0, 20)
+# calc_area(test.dens$Distance, test.dens$Elevation, bottom.elev = 80)
+# trap_area(100, 80, 20)
+# calc_area(test.dens$Distance, test.dens$Elevation, reference.elev = 80)
+# trap_area(40, 20, 20)
 #
 #' @importFrom utils head tail
 #' @importFrom stats approx
 calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
-  reference.elev = NA) {
-  # add bank stations if they're not in the data
+  reference.elev = NA, bottom.elev = NA) {
+  # check input
   if (length(dist) != length(elev))
     stop('Arguments "dist" and "elev" must be the same length')
   if (is.na(left.bank)) {
@@ -288,31 +353,70 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
   } else if (left.bank < min(dist)) {
     warning("Left bank is outside of cross section extent. Returning NA",
       call. = FALSE)
-  } else if (!any(abs(left.bank - dist) < 0.1)) {
-    elev = c(elev, approx(dist, elev, xout = left.bank)$y)
-    dist = c(dist, left.bank)
+    return(NA)
   }
   if (is.na(right.bank)) {
     right.bank = max(dist)
   } else if (right.bank > max(dist)) {
     warning("Right bank is outside of cross section extent. Returning NA",
       call. = FALSE)
-  } else if (!any(abs(right.bank - dist) < 0.1)) {
-    elev = c(elev, approx(dist, elev, xout = right.bank)$y)
-    dist = c(dist, right.bank)
-  }
-  if ((right.bank > max(dist)) || (left.bank < min(dist)))
     return(NA)
+  }
+  dist.order = order(dist)
+  dist = dist[dist.order]
+  elev = elev[dist.order]
+  # check if left bank is in data
+  if (!any(abs(dist - left.bank) < 1e-2)) {
+    leftof = max(which(dist < left.bank))
+    elev = c(
+      head(elev, leftof),
+      approx(dist[c(leftof, leftof + 1)], elev[c(leftof, leftof + 1)],
+        xout = left.bank)$y,
+      tail(elev, -leftof)
+    )
+    dist = c(
+      head(dist, leftof),
+      left.bank,
+      tail(dist, -leftof)
+    )
+  }
+  # check if right bank is in data
+  if (!any(abs(dist - right.bank) < 1e-2)) {
+    leftof = max(which(dist < right.bank))
+    elev = c(
+      head(elev, leftof),
+      approx(dist[c(leftof, leftof + 1)], elev[c(leftof, leftof + 1)],
+        xout = right.bank)$y,
+      tail(elev, -leftof)
+    )
+    dist = c(
+      head(dist, leftof),
+      right.bank,
+      tail(dist, -leftof)
+    )
+  }
+  # reference elevation
   if (is.na(reference.elev))
     reference.elev = max(elev)
+  # bottom elevation
+  if (is.na(bottom.elev))
+    bottom.elev = min(elev)
+  else if (bottom.elev > max(elev)) {
+    warning("Bottom elevation is higher than maximum cross section elevation. ",
+      "Returning NA", call. = FALSE)
+    return(NA)
+  }
   # rescale
   new.right.bank = right.bank - min(dist)
   new.left.bank = left.bank - min(dist)
   new.reference.elev = reference.elev - min(elev)
+  new.bottom.elev = bottom.elev - min(elev)
   new.elev = elev - min(elev)
-  dist.order = order(dist)
-  new.dist = dist[dist.order] - min(dist)
-  new.elev = new.elev[dist.order]
+  new.dist = dist - min(dist)
+  # apply bottom elevation
+  new.elev[new.elev < new.bottom.elev] = new.bottom.elev
+  # apply reference elevation
+  new.elev[new.elev > new.reference.elev] = new.reference.elev
   idx = head(seq.int(
     from = which.min(abs(new.dist - new.left.bank)),
     to = which.min(abs(new.dist - new.right.bank)),
@@ -344,6 +448,10 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
 #' cross section area. Can be a constant or a two column station of cross
 #'   section labels and associated reference elevation. If \code{NULL}, the
 #'   maximum elevation of each cross section will be used.
+#' @param bottom.elevation Use predefined bottom elevations when computing
+#' cross section area. Can be a constant or a two column station of cross
+#'   section labels and associated bottom elevation. If \code{NULL}, the
+#'   minimum elevation of each cross section will be used.
 #' @return A wide-format table of cross section areas.
 #'
 #' @details The \code{bank.stations} argument can be formatted in multiple ways
@@ -367,10 +475,10 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
 #' @export
 xs_area = function(d, time.col = "Time", station.col = "Station",
   distance.col = "Distance", elevation.col = "Elevation", bank.stations = NULL,
-  reference.elevation = NULL) {
+  reference.elevation = NULL, bottom.elevation = NULL) {
   # nse workaround
   Time = NULL; Station = NULL; Distance = NULL; Elevation = NULL
-  LOB = NULL; ROB = NULL; RefElev = NULL; LE = NULL; RE = NULL
+  LOB = NULL; ROB = NULL; RefElev = NULL; BotElev = NULL; LE = NULL; RE = NULL
   # identify stations present at all times
   d = d %>% transmute_(Station = station.col, Time = time.col,
     Distance = distance.col, Elevation = elevation.col)
@@ -432,12 +540,33 @@ xs_area = function(d, time.col = "Time", station.col = "Station",
   if (any(is.na(d$RefElev)))
     warning('Argument "reference.elevation" does not contain information ',
       "for all cross sections")
+  # check bottom elevation
+  if (is.null(bottom.elevation)) {
+    bottom.elevation = d %>% group_by(Station) %>%
+      summarize(BotElev = min(Elevation))
+    d = d %>% left_join(bottom.elevation, by = "Station")
+  }  else if (is.numeric(bottom.elevation)) {
+    d["BotElev"] = bottom.elevation
+  } else if (ncol(bottom.elevation) == 2L) {
+    if (!all(names(bottom.elevation) %in% c("Station", "BotElev"))) {
+      warning('Names of argument "bottom.elevation" not recognized. ',
+        "Default column order is 'Station', 'BotElev'")
+      names(bottom.elevation) = c("Station", "BotElev")
+    }
+    d = d %>% left_join(bottom.elevation, by = "Station")
+  } else {
+    stop('Format of argument "bottom.elevation" not recognized')
+  }
+  # check if bottom elevation defined for all cross sections
+  if (any(is.na(d$BotElev)))
+    warning('Argument "bottom.elevation" does not contain information ',
+      "for all cross sections")
   # compute area
   select.cols = list("Area", "Station", "Time")
   names(select.cols) = c("Area", station.col, time.col)
   d %>% group_by(Station, Time) %>%
     summarize(Area = calc_area(Distance, Elevation, unique(LOB),
-      unique(ROB), unique(RefElev))) %>%
+      unique(ROB), unique(RefElev), unique(BotElev))) %>%
     select_(.dots = select.cols) %>%
     spread_(station.col, "Area", fill = NA)
 }
@@ -512,10 +641,11 @@ area_to_volume = function(d, time.col = "Time", station.lengths = NULL) {
 #' @export
 xs_cumulative_change = function(d, time.col = "Time", station.col = "Station",
   distance.col = "Distance", elevation.col = "Elevation", bank.stations = NULL,
-  reference.elevation = NULL, station.lengths = NULL, over.time = TRUE,
-  longitudinal = TRUE, direction = "downstream"){
+  reference.elevation = NULL, bottom.elevation = NULL,
+  station.lengths = NULL, over.time = TRUE, longitudinal = TRUE,
+  direction = "downstream"){
   d %>% xs_area(time.col, station.col, distance.col, elevation.col,
-      bank.stations, reference.elevation) %>%
+      bank.stations, reference.elevation, bottom.elevation) %>%
     area_to_volume(time.col, station.lengths) %>%
     change_table(time.col) %>%
     cumulative_table(time.col, over.time, longitudinal, direction)
@@ -552,7 +682,7 @@ xs_cumulative_change = function(d, time.col = "Time", station.col = "Station",
 #' @export
 xs_regions = function(d, time.col = "Time", station.col = "Station",
   distance.col = "Distance", elevation.col = "Elevation", bank.stations,
-  extent.stations = NULL, reference.elevation = NULL,
+  extent.stations = NULL, reference.elevation = NULL, bottom.elevation = NULL,
   region = c("LOB", "Channel", "ROB")) {
   # nse workaround
   Station = NULL; Time = NULL; Distance = NULL; LE = NULL; RE = NULL
@@ -610,7 +740,8 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
     else
       channel.stations = all.stations %>% select(Station, LOB, ROB)
     region.list[["Channel"]] = xs_area(d, time.col, station.col,
-      distance.col, elevation.col, channel.stations, reference.elevation)
+      distance.col, elevation.col, channel.stations, reference.elevation,
+      bottom.elevation)
   }
   if ("LOB" %in% region) {
     if ("Time" %in% names(all.stations))
@@ -620,7 +751,8 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
       lob.stations = all.stations %>%
         select(Station, LOB = LE, ROB = LOB)
     region.list[["LOB"]] = xs_area(d, time.col, station.col,
-      distance.col, elevation.col, lob.stations, reference.elevation)
+      distance.col, elevation.col, lob.stations, reference.elevation,
+      bottom.elevation)
   }
   if ("ROB" %in% region) {
     if ("Time" %in% names(all.stations))
@@ -630,7 +762,8 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
       rob.stations = all.stations %>%
         select(Station, LOB = ROB, ROB = RE)
     region.list[["ROB"]] = xs_area(d, time.col, station.col,
-      distance.col, elevation.col, rob.stations, reference.elevation)
+      distance.col, elevation.col, rob.stations, reference.elevation,
+      bottom.elevation)
   }
   bind_rows(region.list, .id = "Region")
 }
@@ -670,12 +803,16 @@ region_to_volume = function(d, time.col = "Time", region.col = "Region",
 xs_region_cumulative_change = function(d, time.col = "Time",
   station.col = "Station", distance.col = "Distance",
   elevation.col = "Elevation", bank.stations, extent.stations = NULL,
-  reference.elevation = NULL, region = c("LOB", "Channel", "ROB"),
-  station.lengths = NULL, over.time = TRUE, longitudinal = TRUE,
+  reference.elevation = NULL, bottom.elevation = NULL,
+  region = c("LOB", "Channel", "ROB"), station.lengths = NULL, over.time = TRUE,
+  longitudinal = TRUE,
   direction = "downstream"){
   d %>% xs_regions(time.col, station.col, distance.col, elevation.col,
-    bank.stations, extent.stations, reference.elevation, region) %>%
+    bank.stations, extent.stations, reference.elevation, bottom.elevation,
+    region) %>%
     region_to_volume(time.col, "Region", station.lengths) %>%
     change_sediment(time.col, "Region") %>%
     cumulative_sediment(time.col, "Region", over.time, longitudinal, direction)
 }
+
+
