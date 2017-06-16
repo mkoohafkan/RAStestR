@@ -9,5 +9,11 @@ RAStestR.rxproj
 RAStestR.sln
 LICENSE
 inst/build_helper.r
+inst/FARGO-report
+inst/DS-GAV
+inst/_old.R
+inst/_import.r
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^docs$
+^_pkgdown.yml$

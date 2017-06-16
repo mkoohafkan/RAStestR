@@ -11,7 +11,7 @@ read_bed_limits(f, run.type, which.stations = NULL, which.times = NULL)
 
 \item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
-\item{which.stations}{Character vector of station numbers to extract. If
+\item{which.stations}{Character vector of stations to extract. If
 NULL, all stations will be returned.}
 
 \item{which.times}{Character vector of timestamps to extract. If
@@ -19,7 +19,7 @@ NULL, all timestamps will be returned.}
 }
 \value{
 a dataframe with columns "Time", "Station", "LOB" and "ROB", where
-  columns "LOB" and "ROB" list the left and right bank stations,
+  columns "LOB" and "ROB" list the left and right moveable bed stations,
   respectively.
 }
 \description{

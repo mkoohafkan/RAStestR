@@ -6,8 +6,8 @@
 \usage{
 xs_regions(d, time.col = "Time", station.col = "Station",
   distance.col = "Distance", elevation.col = "Elevation", bank.stations,
-  extent.stations = NULL, reference.elevation = NULL, region = c("LOB",
-  "Channel", "ROB"))
+  extent.stations = NULL, reference.elevation = NULL,
+  bottom.elevation = NULL, region = c("LOB", "Channel", "ROB"))
 }
 \arguments{
 \item{d}{The cross section data, i.e. output of \code{read_xs}.}
@@ -35,6 +35,11 @@ distances of each cross section will be used.}
 cross section area. Can be a constant or a two column station of cross
   section labels and associated reference elevation. If \code{NULL}, the
   maximum elevation of each cross section will be used.}
+
+\item{bottom.elevation}{Use predefined bottom elevations when computing
+cross section area. Can be a constant or a two column station of cross
+  section labels and associated bottom elevation. If \code{NULL}, the
+  minimum elevation of each cross section will be used.}
 
 \item{region}{The region(s) to compute area for. Can be any combination of
 "channel", "LOB", "ROB". See details for more information.}

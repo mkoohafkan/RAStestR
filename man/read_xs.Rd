@@ -14,7 +14,7 @@ read_xs(f, run.type, which.times = NULL, which.stations = NULL)
 \item{which.times}{Character vector of timestamps to extract. If
 NULL, all timestamps will be returned.}
 
-\item{which.stations}{Character vector of station numbers to extract. If
+\item{which.stations}{Character vector of stations to extract. If
 NULL, all stations will be returned.}
 }
 \value{

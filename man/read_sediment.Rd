@@ -81,7 +81,7 @@ read_reduce_armor_factor(f, run.type, which.times = NULL,
 \item{which.times}{Character vector of timestamps to extract. If
 NULL, all timestamps will be returned.}
 
-\item{which.stations}{Character vector of station numbers to extract. If
+\item{which.stations}{Character vector of stations to extract. If
 NULL, all stations will be returned.}
 
 \item{which.grains}{Grain class tables to extract. Can accept either numeric

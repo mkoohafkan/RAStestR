@@ -7,8 +7,8 @@
 xs_cumulative_change(d, time.col = "Time", station.col = "Station",
   distance.col = "Distance", elevation.col = "Elevation",
   bank.stations = NULL, reference.elevation = NULL,
-  station.lengths = NULL, over.time = TRUE, longitudinal = TRUE,
-  direction = "downstream")
+  bottom.elevation = NULL, station.lengths = NULL, over.time = TRUE,
+  longitudinal = TRUE, direction = "downstream")
 }
 \arguments{
 \item{d}{The cross section data, i.e. output of \code{read_xs}.}
@@ -29,6 +29,11 @@ section will be used. See details for more information.}
 cross section area. Can be a constant or a two column station of cross
   section labels and associated reference elevation. If \code{NULL}, the
   maximum elevation of each cross section will be used.}
+
+\item{bottom.elevation}{Use predefined bottom elevations when computing
+cross section area. Can be a constant or a two column station of cross
+  section labels and associated bottom elevation. If \code{NULL}, the
+  minimum elevation of each cross section will be used.}
 
 \item{station.lengths}{The cross section length values.}
 
