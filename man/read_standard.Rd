@@ -50,116 +50,106 @@
 \alias{read_d90_subsurface}
 \title{Read Standard Table}
 \usage{
-read_standard(f, table.name, run.type, which.times = NULL,
+read_standard(f, table.name, which.times = NULL, which.stations = NULL)
+
+read_dredged_cum(f, which.times = NULL, which.stations = NULL)
+
+read_effective_depth(f, which.times = NULL, which.stations = NULL)
+
+read_effective_width(f, which.times = NULL, which.stations = NULL)
+
+read_flow(f, which.times = NULL, which.stations = NULL)
+
+read_froude_number_channel(f, which.times = NULL, which.stations = NULL)
+
+read_hydraulic_radius(f, which.times = NULL, which.stations = NULL)
+
+read_invert_change(f, which.times = NULL, which.stations = NULL)
+
+read_invert_elevation(f, which.times = NULL, which.stations = NULL)
+
+read_mannings_n_channel(f, which.times = NULL, which.stations = NULL)
+
+read_mean_effective_invert_change(f, which.times = NULL,
   which.stations = NULL)
 
-read_dredged_cum(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_effective_depth(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_effective_width(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_flow(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_froude_number_channel(f, run.type, which.times = NULL,
+read_mean_effective_invert_elevation(f, which.times = NULL,
   which.stations = NULL)
 
-read_hydraulic_radius(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_moveable_elv_l(f, which.times = NULL, which.stations = NULL)
 
-read_invert_change(f, run.type, which.times = NULL, which.stations = NULL)
+read_moveable_elv_r(f, which.times = NULL, which.stations = NULL)
 
-read_invert_elevation(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_moveable_sta_l(f, which.times = NULL, which.stations = NULL)
 
-read_mannings_n_channel(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_moveable_sta_r(f, which.times = NULL, which.stations = NULL)
 
-read_mean_effective_invert_change(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_observed_data(f, which.times = NULL, which.stations = NULL)
 
-read_mean_effective_invert_elevation(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_sediment_concentration(f, which.times = NULL, which.stations = NULL)
 
-read_moveable_elv_l(f, run.type, which.times = NULL, which.stations = NULL)
+read_shear_stress(f, which.times = NULL, which.stations = NULL)
 
-read_moveable_elv_r(f, run.type, which.times = NULL, which.stations = NULL)
+read_shear_velocity(f, which.times = NULL, which.stations = NULL)
 
-read_moveable_sta_l(f, run.type, which.times = NULL, which.stations = NULL)
+read_slope(f, which.times = NULL, which.stations = NULL)
 
-read_moveable_sta_r(f, run.type, which.times = NULL, which.stations = NULL)
+read_temperature(f, which.times = NULL, which.stations = NULL)
 
-read_observed_data(f, run.type, which.times = NULL, which.stations = NULL)
+read_thickness_cover(f, which.times = NULL, which.stations = NULL)
 
-read_sediment_concentration(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_thickness_inactive(f, which.times = NULL, which.stations = NULL)
 
-read_shear_stress(f, run.type, which.times = NULL, which.stations = NULL)
+read_thickness_subsurface(f, which.times = NULL, which.stations = NULL)
 
-read_shear_velocity(f, run.type, which.times = NULL, which.stations = NULL)
+read_velocity(f, which.times = NULL, which.stations = NULL)
 
-read_slope(f, run.type, which.times = NULL, which.stations = NULL)
+read_water_surface(f, which.times = NULL, which.stations = NULL)
 
-read_temperature(f, run.type, which.times = NULL, which.stations = NULL)
+read_d10_active(f, which.times = NULL, which.stations = NULL)
 
-read_thickness_cover(f, run.type, which.times = NULL, which.stations = NULL)
+read_d10_cover(f, which.times = NULL, which.stations = NULL)
 
-read_thickness_inactive(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_d10_inactive(f, which.times = NULL, which.stations = NULL)
 
-read_thickness_subsurface(f, run.type, which.times = NULL,
-  which.stations = NULL)
+read_d10_subsurface(f, which.times = NULL, which.stations = NULL)
 
-read_velocity(f, run.type, which.times = NULL, which.stations = NULL)
+read_d16_active(f, which.times = NULL, which.stations = NULL)
 
-read_water_surface(f, run.type, which.times = NULL, which.stations = NULL)
+read_d16_cover(f, which.times = NULL, which.stations = NULL)
 
-read_d10_active(f, run.type, which.times = NULL, which.stations = NULL)
+read_d16_inactive(f, which.times = NULL, which.stations = NULL)
 
-read_d10_cover(f, run.type, which.times = NULL, which.stations = NULL)
+read_d16_subsurface(f, which.times = NULL, which.stations = NULL)
 
-read_d10_inactive(f, run.type, which.times = NULL, which.stations = NULL)
+read_d50_active(f, which.times = NULL, which.stations = NULL)
 
-read_d10_subsurface(f, run.type, which.times = NULL, which.stations = NULL)
+read_d50_cover(f, which.times = NULL, which.stations = NULL)
 
-read_d16_active(f, run.type, which.times = NULL, which.stations = NULL)
+read_d50_inactive(f, which.times = NULL, which.stations = NULL)
 
-read_d16_cover(f, run.type, which.times = NULL, which.stations = NULL)
+read_d50_subsurface(f, which.times = NULL, which.stations = NULL)
 
-read_d16_inactive(f, run.type, which.times = NULL, which.stations = NULL)
+read_d84_active(f, which.times = NULL, which.stations = NULL)
 
-read_d16_subsurface(f, run.type, which.times = NULL, which.stations = NULL)
+read_d84_cover(f, which.times = NULL, which.stations = NULL)
 
-read_d50_active(f, run.type, which.times = NULL, which.stations = NULL)
+read_d84_inactive(f, which.times = NULL, which.stations = NULL)
 
-read_d50_cover(f, run.type, which.times = NULL, which.stations = NULL)
+read_d84_subsurface(f, which.times = NULL, which.stations = NULL)
 
-read_d50_inactive(f, run.type, which.times = NULL, which.stations = NULL)
+read_d90_active(f, which.times = NULL, which.stations = NULL)
 
-read_d50_subsurface(f, run.type, which.times = NULL, which.stations = NULL)
+read_d90_cover(f, which.times = NULL, which.stations = NULL)
 
-read_d84_active(f, run.type, which.times = NULL, which.stations = NULL)
+read_d90_inactive(f, which.times = NULL, which.stations = NULL)
 
-read_d84_cover(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_d84_inactive(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_d84_subsurface(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_d90_active(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_d90_cover(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_d90_inactive(f, run.type, which.times = NULL, which.stations = NULL)
-
-read_d90_subsurface(f, run.type, which.times = NULL, which.stations = NULL)
+read_d90_subsurface(f, which.times = NULL, which.stations = NULL)
 }
 \arguments{
 \item{f}{The h5 file to read.}
 
 \item{table.name}{The table to read.}
-
-\item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
 \item{which.times}{Character vector of timestamps to extract. If
 NULL, all timestamps will be returned.}
@@ -269,3 +259,19 @@ Read a standard (not grain class-specific) table.
 \item \code{read_d90_subsurface}: Read the d90 Subsurface data output.
 }}
 
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+read_standard(simple.quasi, "Flow")
+
+simple.unsteady = system.file("sample-data/SampleUnsteady.hdf",
+  package = "RAStestR")
+read_standard(simple.unsteady, "Flow")
+
+read_standard(simple.quasi, "Flow", which.times = "11DEC1990 01:00:00",
+  which.stations = c("XS_800", "XS_796.00*"))
+
+read_standard(simple.quasi, "Flow", which.times = 2:3,
+  which.stations = 1:4)
+
+}

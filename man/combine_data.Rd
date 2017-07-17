@@ -18,7 +18,7 @@ etc.}
 }
 \value{
 A single data table with an additional column specifying
-  the data souce.
+  the data source.
 }
 \description{
 Combine data tables into a single table. The tables must have
@@ -27,4 +27,14 @@ Combine data tables into a single table. The tables must have
   consistently before combining. If combining tables of different
   data, provide explicit names to the tables to easily differentiate
   between variables.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+quasi.wse = read_standard(simple.quasi, "Water Surface")
+long.flow = to_longtable(quasi.flow, "Value")
+long.wse= to_longtable(quasi.flow, "Value")
+combine_data(flow = long.flow, wse = long.wse, id.col = "Variable")
+
 }

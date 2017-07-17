@@ -16,8 +16,8 @@ get_bank_stations_table = function(RAS.version = "5.0.3") {
 
 # output interval table path
 get_timestep_table = function(run.type, RAS.version = "5.0.3"){
-  run.type = match.arg(run.type, c("unsteady", "quasi"))
-  if (run.type == "unsteady")
+  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
+  if (run.type == "Unsteady")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Time Date Stamp")
   else
@@ -26,8 +26,8 @@ get_timestep_table = function(run.type, RAS.version = "5.0.3"){
 }
 # parent path of output data
 get_output_block = function(run.type, RAS.version = "5.0.3") {
-  run.type = match.arg(run.type, c("unsteady", "quasi"))
-  if (run.type == "unsteady")
+  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
+  if (run.type == "Unsteady")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections")
   else
@@ -36,8 +36,8 @@ get_output_block = function(run.type, RAS.version = "5.0.3") {
 }
 # parent path of sediment output data
 get_sediment_block = function(run.type, RAS.version = "5.0.3") {
-  run.type = match.arg(run.type, c("unsteady", "quasi"))
-  if (run.type == "unsteady")
+  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
+  if (run.type == "Unsteady")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections")
   else
@@ -46,8 +46,8 @@ get_sediment_block = function(run.type, RAS.version = "5.0.3") {
 }
 # parent path of cross section output data
 get_xsection_block = function(run.type, RAS.version = "5.0.3"){
-  run.type = match.arg(run.type, c("unsteady", "quasi"))
-  if (run.type == "unsteady")
+  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
+  if (run.type == "Unsteady")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment SE", "Sediment Time Series", "Cross Section SE")
   else
@@ -61,6 +61,11 @@ get_xsection_block = function(run.type, RAS.version = "5.0.3"){
 #'
 #' @inheritParams read_standard
 #' @return a vector of grain glass labels.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_grains(simple.quasi)
 #'
 #' @import h5
 #' @import stringr
@@ -82,14 +87,20 @@ list_grains = function(f) {
 #' @inheritParams read_standard
 #' @return a vector of cross section lengths.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_output_times(simple.quasi)
+#'
 #' @import h5
 #' @import stringr
-list_output_times = function(f, run.type) {
+list_output_times = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
+  run.type = get_run_type(f)
+  timespath = get_timestep_table(run.type)
   x = h5file(f)
   on.exit(h5close(x))
-  timespath = get_timestep_table(run.type)
   if (!existsDataSet(x, timespath))
     stop('Table "', timespath, '" could not be found.', call. = FALSE)
   get_dataset(x, timespath, "character") %>% str_trim()
@@ -102,6 +113,11 @@ list_output_times = function(f, run.type) {
 #'
 #' @inheritParams read_standard
 #' @return a vector of cross section lengths.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_lengths(simple.quasi)
 #'
 #' @import h5
 list_lengths = function(f) {
@@ -122,6 +138,11 @@ list_lengths = function(f) {
 #' @inheritParams read_standard
 #' @return a vector of bank stations
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_bank_stations(simple.quasi)
+#'
 #' @import h5
 list_bank_stations = function(f){
   if (!file.exists(f))
@@ -140,6 +161,11 @@ list_bank_stations = function(f){
 #'
 #' @inheritParams read_standard
 #' @return a vector of river station labels.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_stations(simple.quasi)
 #'
 #' @import h5
 #' @import stringr
@@ -161,6 +187,19 @@ list_stations = function(f) {
 #' @inheritParams read_standard
 #' @return a vector of grain glass labels.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+#'     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+#'     "Vol In"))
+#' RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+#'     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+#'     "Vol Inactive"))
+#' RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+#'     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+#'     "Vol In Cum"))
+#'
 #' @import h5
 #' @import stringr
 list_sediment = function(f, table.name) {
@@ -169,7 +208,7 @@ list_sediment = function(f, table.name) {
   x = h5file(f)
   on.exit(h5close(x))
   str_subset(list.datasets(x, path = dirname(table.name), recursive = FALSE),
-    table.name)
+    sprintf("%s\\b(\\s\\d)*$", table.name))
 }
 
 #' List Cross Section Tables
@@ -179,6 +218,13 @@ list_sediment = function(f, table.name) {
 #' @inheritParams read_standard
 #' @param xs.block The HDF folder containing the cross section output tables.
 #' @return a vector of cross section output labels.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_xs(simple.quasi, file.path("Results", "Sediment",
+#'     "Output Blocks", "Sediment SE", "Sediment Time Series", 
+#'     "Cross Section SE"))
 #'
 #' @import h5
 #' @import stringr

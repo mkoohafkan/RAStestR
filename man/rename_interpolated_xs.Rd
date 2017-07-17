@@ -23,3 +23,10 @@ Interpolated cross sections are identified by the presence of a
   manipulations. This function removes the '*' symbol from the Station
   identifiers.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+rename_interpolated_xs(quasi.flow)
+
+}

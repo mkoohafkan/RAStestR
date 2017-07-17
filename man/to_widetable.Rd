@@ -24,3 +24,12 @@ Reformat RAS data from long table format (i.e. output of
 \code{to_longtable}) to wide table format (key values are mapped to
 individual columns).
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
+quasi.long = to_longtable(quasi.volincum, "Vol In Cum")
+to_widetable(quasi.long, "Station", "Vol In Cum")
+to_widetable(quasi.long, "GrainClass", "Vol In Cum")
+
+}

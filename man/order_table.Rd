@@ -17,3 +17,12 @@ the data frame \code{d}, ordered by time and cross section.
 \description{
 Reorder a table by time and cross section.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+
+quasi.disordered = quasi.flow[sample(1:nrow(quasi.flow), nrow(quasi.flow)),]
+order_table(quasi.disordered)
+
+}

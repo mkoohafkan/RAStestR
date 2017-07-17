@@ -67,3 +67,16 @@ This is essentially a wrapper for processing cross section data
   through the sequence \code{xs_regions} --> \code{region_to_volume} -->
   \code{change_sediment} --> \code{cumulative_sediment}.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+quasi.banks = read_bank_stations(simple.quasi)
+quasi.extents = xs_extents(quasi.xs)
+quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+
+xs_region_cumulative_change(quasi.xs, bank.stations = quasi.banks,
+  extent.stations = quasi.extents, station.lengths = quasi.lengths)
+
+}

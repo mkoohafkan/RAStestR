@@ -17,3 +17,10 @@ A table with columns "Station", "LOB" and "ROB", where
 \description{
 Read the bank stations.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+ 
+read_bank_stations(simple.quasi)
+
+}

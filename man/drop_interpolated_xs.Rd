@@ -21,3 +21,10 @@ Interpolated cross sections are identified by the presence of a
   '*' in the column name or value of the "Station" column (for long-format
   data).
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+drop_interpolated_xs(quasi.flow)
+
+}

@@ -66,7 +66,7 @@
 \alias{rmse_reduce_armor_factor}
 \title{Root Mean Square Error Table}
 \usage{
-rmse_table(d, group.col, difference.col, rmse.col)
+rmse_table(d, group.col, difference.col = "Difference", rmse.col = "RMSE")
 
 rmse_dredged_cum(d, group.col = "Station")
 
@@ -338,3 +338,20 @@ Compute RMSE from a difference table.
 \item \code{rmse_reduce_armor_factor}: Compute RMSE of Froude Number Channel outputs.
 }}
 
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+quasi.double = operate_table(quasi.flow, fun = function(x) 2*x)
+quasi.difference = difference_table(quasi.flow, quasi.double)
+
+rmse_table(quasi.difference, "Time", "Difference", "RMSE")
+rmse_table(quasi.difference, "Station", "Difference", "RMSE")
+
+quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
+quasi.double = operate_sediment(quasi.volincum, fun = function(x) 2 * x)
+quasi.difference = difference_sediment(quasi.volincum, quasi.double)
+rmse_table(quasi.difference, c("Time", "GrainClass"), "Difference", "RMSE")
+rmse_table(quasi.difference, c("Station", "GrainClass"), "Difference", "RMSE")
+
+}

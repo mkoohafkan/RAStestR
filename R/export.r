@@ -12,6 +12,15 @@
 #' @param station.col The name of the new column holding station IDs.
 #' @return The original data table in long format.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' to_longtable(quasi.flow, "Flow")
+#'
+#' quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
+#' to_longtable(quasi.volincum, "Vol In Cum")
+#'
 #' @import tidyr
 #' @import dplyr
 #' @export
@@ -34,6 +43,14 @@ to_longtable = function(d, data.col, gather.cols, station.col = "Station") {
 #' @param key.prefix Text to prepend to the new columns created from
 #'   keys in \code{key.col}.
 #' @return The original data table in wide format.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
+#' quasi.long = to_longtable(quasi.volincum, "Vol In Cum")
+#' to_widetable(quasi.long, "Station", "Vol In Cum")
+#' to_widetable(quasi.long, "GrainClass", "Vol In Cum")
 #'
 #' @import tidyr
 #' @export
@@ -59,8 +76,19 @@ to_widetable = function(d, key.col, value.col, key.prefix) {
 #'  etc.
 #' @param id.col The name of the new column containing data source IDs.
 #' @return A single data table with an additional column specifying
-#'   the data souce.
+#'   the data source.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' quasi.wse = read_standard(simple.quasi, "Water Surface")
+#' long.flow = to_longtable(quasi.flow, "Value")
+#' long.wse= to_longtable(quasi.flow, "Value")
+#' combine_data(flow = long.flow, wse = long.wse, id.col = "Variable")
+#'
+#' @import dplyr
+#' @export
 combine_data = function(..., data.list, id.col = "table") {
   if (missing(data.list))
     data.list = list(...)
@@ -75,12 +103,20 @@ combine_data = function(..., data.list, id.col = "table") {
 
 #' Write Data To Clipboard
 #'
-#' Write RAS data to clipboard in comma-seperated format for pasting
+#' Write RAS data to clipboard in comma-separated format for pasting
 #' into e.g. Microsoft Excel.
 #'
 #' @param d The data table.
 #' @param header If \code{TRUE}, write the column names to the first row.
-#' @return Writes the data table to the clipboard in tab-seperated format.
+#' @return Writes the data table to the clipboard in tab-separated format.
+#'
+#' @examples
+#' \dontrun{
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' data_to_clipboard()
+#' }
 #'
 #' @import readr
 #' @importFrom utils writeClipboard
@@ -106,9 +142,20 @@ data_to_clipboard = function(d, header = TRUE) {
 #'   feet.
 #' @return The data table with an additional column of distances.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' long.flow = to_longtable(quasi.flow, "Flow")
+#' station_to_distance(long.flow)
+#' station_to_distance(long.flow, metric = TRUE)
+#' station_to_distance(long.flow, "Distance Upstream",
+#'   direction = "upstream")
+#'
 #' @export
-station_to_distance = function(d, distance.col, station.col = "Station",
-  direction = c("downstream", "upstream"), metric = FALSE) {
+station_to_distance = function(d, distance.col = "Distance", 
+  station.col = "Station", direction = c("downstream", "upstream"), 
+  metric = FALSE) {
   direction = match.arg(direction, c("downstream", "upstream"))
   ld = reformat_fields(d, list(Station = station.col))
   if (metric)
@@ -138,6 +185,15 @@ station_to_distance = function(d, distance.col, station.col = "Station",
 #'   will be formatted as R timestamps (POSIXct). If the "Station"
 #'   field is specified, stations will be converted to numeric values
 #'   (only applicable to long format tables).
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' reformat_fields(quasi.flow)
+#'
+#' long.flow = to_longtable(quasi.flow, "Flow")
+#' reformat_fields(long.flow)
 #'
 #' @import stringr
 #' @export

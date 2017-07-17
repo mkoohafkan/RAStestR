@@ -15,3 +15,9 @@ a vector of river station labels.
 \description{
 List RAS river station labels.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+RAStestR:::list_stations(simple.quasi)
+
+}

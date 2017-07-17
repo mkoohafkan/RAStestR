@@ -18,3 +18,15 @@ get_dataset(x, path, type)
 Safely read in a specific HDF table. This function is used internally and
 should not be called directly by the user.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+tryCatch({
+    test.table = "Geometry/Cross Sections/Bank Stations"
+    quasi.h5 = h5::h5file(simple.quasi)
+    RAStestR:::get_dataset(quasi.h5, test.table, "double")
+  }, finally = {
+    h5::h5close(quasi.h5)
+  }) 
+
+}

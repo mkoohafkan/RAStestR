@@ -33,3 +33,12 @@ A data frame containing the accumulated data from \code{d}. Note
 \description{
 Accumulate data from a sediment table over time and/or longitudinally.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.voloutcum = read_sediment(simple.quasi, "Vol Out Cum")
+
+cumulative_sediment(quasi.voloutcum, over.time = FALSE)
+cumulative_sediment(quasi.voloutcum, direction = "downstream")
+
+}

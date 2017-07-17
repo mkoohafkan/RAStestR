@@ -12,16 +12,16 @@ make_helper_standard = function(table){
   read = paste(
     sprintf("#' @describeIn read_standard Read the %s data output.", table),
     "#' @export",
-    sprintf("read_%s = function(f, run.type, which.times = NULL, which.stations = NULL)", tstring),
-    sprintf('  read_standard(f, "%s", run.type, which.times, which.stations)', table),
+    sprintf("read_%s = function(f, which.times = NULL, which.stations = NULL)", tstring),
+    sprintf('  read_standard(f, "%s", which.times, which.stations)', table),
     sep = "\n"
   )
 
   diff = paste(
-    sprintf("#' @describeIn diff_table Compute a difference table for %s data.", table),
+    sprintf("#' @describeIn difference_table Compute a difference table for %s data.", table),
     "#' @export",
-    sprintf('diff_%s = function(d1, d2, relative = FALSE)', tstring),
-    sprintf('  diff_table(d1, d2, "Time", "Diff_%s", relative)', tstring),
+    sprintf('difference_%s = function(d1, d2, relative = FALSE)', tstring),
+    sprintf('  difference_table(d1, d2, "Difference_%s", relative, "Time")', tstring),
     sep = '\n'
   )
 
@@ -29,7 +29,7 @@ make_helper_standard = function(table){
     sprintf("#' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.", table),
     "#' @export",
     sprintf('rmse_%s = function(d, group.col = "Station")', tstring),
-    sprintf('  rmse_table(d, group.col, "Diff_%s", "RMSE_%s")', tstring, tstring),
+    sprintf('  rmse_table(d, group.col, "Difference_%s", "RMSE_%s")', tstring, tstring),
     sep = "\n"
   )
 
@@ -43,16 +43,16 @@ make_helper_sediment = function(table){
   read = paste(
     sprintf("#' @describeIn read_sediment Read the %s data output.", table),
     "#' @export",
-    sprintf("read_%s = function(f, run.type, which.times = NULL, which.stations = NULL, which.grains = NULL)", tstring),
-    sprintf('  read_sediment(f, "%s", run.type, which.times, which.stations, which.grains)', table),
+    sprintf("read_%s = function(f, which.times = NULL, which.stations = NULL, which.grains = NULL)", tstring),
+    sprintf('  read_sediment(f, "%s", which.times, which.stations, which.grains)', table),
     sep = "\n"
   )
 
   diff = paste(
-    sprintf("#' @describeIn diff_sediment Compute a difference table for %s data.", table),
+    sprintf("#' @describeIn difference_sediment Compute a difference table for %s data.", table),
     "#' @export",
-    sprintf("diff_%s = function(d1, d2, relative = FALSE)", tstring),
-    sprintf('  diff_sediment(d1, d2, "Time", "GrainClass", "Diff_%s", relative)', tstring),
+    sprintf("difference_%s = function(d1, d2, relative = FALSE)", tstring),
+    sprintf('  difference_sediment(d1, d2, "Difference_%s", relative, "Time", "GrainClass")', tstring),
     sep = "\n"
   )
 
@@ -60,7 +60,7 @@ make_helper_sediment = function(table){
     sprintf("#' @describeIn rmse_table Compute RMSE of Froude Number Channel outputs.", table),
     "#' @export",
     sprintf('rmse_%s = function(d, group.col = "Station")', tstring),
-    sprintf('  rmse_table(d, c("GrainClass", group.col), "Diff_%s", "RMSE_%s")', tstring, tstring),
+    sprintf('  rmse_table(d, c("GrainClass", group.col), "Difference_%s", "RMSE_%s")', tstring, tstring),
     sep = "\n"
   )
 

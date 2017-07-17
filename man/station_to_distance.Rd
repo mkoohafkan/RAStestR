@@ -4,7 +4,7 @@
 \alias{station_to_distance}
 \title{Convert Stations To Distance}
 \usage{
-station_to_distance(d, distance.col, station.col = "Station",
+station_to_distance(d, distance.col = "Distance", station.col = "Station",
   direction = c("downstream", "upstream"), metric = FALSE)
 }
 \arguments{
@@ -27,4 +27,15 @@ The data table with an additional column of distances.
 }
 \description{
 Convert station values to distance upstream.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+long.flow = to_longtable(quasi.flow, "Flow")
+station_to_distance(long.flow)
+station_to_distance(long.flow, metric = TRUE)
+station_to_distance(long.flow, "Distance Upstream",
+  direction = "upstream")
+
 }

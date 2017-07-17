@@ -25,3 +25,13 @@ If the "Time" field is specified, values in that column
   field is specified, stations will be converted to numeric values
   (only applicable to long format tables).
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+reformat_fields(quasi.flow)
+
+long.flow = to_longtable(quasi.flow, "Flow")
+reformat_fields(long.flow)
+
+}

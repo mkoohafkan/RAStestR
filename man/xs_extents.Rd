@@ -23,3 +23,11 @@ A dataframe with columns "Station", "LE" and "RE", where "LE" and
 \description{
 Compute the coincident extents of a cross section
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+xs_extents (quasi.xs)
+
+}

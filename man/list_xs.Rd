@@ -17,3 +17,11 @@ a vector of cross section output labels.
 \description{
 List cross section tables.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+RAStestR:::list_xs(simple.quasi, file.path("Results", "Sediment",
+    "Output Blocks", "Sediment SE", "Sediment Time Series", 
+    "Cross Section SE"))
+
+}

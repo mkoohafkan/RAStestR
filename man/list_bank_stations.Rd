@@ -15,3 +15,9 @@ a vector of bank stations
 \description{
 Get list of bank stations
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+RAStestR:::list_bank_stations(simple.quasi)
+
+}

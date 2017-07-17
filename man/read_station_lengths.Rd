@@ -17,3 +17,10 @@ a dataframe with columns "Station", "LOB", "Channel" and "ROB", where
 \description{
 Read the river station lengths.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+read_station_lengths(simple.quasi)
+
+}

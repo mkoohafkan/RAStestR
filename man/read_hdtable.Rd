@@ -4,8 +4,8 @@
 \alias{read_hdtable}
 \title{Read RAS Table}
 \usage{
-read_hdtable(f, table.path, row.table.path, col.table.path, run.type,
-  rowcolname, colprefix)
+read_hdtable(f, table.path, row.table.path, col.table.path, rowcolname,
+  colprefix)
 }
 \arguments{
 \item{f}{The h5 file to read.}
@@ -15,8 +15,6 @@ read_hdtable(f, table.path, row.table.path, col.table.path, run.type,
 \item{row.table.path}{The table containing the row identifiers.}
 
 \item{col.table.path}{The table containing the column identifiers.}
-
-\item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
 \item{rowcolname}{The name to assign to the new row id column.}
 
@@ -28,4 +26,16 @@ A dataframe.
 \description{
 Read RAS sediment data output. This function is used internally and should
 not be called directly by the user.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+RAStestR:::read_hdtable(simple.quasi, 
+  file.path("Results", "Sediment", "Output Blocks", "Sediment", 
+    "Sediment Time Series", "Cross Sections", "Flow"),
+  file.path("Results", "Sediment", "Output Blocks", "Sediment", 
+    "Sediment Time Series", "Time Date Stamp"),
+  file.path("Geometry", "Cross Sections", "River Stations"),
+  "Time", "XS_")
+
 }

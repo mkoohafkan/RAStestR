@@ -19,3 +19,13 @@ the data frame \code{d}, ordered by time, cross section and grain class.
 \description{
 Reorder a sediment data table by time and cross section.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.voloutcum = read_sediment(simple.quasi, "Vol Out Cum")
+
+quasi.disordered = quasi.voloutcum[sample(1:nrow(quasi.voloutcum), 
+  nrow(quasi.voloutcum)),]
+order_sediment(quasi.voloutcum)
+
+}

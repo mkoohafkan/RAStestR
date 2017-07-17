@@ -21,3 +21,11 @@ A wide-format table of change over time. A value of 0 is assigned to
 \description{
 Compute change over time from a sediment data table.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.voloutcum = read_sediment(simple.quasi, "Vol Out Cum")
+
+change_sediment(quasi.voloutcum)
+
+}

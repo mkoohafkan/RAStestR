@@ -12,9 +12,18 @@ data_to_clipboard(d, header = TRUE)
 \item{header}{If \code{TRUE}, write the column names to the first row.}
 }
 \value{
-Writes the data table to the clipboard in tab-seperated format.
+Writes the data table to the clipboard in tab-separated format.
 }
 \description{
-Write RAS data to clipboard in comma-seperated format for pasting
+Write RAS data to clipboard in comma-separated format for pasting
 into e.g. Microsoft Excel.
+}
+\examples{
+\dontrun{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+data_to_clipboard()
+}
+
 }

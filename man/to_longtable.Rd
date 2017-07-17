@@ -25,3 +25,13 @@ Reformat RAS data from wide table format (stations are individual
 columns) to long table format (stations and data are collapsed to
 key-value column format.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+to_longtable(quasi.flow, "Flow")
+
+quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
+to_longtable(quasi.volincum, "Vol In Cum")
+
+}

@@ -15,3 +15,9 @@ a vector of cross section lengths.
 \description{
 Get list cross section lengths.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+RAStestR:::list_lengths(simple.quasi)
+
+}

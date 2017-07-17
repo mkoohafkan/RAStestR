@@ -29,3 +29,14 @@ A data frame containing the accumulated data from \code{d}. Note
 \description{
 Accumulate data from a table over time and/or longitudinally.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+
+cumulative_table(quasi.flow, over.time = TRUE, longitudinal = FALSE)
+cumulative_table(quasi.flow, over.time = TRUE, longitudinal = TRUE)
+cumulative_table(quasi.flow, over.time = TRUE, longitudinal = TRUE,
+  direction = "downstream")
+
+}

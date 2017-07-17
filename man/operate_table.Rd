@@ -4,12 +4,16 @@
 \alias{operate_table}
 \title{Table Operations}
 \usage{
-operate_table(..., fun = "+", time.col = "Time")
+operate_table(..., fun, time.col = "Time")
 }
 \arguments{
 \item{...}{Arbitrary number of wide-format data tables to combine.}
 
-\item{fun}{A function to apply.}
+\item{fun}{A function to apply. If multiple tables are supplied in \code{...},
+\code{fun} must either be one of the strings "+", "-", "*" and "/" or be 
+a function that accepts exactly two arguments. If only one table
+is supplied in \code{...}, \code{fun} must accept exactly one 
+argument.}
 
 \item{time.col}{The time column name.}
 }
@@ -18,4 +22,15 @@ A single table.
 }
 \description{
 Combine tables via an operation, e.g. addition or multiplication.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+quasi.flow = read_standard(simple.quasi, "Flow")
+
+operate_table(quasi.flow, quasi.flow, fun = "+")
+operate_table(quasi.flow, quasi.flow, fun = "-")
+operate_table(quasi.flow, fun = function(x) 0.5*x)
+operate_table(quasi.flow, fun = function(x) x/x)
+
 }

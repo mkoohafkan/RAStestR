@@ -9,6 +9,64 @@
 #' @docType package
 NULL
 
+#' Get RAS Plan Meta Data
+#'
+#' Get meta data of RAS plan.
+#'
+#' @param f The h5 file to read.
+#' @return A named list of plan meta data.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::get_meta(simple.quasi)
+#'
+#' @import h5
+get_meta = function(f) {
+  x = h5file(f)
+  on.exit(h5close(x))
+  plan.attr = c(
+    get_group_attr(x),
+    get_group_attr(x, "Plan Data/Plan Information"),
+    get_group_attr(x, "Plan Data/Plan Parameters")
+  )
+  # Other stuff?
+  return(plan.attr)
+}
+
+#' Get RAS Plan Run Type
+#'
+#' Identify a RAS plan as Unsteady, Steady or QuasiUnsteady.
+#'
+#' @inheritParams get_meta
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::get_run_type(simple.quasi)
+#'
+#' simple.unsteady= system.file("sample-data/SampleUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::get_run_type(simple.unsteady)
+#'
+#' @import h5
+get_run_type = function(f) {
+  x = h5file(f)
+  on.exit(h5close(x))
+  event.x = openGroup(x, "Event Conditions")
+  on.exit(h5close(event.x))
+  event.groups = list.groups(event.x, full.names = FALSE, recursive = FALSE)
+  if ("QuasiUnsteady" %in% event.groups)
+    "QuasiUnsteady"
+  else if ("Unsteady" %in% event.groups)
+    "Unsteady"
+  else if ("Steady" %in% event.groups)
+    "Steady"
+  else
+    stop("Could not find run type specification 'Steady', ",
+      "'Unsteady' or 'QuasiUnsteady'")
+}
+
 #' Read HDF Table
 #'
 #' Safely read in a specific HDF table. This function is used internally and
@@ -18,11 +76,66 @@ NULL
 #' @param path The table path.
 #' @param type The type of data contained in the table. Can be one of "double",
 #' "integer", or "character".
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' tryCatch({
+#'     test.table = "Geometry/Cross Sections/Bank Stations"
+#'     quasi.h5 = h5::h5file(simple.quasi)
+#'     RAStestR:::get_dataset(quasi.h5, test.table, "double")
+#'   }, finally = {
+#'     h5::h5close(quasi.h5)
+#'   }) 
+#'
 #' @import h5
 get_dataset = function(x, path, type){
   g = openDataSet(x, path, type)
   on.exit(h5close(g))
   readDataSet(g)
+}
+
+#' Read HDF Attributes
+#'
+#' Safely read attributes of an HDF Group
+#'
+#' @inheritParams get_dataset
+#' @param attrs The attributes to read. If \code{NULL}, all 
+#'   attributes will be read.
+#' @return a named list of attributes.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' tryCatch({
+#'     quasi.h5 = h5::h5file(simple.quasi)
+#'     RAStestR:::get_group_attr(quasi.h5)
+#'   }, finally = {
+#'     h5::h5close(quasi.h5)
+#'   }) 
+#'
+#' tryCatch({
+#'     test.group = "Plan Data/Plan Information"
+#'     quasi.h5 = h5::h5file(simple.quasi)
+#'     RAStestR:::get_group_attr(quasi.h5, test.group)
+#'   }, finally = {
+#'     h5::h5close(quasi.h5)
+#'   }) 
+#'
+#' @import h5
+get_group_attr = function(x, path = NULL, attrs = NULL) {
+  if (!is.null(path)) {
+    group.x = openGroup(x, path)
+    on.exit(h5close(group.x))
+  } else {
+    group.x = x
+  }
+  if (is.null(attrs))
+    attrs = list.attributes(group.x)
+  group.attr = lapply(attrs, h5attr, .Object = group.x)
+  names(group.attr) = attrs
+  group.attr
 }
 
 #' Drop Interpolated Cross Section Data
@@ -36,6 +149,13 @@ get_dataset = function(x, path, type){
 #' @details Interpolated cross sections are identified by the presence of a
 #'   '*' in the column name or value of the "Station" column (for long-format
 #'   data).
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' drop_interpolated_xs(quasi.flow)
+#'
 #' @import stringr
 #' @export
 drop_interpolated_xs = function(d) {
@@ -62,6 +182,12 @@ drop_interpolated_xs = function(d) {
 #'   manipulations. This function removes the '*' symbol from the Station
 #'   identifiers.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' rename_interpolated_xs(quasi.flow)
+#'
 #' @import stringr
 #' @export
 rename_interpolated_xs = function(d){
@@ -80,7 +206,6 @@ rename_interpolated_xs = function(d){
 #'
 #' @param f The h5 file to read.
 #' @param table.name The table to read.
-#' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @param which.times Character vector of timestamps to extract. If
 #'   NULL, all timestamps will be returned.
 #' @param which.stations Character vector of stations to extract. If
@@ -88,19 +213,39 @@ rename_interpolated_xs = function(d){
 #' @return A dataframe with a column "Time" containing the Date Time
 #'   Stamp data and columns "XS_####" where ### is the cross-section ID.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' read_standard(simple.quasi, "Flow")
+#'
+#' simple.unsteady = system.file("sample-data/SampleUnsteady.hdf",
+#'   package = "RAStestR")
+#' read_standard(simple.unsteady, "Flow")
+#'
+#' read_standard(simple.quasi, "Flow", which.times = "11DEC1990 01:00:00",
+#'   which.stations = c("XS_800", "XS_796.00*"))
+#'
+#' read_standard(simple.quasi, "Flow", which.times = 2:3,
+#'   which.stations = 1:4)
+#'
 #' @import stringr
 #' @export
-read_standard = function(f, table.name, run.type, which.times = NULL,
+read_standard = function(f, table.name, which.times = NULL,
   which.stations = NULL) {
+  # get run type
+  run.type = get_run_type(f)
   # argument checks
   if (is.null(which.times))
-    which.times = list_output_times(f, run.type)
-  if (!any(which.times %in% list_output_times(f, run.type)))
+    which.times = list_output_times(f)
+  else if (is.numeric(which.times))
+    which.times = list_output_times(f)[which.times]
+  if (!any(which.times %in% list_output_times(f)))
     stop("No data matching 'which.times' was found")
   if (is.null(which.stations))
     which.stations = str_c("XS_", list_stations(f))
   else if (is.numeric(which.stations))
-    which.stations = str_c("XS_", list_stations(f)[which.stations])
+    which.stations = str_c("XS_", str_replace(list_stations(f)[which.stations], 
+      "XS_", ""))
   else if (is.character(which.stations))
     which.stations = str_c("XS_", str_replace(which.stations, "XS_", ""))
   if (!any(which.stations %in% str_c("XS_", list_stations(f))))
@@ -110,7 +255,7 @@ read_standard = function(f, table.name, run.type, which.times = NULL,
   tblpath = file.path(get_output_block(run.type), table.name)
   tspath = get_timestep_table(run.type)
   # read data
-  res = read_hdtable(f, tblpath, tspath, geompath, run.type, "Time", "XS_")
+  res = read_hdtable(f, tblpath, tspath, geompath, "Time", "XS_")
   # filter by time/station
   res = res[res$Time %in% which.times,]
   othercols = !str_detect(names(res), "XS_")
@@ -125,18 +270,29 @@ read_standard = function(f, table.name, run.type, which.times = NULL,
 #' @inheritParams read_standard
 #' @param which.grains Grain class tables to extract. Can accept either numeric
 #'   grain class IDs or grain class labels. Label "ALL" or "" corresponds to
-#'   the totals. If NULL, all grain
-#'   classes will be returned.
+#'   the totals. If NULL, all grain classes will be returned.
 #' @return A dataframe with a column "Time" containing the Date Time
 #'   Stamp data; columns "XS_####" where ### is the cross-section ID;
 #'   and column "GrainClass".
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' read_sediment(simple.quasi, "Vol Out Cum")
+#'
+#' read_sediment(simple.quasi, "Vol Out Cum", 
+#'   which.grains = c("6", "7"))
+#' read_sediment(simple.quasi, "Vol Out Cum", 
+#'   which.grains = c("VFS", "FS"))
 #'
 #' @import h5
 #' @import dplyr
 #' @import stringr
 #' @export
-read_sediment = function(f, table.name, run.type, which.times = NULL,
+read_sediment = function(f, table.name, which.times = NULL,
   which.stations = NULL, which.grains = NULL) {
+  # get run type
+  run.type = get_run_type(f)
   grain.levels = c("", paste(1:20))
   grain.labels = list_grains(f)
   if (!is.null(which.grains)) {
@@ -160,7 +316,7 @@ read_sediment = function(f, table.name, run.type, which.times = NULL,
   table.names = basename(table.paths)
   res = vector("list", length(table.names))
   for (i in seq_along(table.names)) {
-    res[[i]] = read_standard(f, table.names[[i]], run.type, which.times,
+    res[[i]] = read_standard(f, table.names[[i]], which.times,
       which.stations)
     res[[i]]["GrainClass"] = factor(which.grains[i],
       levels = grain.levels, labels = grain.labels)
@@ -177,10 +333,20 @@ read_sediment = function(f, table.name, run.type, which.times = NULL,
 #' @param table.path The table to read in.
 #' @param row.table.path The table containing the row identifiers.
 #' @param col.table.path The table containing the column identifiers.
-#' @param run.type The model run type, e.g. "quasi" or "unsteady".
 #' @param rowcolname The name to assign to the new row id column.
 #' @param colprefix A prefix to apply to the column IDs.
 #' @return A dataframe.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::read_hdtable(simple.quasi, 
+#'   file.path("Results", "Sediment", "Output Blocks", "Sediment", 
+#'     "Sediment Time Series", "Cross Sections", "Flow"),
+#'   file.path("Results", "Sediment", "Output Blocks", "Sediment", 
+#'     "Sediment Time Series", "Time Date Stamp"),
+#'   file.path("Geometry", "Cross Sections", "River Stations"),
+#'   "Time", "XS_")
 #'
 #' @importFrom utils head
 #' @importFrom utils tail
@@ -188,25 +354,25 @@ read_sediment = function(f, table.name, run.type, which.times = NULL,
 #' @import dplyr
 #' @import stringr
 read_hdtable = function(f, table.path, row.table.path, col.table.path,
-  run.type, rowcolname, colprefix) {
+  rowcolname, colprefix) {
+  # get run type
+  run.type = get_run_type(f)
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   x = h5file(f)
   on.exit(h5close(x))
   for (pth in c(table.path, row.table.path, col.table.path))
     if (!existsDataSet(x, pth))
-      stop('Table "', pth, '" could not be found. ',
-        'Check that argument "run.type" is correct.',
-        call. = FALSE)
+      stop('Table "', pth, '" could not be found', call. = FALSE)
   clabs = get_dataset(x, col.table.path, "character") %>% str_trim()
   rlabs = get_dataset(x, row.table.path, "character") %>% str_trim()
   this = get_dataset(x, table.path, "double") %>% as_data_frame()
-  if (run.type == "unsteady") {
+  if (run.type == "Unsteady") {
     this = this %>% head(-1) #%>% tail(-1)
 #    rlabs[2] = rlabs[1]
     rlabs = rlabs %>% head(-1) #%>% tail(-1)
   }
-#  else if (run.type == "quasi") {
+#  else if (run.type == "QuasiUnsteady") {
 #    this = this %>% head(-1)
 #    rlabs = rlabs %>% head(-1)
 #  }
@@ -229,59 +395,62 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
 #'   if \code{relative = TRUE}, the difference is defined as
 #'   \code{(d2 - d1)/(0.5*(d2 + d1))}.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#'
+#' difference_table(quasi.flow, quasi.flow)
+#' 
+#' quasi.double = operate_table(quasi.flow, fun = function(x) 2*x)
+#' difference_table(quasi.flow, quasi.double)
+#' difference_table(quasi.flow, quasi.double, relative = TRUE)
+#'
 #' @import dplyr
 #' @export
-diff_table = function(d1, d2, difference.col, time.col = "Time",
-  relative = FALSE) {
-  ####
-  # MODIFY TO OUTPUT WIDE TABLE
-  ####
-  if (missing(difference.col))
-    stop('argument "difference.col" is missing, with no default')
-  datime.cols = intersect(names(d1), names(d2))
-  datime.cols = datime.cols[datime.cols != time.col]
-  d1 = d1 %>% arrange_(time.col)
-  d2 = d2 %>% arrange_(time.col)
+difference_table = function(d1, d2, difference.col = "Difference", 
+  relative = FALSE, time.col = "Time") {
   if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
     else
       fun = function(x1, x2)
         x2 - x1
-  as_data_frame(cbind(d1[time.col], fun(d1[, datime.cols], d2[, datime.cols]))) %>%
-    to_longtable(difference.col)
+  operate_table(d1, d2, fun = fun) %>% to_longtable(difference.col)  
 }
 
 #' Difference Table (Sediment)
 #'
 #' Compute a difference table from sediment data.
 #'
-#' @inheritParams diff_table
+#' @inheritParams difference_table
 #' @param grain.col the grain class column name.
 #' @return A dataframe in long table format, with difference defined as
 #'  \code{d2- d1}. If \code{relative = TRUE}, the difference is defined
 #'  as \code{(d2 - d1)/(0.5*(d2 + d1))}
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
+#'
+#' difference_sediment(quasi.volincum, quasi.volincum)
+#' 
+#' quasi.double = operate_sediment(quasi.volincum , fun = function(x) 2*x)
+#' difference_sediment(quasi.volincum, quasi.double)
+#' difference_sediment(quasi.volincum, quasi.double, relative = TRUE)
+#'
 #' @import dplyr
 #' @export
-diff_sediment = function(d1, d2, time.col, grain.col, difference.col,
-  relative = FALSE) {
-  ####
-  # MODIFY TO OUTPUT WIDE TABLE
-  ####
-  datime.cols = intersect(names(d1), names(d2))
-  datime.cols = datime.cols[datime.cols != time.col & datime.cols != grain.col]
-  gvals = intersect(unique(d1[[grain.col]]), unique(d2[[grain.col]]))
-  d1 = d1[d1[[grain.col]] %in% gvals,] %>% arrange_(time.col, grain.col)
-  d2 = d2[d2[[grain.col]] %in% gvals,] %>% arrange_(time.col, grain.col)
+difference_sediment = function(d1, d2, difference.col = "Difference",
+  relative = FALSE, time.col, grain.col) {
   if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
   else
     fun = function(x1, x2)
       x2 - x1
-  as_data_frame(cbind(d1[time.col], d1[grain.col], fun(d1[, datime.cols],
-    d2[, datime.cols]))) %>% to_longtable(difference.col)
+  operate_sediment(d1, d2, fun = fun) %>% to_longtable(difference.col)
 }
 
 #' Root Mean Square Error Table
@@ -298,15 +467,28 @@ diff_sediment = function(d1, d2, time.col, grain.col, difference.col,
 #' @param rmse.col The output column containing RMSE values
 #' @return A dataframe.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' quasi.double = operate_table(quasi.flow, fun = function(x) 2*x)
+#' quasi.difference = difference_table(quasi.flow, quasi.double)
+#'
+#' rmse_table(quasi.difference, "Time", "Difference", "RMSE")
+#' rmse_table(quasi.difference, "Station", "Difference", "RMSE")
+#'
+#' quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
+#' quasi.double = operate_sediment(quasi.volincum, fun = function(x) 2 * x)
+#' quasi.difference = difference_sediment(quasi.volincum, quasi.double)
+#' rmse_table(quasi.difference, c("Time", "GrainClass"), "Difference", "RMSE")
+#' rmse_table(quasi.difference, c("Station", "GrainClass"), "Difference", "RMSE")
+#'
 #' @importFrom stats setNames
 #' @import dplyr
 #' @import stringr
 #' @export
-rmse_table = function(d, group.col, difference.col, rmse.col) {
-  ####
-  # MODIFY TO TAKE WIDE TABLE AS INPUT
-  # SPLIT INTO RMSE_TABLE AND RMSE_SEDIMENT
-  ####
+rmse_table = function(d, group.col, difference.col = "Difference", 
+  rmse.col = "RMSE") {
   d %>% group_by_(.dots = group.col) %>% summarize_(
     .dots = setNames(str_c("sqrt(mean(", difference.col, "^2))"), rmse.col))
 }
@@ -316,7 +498,7 @@ rmse_table = function(d, group.col, difference.col, rmse.col) {
 #' Accumulate data from a table over time and/or longitudinally.
 #'
 #' @param d A wide-format table containing values to accumulate.
-#' @inheritParams diff_table
+#' @inheritParams difference_table
 #' @param over.time If \code{TRUE}, accumulate data across time steps. This
 #'   is generally valid only for data output at the computation time step.
 #' @param longitudinal If \code{TRUE}, accumulate data along the reach. This
@@ -326,6 +508,16 @@ rmse_table = function(d, group.col, difference.col, rmse.col) {
 #'   \code{longitudinal} is \code{FALSE}.
 #' @return A data frame containing the accumulated data from \code{d}. Note
 #'   that \code{d} may be reordered in time and by cross-section.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#'
+#' cumulative_table(quasi.flow, over.time = TRUE, longitudinal = FALSE)
+#' cumulative_table(quasi.flow, over.time = TRUE, longitudinal = TRUE)
+#' cumulative_table(quasi.flow, over.time = TRUE, longitudinal = TRUE,
+#'   direction = "downstream")
 #'
 #' @import dplyr
 #' @import stringr
@@ -361,11 +553,19 @@ cumulative_table = function(d, time.col = "Time", over.time = TRUE,
 #' Accumulate data from a sediment table over time and/or longitudinally.
 #'
 #' @param d A wide-format table containing values to accumulate.
-#' @inheritParams diff_sediment
+#' @inheritParams difference_sediment
 #' @inheritParams cumulative_table
 #' @return A data frame containing the accumulated data from \code{d}. Note
 #'   that \code{d} may be reordered in time and by cross-section and grain
 #'   class.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.voloutcum = read_sediment(simple.quasi, "Vol Out Cum")
+#'
+#' cumulative_sediment(quasi.voloutcum, over.time = FALSE)
+#' cumulative_sediment(quasi.voloutcum, direction = "downstream")
 #'
 #' @import dplyr
 #' @import stringr
@@ -388,6 +588,13 @@ cumulative_sediment = function(d, time.col = "Time", grain.col = "GrainClass",
 #' @inheritParams cumulative_table
 #' @return A wide-format table of change over time. A value of 0 is assigned to
 #'   the first time step.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#'
+#' change_table(quasi.flow)
 #'
 #' @import dplyr
 #' @import tidyr
@@ -416,6 +623,13 @@ change_table = function(d, time.col = "Time") {
 #' @return A wide-format table of change over time. A value of 0 is assigned to
 #'   the first time step.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.voloutcum = read_sediment(simple.quasi, "Vol Out Cum")
+#'
+#' change_sediment(quasi.voloutcum)
+#'
 #' @import dplyr
 #' @export
 change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
@@ -431,6 +645,14 @@ change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
 #' @param d A wide-format table.
 #' @param time.col The time column name.
 #' @return the data frame \code{d}, ordered by time and cross section.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#' 
+#' quasi.disordered = quasi.flow[sample(1:nrow(quasi.flow), nrow(quasi.flow)),]
+#' order_table(quasi.disordered)
 #'
 #' @import stringr
 #' @import dplyr
@@ -457,6 +679,15 @@ order_table = function(d, time.col = "Time") {
 #' @inheritParams change_sediment
 #' @return the data frame \code{d}, ordered by time, cross section and grain class.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.voloutcum = read_sediment(simple.quasi, "Vol Out Cum")
+#'
+#' quasi.disordered = quasi.voloutcum[sample(1:nrow(quasi.voloutcum), 
+#'   nrow(quasi.voloutcum)),]
+#' order_sediment(quasi.voloutcum)
+#'
 #' @import stringr
 #' @import dplyr
 #' @export
@@ -472,14 +703,36 @@ order_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
 #' Combine tables via an operation, e.g. addition or multiplication.
 #'
 #' @param ... Arbitrary number of wide-format data tables to combine.
-#' @param fun A function to apply.
+#' @param fun A function to apply. If multiple tables are supplied in \code{...},
+#'   \code{fun} must either be one of the strings "+", "-", "*" and "/" or be 
+#'   a function that accepts exactly two arguments. If only one table
+#'   is supplied in \code{...}, \code{fun} must accept exactly one 
+#'   argument.
 #' @inheritParams order_table
 #' @return A single table.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.flow = read_standard(simple.quasi, "Flow")
+#'
+#' operate_table(quasi.flow, quasi.flow, fun = "+")
+#' operate_table(quasi.flow, quasi.flow, fun = "-")
+#' operate_table(quasi.flow, fun = function(x) 0.5*x)
+#' operate_table(quasi.flow, fun = function(x) x/x)
+#'
 #' @import dplyr
 #' @export
-operate_table = function(..., fun = "+", time.col = "Time") {
+operate_table = function(..., fun, time.col = "Time") {
   dots = list(...)
+  # single table
+  if(length(dots) == 1L) {
+    dots = dots[[1]]
+    datime.cols = names(dots)
+    datime.cols = datime.cols[datime.cols != time.col]
+    return(as_data_frame(cbind(dots[time.col],
+      fun(dots[, datime.cols]))))
+  }
   # check column names
   if (length(setdiff(
     Reduce(function(...) union(...), lapply(dots, names)),
@@ -499,8 +752,8 @@ operate_table = function(..., fun = "+", time.col = "Time") {
   for (i in seq_along(dots))
     dots[[i]] = order_table(dots[[i]], time.col)
   # apply function
-  as_data_frame(cbind(dots[[1]][time.col],
-    Reduce(fun, lapply(dots, function(x) x[, datime.cols]))))
+  as_data_frame(cbind.data.frame(dots[[1]][time.col],
+    Reduce(fun, lapply(dots, function(x) x[datime.cols]))))
 }
 
 #' Table Operations (Sediment)
@@ -511,11 +764,28 @@ operate_table = function(..., fun = "+", time.col = "Time") {
 #' @inheritParams order_sediment
 #' @return A single sediment table.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' quasi.voloutcum = read_sediment(simple.quasi, "Vol Out Cum")
+#'
+#' operate_sediment(quasi.voloutcum, quasi.voloutcum, fun = "+")
+#' operate_sediment(quasi.voloutcum, quasi.voloutcum, fun = "-")
+#' operate_sediment(quasi.voloutcum, fun = function(x) 2*x)
+#' operate_sediment(quasi.voloutcum, fun = function(x) x*x)
+#'
 #' @import dplyr
 #' @export
 operate_sediment = function(..., fun = "+", time.col = "Time",
   grain.col = "GrainClass") {
   dots = list(...)
+  if (length(dots) == 1L) {
+    dots = dots[[1]]
+    datime.cols = names(dots)
+    datime.cols = datime.cols[!(datime.cols %in% c(time.col, grain.col))]
+    return(as_data_frame(cbind(dots[c(time.col, grain.col)],
+        fun(dots[, datime.cols]))))
+  }
   # check grain classes
   if (length(setdiff(
     Reduce(function(...) union(...), lapply(dots, function(x) unique(x[[grain.col]]))),
@@ -541,6 +811,6 @@ operate_sediment = function(..., fun = "+", time.col = "Time",
   for (i in seq_along(dots))
     dots[[i]] = order_sediment(dots[[i]], time.col, grain.col)
   # apply function
-  as_data_frame(cbind(dots[[1]][c(time.col, grain.col)],
-    Reduce(fun, lapply(dots, function(x) x[, datime.cols]))))
+  as_data_frame(cbind.data.frame(dots[[1]][c(time.col, grain.col)],
+    Reduce(fun, lapply(dots, function(x) x[datime.cols]))))
 }

@@ -4,17 +4,17 @@
 \alias{xs_lengths}
 \title{Compute Cross Section Lengths}
 \usage{
-xs_lengths(stations, station.lengths, station.col = "Station")
+xs_lengths(station.lengths, stations = NULL, station.col = "Station")
 }
 \arguments{
-\item{stations}{A list of stations to compute lengths for.}
-
 \item{station.lengths}{A data frame containing station lengths, i.e. output
 of \code{read_station_lengths}. Must include columns "Station" and
 "Channel".}
 
-\item{station.col}{The column in \code{d} containing the cross section
-stations.}
+\item{stations}{A list of stations to compute lengths for.}
+
+\item{station.col}{The column in \code{station.lengths} containing the 
+cross section stations.}
 }
 \value{
 a dataframe with columns "Station" and "Length", where column
@@ -24,9 +24,21 @@ a dataframe with columns "Station" and "Length", where column
 Compute cross section lengths from the river station lengths table.
 }
 \details{
-The cross section length is computed as the average of of the
+The cross section length is computed as the average of the
   current river station channel length and the upstream river station channel
   length; in other words, the cross section control volume is assumed to
   extend half the channel distance between the next upstream and downstream
   cross sections.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.lengths = read_station_lengths(simple.quasi)
+xs_lengths(quasi.lengths)
+xs_lengths(quasi.lengths, head(quasi.lengths$Station))
+xs_lengths(quasi.lengths, tail(quasi.lengths$Station))
+xs_lengths(quasi.lengths, 
+  quasi.lengths$Station[seq(1, nrow(quasi.lengths), 2)])
+
 }

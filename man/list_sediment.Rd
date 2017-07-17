@@ -17,3 +17,17 @@ a vector of grain glass labels.
 \description{
 List grain class-specific tables of the specified type.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+    "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+    "Vol In"))
+RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+    "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+    "Vol Inactive"))
+RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+    "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+    "Vol In Cum"))
+
+}

@@ -22,3 +22,17 @@ A wide-format table of cross section region volumes.
 \description{
 Compute cross section volumes by region.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+quasi.banks = read_bank_stations(simple.quasi)
+quasi.extents = xs_extents(quasi.xs)
+quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+
+quasi.regions = xs_regions(quasi.xs, bank.stations = quasi.banks, 
+ extent.stations = quasi.extents)
+region_to_volume(quasi.regions, station.lengths = quasi.lengths)
+
+}

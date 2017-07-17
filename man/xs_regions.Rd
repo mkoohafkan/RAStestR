@@ -63,3 +63,17 @@ The \code{extent.stations} argument is similar to the
   bounded by the left and right bank stations; and the "ROB" region is
   bounded by the right bank station and the right extent.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+quasi.banks = read_bank_stations(simple.quasi)
+quasi.extents = xs_extents(quasi.xs)
+xs_regions(quasi.xs, bank.stations = quasi.banks, 
+ extent.stations = quasi.extents)
+xs_regions(quasi.xs, bank.stations = quasi.banks, 
+  extent.stations = quasi.extents, reference.elevation = 1200, 
+  region = "LOB")
+
+}

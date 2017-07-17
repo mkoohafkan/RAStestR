@@ -55,3 +55,20 @@ This is essentially a wrapper for processing cross section data
   through the sequence \code{xs_area} --> \code{area_to_volume} -->
   \code{change_table} --> \code{cumulative_table.}
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths)
+xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths,
+  longitudinal = FALSE)
+xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths,
+  over.time = FALSE, direction = "upstream")
+
+quasi.banks = read_bank_stations(simple.quasi)
+xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths,
+  bank.stations = quasi.banks, reference.elevation = 1200)
+
+}

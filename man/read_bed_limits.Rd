@@ -4,12 +4,10 @@
 \alias{read_bed_limits}
 \title{Read Bed Limits}
 \usage{
-read_bed_limits(f, run.type, which.stations = NULL, which.times = NULL)
+read_bed_limits(f, which.stations = NULL, which.times = NULL)
 }
 \arguments{
 \item{f}{The h5 file to read.}
-
-\item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
 \item{which.stations}{Character vector of stations to extract. If
 NULL, all stations will be returned.}
@@ -30,4 +28,15 @@ The moveable bed limits will change over time in models that use
   BSTEM. In general, it is recommended but not required that the BSTEM toe
   stations are coincident with the moveable bed limits; otherwise, cross
   sections may adjust in unexpected ways.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+read_bed_limits(simple.quasi)
+read_bed_limits(simple.quasi, which.times = "11DEC1990 01:00:00",
+  which.stations = "XS_800")
+read_bed_limits(simple.quasi, which.times = 1:4,
+  which.stations = 1:2)
+
 }

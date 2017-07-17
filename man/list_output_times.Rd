@@ -4,16 +4,20 @@
 \alias{list_output_times}
 \title{List Time Steps}
 \usage{
-list_output_times(f, run.type)
+list_output_times(f)
 }
 \arguments{
 \item{f}{The h5 file to read.}
-
-\item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 }
 \value{
 a vector of cross section lengths.
 }
 \description{
 Get list of output times.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+RAStestR:::list_output_times(simple.quasi)
+
 }

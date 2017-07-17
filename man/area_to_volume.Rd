@@ -19,3 +19,13 @@ A wide-format table of cross section volumes.
 \description{
 Compute cross section volumes given cross section areas and lengths.
 }
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+quasi.area = xs_area(quasi.xs)
+area_to_volume(quasi.area, station.lengths = quasi.lengths)
+
+}

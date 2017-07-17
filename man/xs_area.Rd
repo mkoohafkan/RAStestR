@@ -42,7 +42,7 @@ Compute cross section flow area directly from cross section gometry.
 }
 \details{
 The \code{bank.stations} argument can be formatted in multiple ways
-  to accomodate different bank station definitions. If bank stations are
+  to accommodate different bank station definitions. If bank stations are
   fixed at the same distances in each cross section and do not change over
   time, \code{bank.stations} can be a two-element numeric vector specifying
   constant left and right bank stations, respectively. If bank stations vary
@@ -55,4 +55,17 @@ The \code{bank.stations} argument can be formatted in multiple ways
   can be formatted as a four column table with columns "Time", "Station",
   "LOB", "ROB". This can be used if e.g. the bank stations are read from a
   RAS output file using \code{read_bed_limits}.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+xs_area(quasi.xs)
+xs_area(quasi.xs, reference.elevation = 1200)
+xs_area(quasi.xs, reference.elevation = 1200, bottom.elevation = 1170)
+
+quasi.banks = read_bank_stations(simple.quasi)
+xs_area(quasi.xs, bank.stations = quasi.banks, reference.elevation = 1200)
+
 }

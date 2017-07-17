@@ -9,29 +9,50 @@
 #'   distance location; and column "Elevation" containing the elevation at the
 #'   distance location.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' 
+#' read_xs(simple.quasi) 
+#' read_xs(simple.quasi, which.times = "02DEC1990 01:00:00",
+#'   which.stations = c("XS_800", "XS_796.00*"))
+#' read_xs(simple.quasi, which.times = 2:4, which.stations = 1:3)
+#'
 #' @import h5
 #' @import dplyr
 #' @import stringr
 #' @export
-read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
+read_xs = function(f, which.times = NULL, which.stations = NULL) {
   Station = NULL # workaround for nse
+  # get run type
+  run.type = get_run_type(f)
   tblblock = get_xsection_block(run.type)
   xsoutputs = list_xs(f, tblblock)
   if (is.null(which.times))
     which.times = str_split_fixed(xsoutputs, "[(.+)]", 3)[,2]
+  else if (is.numeric(which.times))
+    which.times = str_split_fixed(xsoutputs, "[(.+)]", 3)[, 2][which.times]
   else if (any(nchar(which.times) != 18L))
     stop('Format of argument "which.times" not recognized')
-  else {
-    xsoutputs = str_subset(xsoutputs, str_c(which.times, collapse = "|"))
-    timeoutputs = xsoutputs %>% str_sub(20, 37)
-    times.found = which.times %in% timeoutputs
-    if (!all(times.found)) {
-      warning("The following times were not found in ", f, ": ",
-        str_c(which.times[!times.found], collapse = ", "))
-      which.times = which.times[times.found]
-    }
+  xsoutputs = str_subset(xsoutputs, str_c(which.times, collapse = "|"))
+  timeoutputs = xsoutputs %>% str_sub(20, 37)
+  times.found = which.times %in% timeoutputs
+  if (!all(times.found)) {
+    warning("The following times were not found in ", f, ": ",
+      str_c(which.times[!times.found], collapse = ", "))
+    which.times = which.times[times.found]
   }
   stations = list_stations(f)
+  if (is.null(which.stations))
+    which.stations = str_c("XS_", stations)
+  else if (is.numeric(which.stations))
+    which.stations = str_c("XS_", str_replace(stations[which.stations],
+      "XS_", ""))
+  else if (is.character(which.stations))
+    which.stations = str_c("XS_", str_replace(which.stations, "XS_", ""))
+  if (!any(which.stations %in% str_c("XS_", list_stations(f))))
+    stop("No data matching 'which.stations' was found")
+
   x = h5file(f)
   on.exit(h5close(x))
   dlist = vector("list", length(which.times))
@@ -47,11 +68,7 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
     names(xs.table) = c("Distance", "Elevation")
     xs.table["Station"] = str_c("XS_", xs.indices)
     xs.table["Time"] = this.time
-    if (!is.null(which.stations)) {
-      dlist[[i]] = filter(xs.table,
-        Station %in% str_c("XS_", str_replace(which.stations, "XS_", "")))
-    } else
-      dlist[[i]] = xs.table
+    dlist[[i]] = filter(xs.table, Station %in% which.stations)
   }
   do.call(bind_rows, dlist)[c("Time", "Station", "Distance", "Elevation")]
 }
@@ -70,15 +87,27 @@ read_xs = function(f, run.type, which.times = NULL, which.stations = NULL) {
 #'   stations are coincident with the moveable bed limits; otherwise, cross
 #'   sections may adjust in unexpected ways.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' 
+#' read_bed_limits(simple.quasi)
+#' read_bed_limits(simple.quasi, which.times = "11DEC1990 01:00:00",
+#'   which.stations = "XS_800")
+#' read_bed_limits(simple.quasi, which.times = 1:4,
+#'   which.stations = 1:2)
+#'
 #' @import stringr
 #' @import dplyr
 #' @export
-read_bed_limits = function(f, run.type, which.stations = NULL,
+read_bed_limits = function(f, which.stations = NULL,
   which.times = NULL) {
+  # get run type
+  run.type = get_run_type(f)
   # get bank station data
-  lob = read_standard(f, "Moveable Sta L", run.type, which.times = which.times,
+  lob = read_standard(f, "Moveable Sta L", which.times = which.times,
     which.stations = which.stations)
-  rob = read_standard(f, "Moveable Sta R", run.type, which.times = which.times,
+  rob = read_standard(f, "Moveable Sta R", which.times = which.times,
     which.stations = which.stations)
   list(LOB = lob, ROB = rob) %>%
     lapply(to_longtable, data.col = "Distance") %>%
@@ -100,15 +129,26 @@ read_bed_limits = function(f, run.type, which.stations = NULL,
 #'   to channel change and due to lateral movement in models that use
 #'   BSTEM.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' 
+#' read_bed_limits_elev(simple.quasi)
+#' read_bed_limits_elev(simple.quasi, which.times = "11DEC1990 01:00:00",
+#'   which.stations = "XS_800")
+#' read_bed_limits_elev(simple.quasi, which.times = 1:4,
+#'   which.stations = 1:2)
+#'
 #' @import stringr
 #' @import dplyr
 #' @export
-read_bed_limits_elev = function(f, run.type, which.stations = NULL,
+read_bed_limits_elev = function(f, which.stations = NULL,
   which.times = NULL) {
+  # get run type
   # get bank station data
-  lob = read_standard(f, "Moveable Elv L", run.type, which.times = which.times,
+  lob = read_standard(f, "Moveable Elv L", which.times = which.times,
     which.stations = which.stations)
-  rob = read_standard(f, "Moveable Elv R", run.type, which.times = which.times,
+  rob = read_standard(f, "Moveable Elv R", which.times = which.times,
     which.stations = which.stations)
   list(LOB = lob, ROB = rob) %>%
     lapply(to_longtable, data.col = "Elevation") %>%
@@ -126,6 +166,12 @@ read_bed_limits_elev = function(f, run.type, which.stations = NULL,
 #' @return a dataframe with columns "Station", "LOB", "Channel" and "ROB", where
 #'   column "Channel" list the channel length and columns "LOB" and "ROB" list
 #'   the left and right bank stations lengths, respectively.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' 
+#' read_station_lengths(simple.quasi)
 #'
 #' @import stringr
 #' @import dplyr
@@ -145,7 +191,7 @@ read_station_lengths = function(f) {
 #' @param what Apply a \code{"horizontal"} and/or \code{"vertical"} shift to
 #'   data.
 #' @param shift.table A table of cross section stations and shift values.
-#'   If \code{what} is \code{"horizontal"}  (\code{"vertical"}),
+#'   If \code{what} is \code{"horizontal"} (\code{"vertical"}),
 #'   a two-column table is expected with the first column listing the
 #'   cross section stations and the second column listing the horizontal
 #'   (vertical) shift to apply to that cross section. If
@@ -162,6 +208,18 @@ read_station_lengths = function(f) {
 #'   subtracted from \code{d}; if \code{FALSE}, values will be added.
 #' @return The data frame \code{d} with cross sections shifted according to
 #'   \code{shift.table}
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' quasi.xs = read_xs(simple.quasi)
+#' quasi.shift = data.frame(Station = "XS_800", horizontal = 5, 
+#'   vertical = 2, stringsAsFactors = FALSE)
+#' xs_shift(quasi.xs, "horizontal", quasi.shift)
+#' xs_shift(quasi.xs, "horizontal", quasi.shift, subtract = FALSE)
+#' xs_shift(quasi.xs, "vertical", quasi.shift)
+#' xs_shift(quasi.xs, c("horizontal", "vertical"), quasi.shift)
 #'
 #' @import dplyr
 #' @importFrom stats setNames
@@ -210,23 +268,41 @@ xs_shift = function(d, what = c("horizontal", "vertical"), shift.table,
 #' @param station.lengths A data frame containing station lengths, i.e. output
 #'   of \code{read_station_lengths}. Must include columns "Station" and
 #'   "Channel".
-#' @param station.col The column in \code{d} containing the cross section
-#'   stations.
+#' @param station.col The column in \code{station.lengths} containing the 
+#'   cross section stations.
 #' @return a dataframe with columns "Station" and "Length", where column
 #' "Length" lists the cross section length.
 #'
-#' @details The cross section length is computed as the average of of the
+#' @details The cross section length is computed as the average of the
 #'   current river station channel length and the upstream river station channel
 #'   length; in other words, the cross section control volume is assumed to
 #'   extend half the channel distance between the next upstream and downstream
 #'   cross sections.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' 
+#' quasi.lengths = read_station_lengths(simple.quasi)
+#' xs_lengths(quasi.lengths)
+#' xs_lengths(quasi.lengths, head(quasi.lengths$Station))
+#' xs_lengths(quasi.lengths, tail(quasi.lengths$Station))
+#' xs_lengths(quasi.lengths, 
+#'   quasi.lengths$Station[seq(1, nrow(quasi.lengths), 2)])
+#'
 #' @import dplyr
 #' @import stringr
 #' @export
-xs_lengths = function(stations, station.lengths, station.col = "Station") {
+xs_lengths = function(station.lengths, stations = NULL, station.col = "Station") {
   # nse workaround
   Station = NULL; Channel = NULL; ds.dist = NULL; us.dist = NULL
+  names(station.lengths)[names(station.lengths) == station.col] = "Station"
+  station.lengths$Station = str_c("XS_",
+    str_replace(station.lengths$Station, "XS_", ""))
+  if(is.null(stations))
+    stations = unique(station.lengths$Station)
+  else
+    stations = str_c("XS_", str_replace(stations, "XS_", ""))  
   us.station = max(stations)
   ds.station = min(stations)
   if (ds.station != min(station.lengths$Station))
@@ -258,6 +334,12 @@ xs_lengths = function(stations, station.lengths, station.col = "Station") {
 #'   columns "LOB" and "ROB" list the left and right bank stations,
 #'   respectively.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'  
+#' read_bank_stations(simple.quasi)
+#'
 #' @import dplyr
 #' @import stringr
 #' @export
@@ -276,6 +358,13 @@ read_bank_stations = function(f){
 #' @return A dataframe with columns "Station", "LE" and "RE", where "LE" and
 #'   "RE" are the left and right extents, respectively.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' 
+#' quasi.xs = read_xs(simple.quasi)
+#' xs_extents (quasi.xs)
+#'
 #' @import dplyr
 #' @export
 xs_extents = function(d, station.col = "Station", time.col = "Time",
@@ -289,58 +378,60 @@ xs_extents = function(d, station.col = "Station", time.col = "Time",
     summarize(LE = max(LE), RE = min(RE))
 }
 
-# area of a cross section
-#
-# Compute cross section volumes from cross section data.
-#
-# @param distance The lateral cross section stations.
-# @param elevation The cross section elevations at each station.
-# @param left.bank The left bank station. If \code{NA}, the minimum distance
-#   will be used.
-# @param right.bank The right bank station. If \code{NA}, the minimum distance
-#   will be used.
-# @param reference.elevation The reference elevation to use for computing
-#   volume. Note that specifying a reference elevation lower than the maximum
-#   elevation of the cross section can introduce some error in the volume
-#   computation if the cross section data is not dense. If \code{NA}, the
-#   maximum elevation of the cross section will be used.
-# @param bottom.elevation Minimum elevation below which to ignore cross section
-#   volume; effectively flattens the cross section. Note that specifying a
-#   bottom elevation higher than the minimum elevation of the cross section
-#   can introduce some error in the volume computation if the cross section data
-#   is not dense. If \code{NA}, the minimum elevation of the cross section will
-#   be used.
-# @return The flow area of the cross section. The maximum elevation is used as
-#   the upper boundary.
-#
-# @example
-# test = data.frame(
-#   Distance = c(100, 120, 130, 150, 160, 180, 190, 210, 220, 240),
-#   Elevation = c(100, 100, 80, 80, 60, 60, 80, 80, 100, 100)
-# )
-# test.dens = data.frame(
-#   Distance = approx(test$Distance, test$Distance, xout = seq(100, 240))$y,
-#   Elevation = approx(test$Distance, test$Elevation, xout = seq(100, 240))$y
-# )
-# trap_area = function(a,b,h) 0.5*(a + b)*h
-# calc_area(test$Distance, test$Elevation)
-# trap_area(100, 80, 20) + trap_area(40, 20, 20)
-# calc_area(test.dens$Distance, test.dens$Elevation)
-# trap_area(100, 80, 20) + trap_area(40, 20, 20)
-# calc_area(test$Distance, test$Elevation,
-#   left.bank = 160, right.bank = 180)
-# calc_area(test.dens$Distance, test.dens$Elevation,
-#   left.bank = 160, right.bank = 180)
-# trap_area(20, 20, 40)
-# calc_area(test.dens$Distance, test.dens$Elevation, right.bank = 150)
-# trap_area(30, 20, 20)
-# calc_area(test.dens$Distance, test.dens$Elevation, left.bank = 210)
-# trap_area(10, 0, 20)
-# calc_area(test.dens$Distance, test.dens$Elevation, bottom.elev = 80)
-# trap_area(100, 80, 20)
-# calc_area(test.dens$Distance, test.dens$Elevation, reference.elev = 80)
-# trap_area(40, 20, 20)
-#
+#' Area of a Cross Section
+#'
+#' Compute cross section area from station-elevation data. This function is
+#' used internally by \code{xs_area} and should not be called by the user
+#' directly.
+#'
+#' @param dist The lateral cross section stations.
+#' @param elev The cross section elevations at each station.
+#' @param left.bank The left bank station. If \code{NA}, the minimum distance
+#'   will be used.
+#' @param right.bank The right bank station. If \code{NA}, the minimum distance
+#'   will be used.
+#' @param reference.elev The reference elevation to use for computing
+#'   volume. Note that specifying a reference elevation lower than the maximum
+#'   elevation of the cross section can introduce some error in the volume
+#'   computation if the cross section data is not dense. If \code{NA}, the
+#'   maximum elevation of the cross section will be used.
+#' @param bottom.elev Minimum elevation below which to ignore cross section
+#'   volume; effectively flattens the cross section. Note that specifying a
+#'   bottom elevation higher than the minimum elevation of the cross section
+#'   can introduce some error in the volume computation if the cross section data
+#'   is not dense. If \code{NA}, the minimum elevation of the cross section will
+#'   be used.
+#' @return The flow area of the cross section. The maximum elevation is used as
+#'   the upper boundary.
+#'
+#' @examples
+#' test = data.frame(
+#'   Distance = c(100, 120, 130, 150, 160, 180, 190, 210, 220, 240),
+#'   Elevation = c(100, 100, 80, 80, 60, 60, 80, 80, 100, 100)
+#' )
+#' test.dens = data.frame(
+#'   Distance = approx(test$Distance, test$Distance, xout = seq(100, 240))$y,
+#'   Elevation = approx(test$Distance, test$Elevation, xout = seq(100, 240))$y
+#' )
+#' trap_area = function(a,b,h) 0.5*(a + b)*h
+#' RAStestR:::calc_area(test$Distance, test$Elevation)
+#' trap_area(100, 80, 20) + trap_area(40, 20, 20)
+#' RAStestR:::calc_area(test.dens$Distance, test.dens$Elevation)
+#' trap_area(100, 80, 20) + trap_area(40, 20, 20)
+#' RAStestR:::calc_area(test$Distance, test$Elevation,
+#'   left.bank = 160, right.bank = 180)
+#' RAStestR:::calc_area(test.dens$Distance, test.dens$Elevation,
+#'   left.bank = 160, right.bank = 180)
+#' trap_area(20, 20, 40)
+#' RAStestR:::calc_area(test.dens$Distance, test.dens$Elevation, right.bank = 150)
+#' trap_area(30, 20, 20)
+#' RAStestR:::calc_area(test.dens$Distance, test.dens$Elevation, left.bank = 210)
+#' trap_area(10, 0, 20)
+#' RAStestR:::calc_area(test.dens$Distance, test.dens$Elevation, bottom.elev = 80)
+#' trap_area(100, 80, 20)
+#' RAStestR:::calc_area(test.dens$Distance, test.dens$Elevation, reference.elev = 80)
+#' trap_area(40, 20, 20)
+#'
 #' @importFrom utils head tail
 #' @importFrom stats approx
 calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
@@ -455,7 +546,7 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
 #' @return A wide-format table of cross section areas.
 #'
 #' @details The \code{bank.stations} argument can be formatted in multiple ways
-#'   to accomodate different bank station definitions. If bank stations are
+#'   to accommodate different bank station definitions. If bank stations are
 #'   fixed at the same distances in each cross section and do not change over
 #'   time, \code{bank.stations} can be a two-element numeric vector specifying
 #'   constant left and right bank stations, respectively. If bank stations vary
@@ -468,6 +559,18 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
 #'   can be formatted as a four column table with columns "Time", "Station",
 #'   "LOB", "ROB". This can be used if e.g. the bank stations are read from a
 #'   RAS output file using \code{read_bed_limits}.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' quasi.xs = read_xs(simple.quasi)
+#' xs_area(quasi.xs)
+#' xs_area(quasi.xs, reference.elevation = 1200)
+#' xs_area(quasi.xs, reference.elevation = 1200, bottom.elevation = 1170)
+#'
+#' quasi.banks = read_bank_stations(simple.quasi)
+#' xs_area(quasi.xs, bank.stations = quasi.banks, reference.elevation = 1200)
 #'
 #' @import dplyr
 #' @import tidyr
@@ -580,6 +683,15 @@ xs_area = function(d, time.col = "Time", station.col = "Station",
 #' @param station.lengths The cross section length values.
 #' @return A wide-format table of cross section volumes.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' quasi.xs = read_xs(simple.quasi)
+#' quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+#' quasi.area = xs_area(quasi.xs)
+#' area_to_volume(quasi.area, station.lengths = quasi.lengths)
+#'
 #' @import dplyr
 #' @import tidyr
 #' @export
@@ -637,6 +749,22 @@ area_to_volume = function(d, time.col = "Time", station.lengths = NULL) {
 #'   through the sequence \code{xs_area} --> \code{area_to_volume} -->
 #'   \code{change_table} --> \code{cumulative_table.}
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' quasi.xs = read_xs(simple.quasi)
+#' quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+#' xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths)
+#' xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths,
+#'   longitudinal = FALSE)
+#' xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths,
+#'   over.time = FALSE, direction = "upstream")
+#' 
+#' quasi.banks = read_bank_stations(simple.quasi)
+#' xs_cumulative_change(quasi.xs, station.lengths = quasi.lengths,
+#'   bank.stations = quasi.banks, reference.elevation = 1200)
+#'
 #' @import dplyr
 #' @export
 xs_cumulative_change = function(d, time.col = "Time", station.col = "Station",
@@ -677,6 +805,19 @@ xs_cumulative_change = function(d, time.col = "Time", station.col = "Station",
 #'   bounded by the left extent and the left bank station; the "Channel" is
 #'   bounded by the left and right bank stations; and the "ROB" region is
 #'   bounded by the right bank station and the right extent.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' quasi.xs = read_xs(simple.quasi)
+#' quasi.banks = read_bank_stations(simple.quasi)
+#' quasi.extents = xs_extents(quasi.xs)
+#' xs_regions(quasi.xs, bank.stations = quasi.banks, 
+#'  extent.stations = quasi.extents)
+#' xs_regions(quasi.xs, bank.stations = quasi.banks, 
+#'   extent.stations = quasi.extents, reference.elevation = 1200, 
+#'   region = "LOB")
 #'
 #' @import dplyr
 #' @export
@@ -776,6 +917,19 @@ xs_regions = function(d, time.col = "Time", station.col = "Station",
 #' @param region.col The name of the column containing the Region identifier.
 #' @return A wide-format table of cross section region volumes.
 #'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' quasi.xs = read_xs(simple.quasi)
+#' quasi.banks = read_bank_stations(simple.quasi)
+#' quasi.extents = xs_extents(quasi.xs)
+#' quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+#'
+#' quasi.regions = xs_regions(quasi.xs, bank.stations = quasi.banks, 
+#'  extent.stations = quasi.extents)
+#' region_to_volume(quasi.regions, station.lengths = quasi.lengths)
+#'
 #' @import dplyr
 #' @export
 region_to_volume = function(d, time.col = "Time", region.col = "Region",
@@ -797,6 +951,18 @@ region_to_volume = function(d, time.col = "Time", region.col = "Region",
 #' @details This is essentially a wrapper for processing cross section data
 #'   through the sequence \code{xs_regions} --> \code{region_to_volume} -->
 #'   \code{change_sediment} --> \code{cumulative_sediment}.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#'
+#' quasi.xs = read_xs(simple.quasi)
+#' quasi.banks = read_bank_stations(simple.quasi)
+#' quasi.extents = xs_extents(quasi.xs)
+#' quasi.lengths = xs_lengths(read_station_lengths(simple.quasi))
+#'
+#' xs_region_cumulative_change(quasi.xs, bank.stations = quasi.banks,
+#'   extent.stations = quasi.extents, station.lengths = quasi.lengths)
 #'
 #' @import dplyr
 #' @export

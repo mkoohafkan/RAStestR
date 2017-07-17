@@ -4,12 +4,10 @@
 \alias{read_xs}
 \title{Cross Section Table}
 \usage{
-read_xs(f, run.type, which.times = NULL, which.stations = NULL)
+read_xs(f, which.times = NULL, which.stations = NULL)
 }
 \arguments{
 \item{f}{The h5 file to read.}
-
-\item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
 \item{which.times}{Character vector of timestamps to extract. If
 NULL, all timestamps will be returned.}
@@ -26,4 +24,14 @@ A dataframe with a column "Time" containing the Date Time
 }
 \description{
 Read the cross section data output.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+read_xs(simple.quasi) 
+read_xs(simple.quasi, which.times = "02DEC1990 01:00:00",
+  which.stations = c("XS_800", "XS_796.00*"))
+read_xs(simple.quasi, which.times = 2:4, which.stations = 1:3)
+
 }

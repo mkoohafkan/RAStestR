@@ -15,7 +15,7 @@ xs_shift(d, what = c("horizontal", "vertical"), shift.table,
 data.}
 
 \item{shift.table}{A table of cross section stations and shift values.
-If \code{what} is \code{"horizontal"}  (\code{"vertical"}),
+If \code{what} is \code{"horizontal"} (\code{"vertical"}),
 a two-column table is expected with the first column listing the
 cross section stations and the second column listing the horizontal
 (vertical) shift to apply to that cross section. If
@@ -41,4 +41,17 @@ The data frame \code{d} with cross sections shifted according to
 }
 \description{
 Apply a horizontal and/or vertical shift to cross section data.
+}
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+
+quasi.xs = read_xs(simple.quasi)
+quasi.shift = data.frame(Station = "XS_800", horizontal = 5, 
+  vertical = 2, stringsAsFactors = FALSE)
+xs_shift(quasi.xs, "horizontal", quasi.shift)
+xs_shift(quasi.xs, "horizontal", quasi.shift, subtract = FALSE)
+xs_shift(quasi.xs, "vertical", quasi.shift)
+xs_shift(quasi.xs, c("horizontal", "vertical"), quasi.shift)
+
 }

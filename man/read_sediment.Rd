@@ -20,63 +20,61 @@
 \alias{read_reduce_armor_factor}
 \title{Sediment By Grain Class Table}
 \usage{
-read_sediment(f, table.name, run.type, which.times = NULL,
+read_sediment(f, table.name, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
+
+read_fall_velocity(f, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
+
+read_lat_struc_mass_div(f, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
+
+read_long_cum_mass_change(f, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
+
+read_long_cum_vol_change(f, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
+
+read_long_cum_mass_moveable_limit(f, which.times = NULL,
   which.stations = NULL, which.grains = NULL)
 
-read_fall_velocity(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_bed_change(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_lat_struc_mass_div(f, run.type, which.times = NULL,
-  which.stations = NULL, which.grains = NULL)
-
-read_long_cum_mass_change(f, run.type, which.times = NULL,
-  which.stations = NULL, which.grains = NULL)
-
-read_long_cum_vol_change(f, run.type, which.times = NULL,
-  which.stations = NULL, which.grains = NULL)
-
-read_long_cum_mass_moveable_limit(f, run.type, which.times = NULL,
-  which.stations = NULL, which.grains = NULL)
-
-read_mass_bed_change(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_bed_change_cum(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_bed_change_cum(f, run.type, which.times = NULL,
-  which.stations = NULL, which.grains = NULL)
-
-read_mass_capacity(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_capacity(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_cover(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_cover(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_in(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_in(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_inactive(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_inactive(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_in_cum(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_in_cum(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_out(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_out(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_out_cum(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_out_cum(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_mass_subsurface(f, run.type, which.times = NULL, which.stations = NULL,
+read_mass_subsurface(f, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 
-read_reduce_armor_factor(f, run.type, which.times = NULL,
-  which.stations = NULL, which.grains = NULL)
+read_reduce_armor_factor(f, which.times = NULL, which.stations = NULL,
+  which.grains = NULL)
 }
 \arguments{
 \item{f}{The h5 file to read.}
 
 \item{table.name}{The table to read.}
-
-\item{run.type}{The model run type, e.g. "quasi" or "unsteady".}
 
 \item{which.times}{Character vector of timestamps to extract. If
 NULL, all timestamps will be returned.}
@@ -86,8 +84,7 @@ NULL, all stations will be returned.}
 
 \item{which.grains}{Grain class tables to extract. Can accept either numeric
 grain class IDs or grain class labels. Label "ALL" or "" corresponds to
-the totals. If NULL, all grain
-classes will be returned.}
+the totals. If NULL, all grain classes will be returned.}
 }
 \value{
 A dataframe with a column "Time" containing the Date Time
@@ -132,3 +129,14 @@ Read the sediment data output for all grain classes.
 \item \code{read_reduce_armor_factor}: Read the Reduce Armor Factor data output.
 }}
 
+\examples{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+read_sediment(simple.quasi, "Vol Out Cum")
+
+read_sediment(simple.quasi, "Vol Out Cum", 
+  which.grains = c("6", "7"))
+read_sediment(simple.quasi, "Vol Out Cum", 
+  which.grains = c("VFS", "FS"))
+
+}
