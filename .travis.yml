@@ -2,14 +2,41 @@ language: r
 r:
   - release
   - devel
+sudo: true
 cache: packages
-sudo: required
-
-# Be strict when checking our package
+os:
+  - linux
+dist: trusty
+  
+env:
+  global:
+    - PKG_CFLAGS="-pedantic"
+    - _R_CHECK_CRAN_INCOMING_=FALSE
+    - ASAN="-fsanitize=address -fno-omit-frame-pointer"
+    - HDF5_RELEASE_URL="https://support.hdfgroup.org/ftp/HDF5/releases"
+    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+  matrix:
+    - HDF5_VERSION=1.8.14
+    - HDF5_VERSION=1.8.16
+    - HDF5_VERSION=1.10.0-patch1
+    - HDF5_VERSION=1.10.1
+      
 warnings_are_errors: true
+addons:
+  apt:
+    packages:
+      - subversion
+      - autoconf
+      - build-essential
+      - libtool
+      - libmagick++-dev
+      
+before_install: 
+  - chmod +x travis_setup.sh
+  - ./travis_setup.sh
 
-# System dependencies for HTTP calling
 r_packages:
+  - h5
   - readr
   - dplyr
   - stringr
@@ -18,7 +45,3 @@ r_packages:
   - rmarkdown
   - ggplot2
   - scales
-  - h5
-
-before_install:
-  - sudo apt-get install libhdf5-dev
