@@ -5,6 +5,18 @@ r:
 cache: packages
 sudo: required
 
+env:
+  global:
+    - PKG_CFLAGS="-pedantic"
+    - _R_CHECK_CRAN_INCOMING_=FALSE
+    - ASAN="-fsanitize=address -fno-omit-frame-pointer"
+    - HDF5_RELEASE_URL="https://support.hdfgroup.org/ftp/HDF5/releases"
+    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+  matrix:
+    - HDF5_VERSION=1.8.14
+    - HDF5_VERSION=1.8.16
+    - HDF5_VERSION=1.10.0-patch1
+
 # Be strict when checking our package
 warnings_are_errors: true
 
@@ -21,4 +33,7 @@ r_packages:
  - h5
 
 before_install:
- - sudo apt-get install libhdf5-serial-dev
+  - chmod +x travis_setup.sh
+  - ./travis_setup.sh
+
+    - HDF5_VERSION=1.10.1
