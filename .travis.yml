@@ -14,8 +14,9 @@ r_packages:
  - dplyr
  - stringr
  - tidyr
- - h5
  - knitr
  - rmarkdown
  - ggplot2
  - scales
+r_binary_packages:
+ - h5
