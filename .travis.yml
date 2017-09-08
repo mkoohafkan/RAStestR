@@ -3,7 +3,7 @@ r:
   - release
   - devel
 cache: packages
-sudo: false
+sudo: required
 
 # Be strict when checking our package
 warnings_are_errors: true
@@ -18,5 +18,9 @@ r_packages:
  - rmarkdown
  - ggplot2
  - scales
+
 r_binary_packages:
  - h5
+
+before_install:
+ - sudo apt-get install libhdf5-serial-dev
