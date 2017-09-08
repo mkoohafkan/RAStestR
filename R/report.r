@@ -2,12 +2,8 @@
 #'
 #' Generate a RAStestR report.
 #'
-#' @param model1.file The path to the first or "base" RAS model HDF output.
-#' @param model2.file The path to the second or "new" RAS model HDF output.
-#' @param model1.type The type ("quasi" or "unsteady") of the base RAS model.
-#' @param model2.type The type of the new RAS model.
-#' @param model1.label Optional label for the base RAS model.
-#' @param model2.label Optional label for the new RAS model.
+#' @param base.file The path to the first or "base" RAS model HDF output.
+#' @param new.file The path to the second or "new" RAS model HDF output.
 #' @param sections The sections to include in the report.
 #' @param standard.opts List with elements \code{which.times} and 
 #'   \code{which.stations} specifying the times and stations to output
@@ -53,11 +49,18 @@
 #'     \item d90 inactive
 #'   }
 #'
+#' @examples
+#' \dontrun{
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' generate_report(simple.quasi, simple.quasi, sections = c("Flow", "Vol In Cum"),
+#'   output.name = "test", output.type = "html")
+#' }
+#'
 #' @seealso \link{read_standard}
 #' @seealso \link{read_sediment}
 #' @export
-generate_report = function(model1.file, model2.file, model1.type, 
-  model2.type, model1.label = NULL, model2.label = NULL, sections, 
+generate_report = function(base.file, new.file, sections, 
   standard.opts = list(), sediment.opts = list(),  
   output.name, output.folder = tempdir(), 
   output.type = c("html", "pdf")) {
@@ -73,17 +76,25 @@ generate_report = function(model1.file, model2.file, model1.type,
   if(missing(output.name))
     output.name = basename(tempfile(tmpdir = output.folder))
     
-  model1.file = normalizePath(model1.file, winslash = "/")
-  model2.file = normalizePath(model2.file, winslash = "/")
-  if (!(file.exists(model1.file)))
-    stop("file ", model1.file, " could not be found.")
-  if (!(file.exists(model2.file)))
-    stop("file ", model2.file, " could not be found.")
+  base.file = normalizePath(base.file, winslash = "/")
+  new.file = normalizePath(new.file, winslash = "/")
+  if (!(file.exists(base.file)))
+    stop("file ", base.file, " could not be found.")
+  if (!(file.exists(new.file)))
+    stop("file ", new.file, " could not be found.")
+
+  # get plan attributes
+  base.attr = get_meta(base.file)
+  new.attr = get_meta(new.file)
+  # get plan run types
+  base.type = get_run_type(base.file)
+  new.type = get_run_type(new.file)
 
   # prepare table options
   if (!all(names(standard.opts) %in% c("which.times", "which.stations")))
     stop("Some elements of argument 'standard.opts' were not recognized.")
-  if (!all(names(sediment.opts) %in% c("which.times", "which.stations", "which.grains")))
+  if (!all(names(sediment.opts) %in% c("which.times", "which.stations", 
+      "which.grains")))
     stop("Some elements of argument 'sediment.opts' were not recognized.")
   which.times.standard = standard.opts[["which.times"]]
   which.stations.standard = standard.opts[["which.stations"]]
@@ -102,9 +113,9 @@ generate_report = function(model1.file, model2.file, model1.type,
   file.copy(sediment.template, file.path(output.folder, basename(sediment.template)))
 
   on.exit({
-  file.remove(basename(doc.template))
-  file.remove(basename(standard.template))
-  file.remove(basename(sediment.template))
+  file.remove(file.path(output.folder, basename(doc.template)))
+  file.remove(file.path(output.folder, basename(standard.template)))
+    file.remove(file.path(output.folder, basename(sediment.template)))
   setwd(oldwd)
   })
 
@@ -127,12 +138,12 @@ generate_report = function(model1.file, model2.file, model1.type,
 
   doc.env = new.env()
   assign("childsections", sections, pos = doc.env)
-  assign("file1", model1.file, pos = doc.env)
-  assign("file2", model2.file, pos = doc.env)
-  assign("type1", model1.type, pos = doc.env)
-  assign("type2", model2.type, pos = doc.env)
-  assign("label1", model1.label, pos = doc.env)
-  assign("label2", model2.label, pos = doc.env)
+  assign("file1", base.file, pos = doc.env)
+  assign("file2", new.file, pos = doc.env)
+  assign("type1", base.type, pos = doc.env)
+  assign("type2", new.type, pos = doc.env)
+  assign("label1", base.attr[["Plan Name"]], pos = doc.env)
+  assign("label2", new.attr[["Plan Name"]], pos = doc.env)
   assign("sectionchunk", spin_chunk, pos = doc.env)
   assign("table.times.standard", which.times.standard, pos = doc.env)
   assign("table.stations.standard", which.stations.standard, pos = doc.env)  

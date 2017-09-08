@@ -400,8 +400,8 @@ survey_interp_space = function(d) {
 #'
 #' @import dplyr
 #' @export
-survey_extend = function(d, station.col = "Station", time.col = "Time",
-  distance.col = "Distance", mode = c("lag", "lead")) {
+survey_extend = function(d, mode = c("lag", "lead"), 
+  station.col = "Station", time.col = "Time", distance.col = "Distance") {
   # nse workaround
   Station = NULL; Time = NULL; Distance = NULL
   d = d %>% rename_(Station = station.col, Time = time.col,
@@ -410,6 +410,7 @@ survey_extend = function(d, station.col = "Station", time.col = "Time",
   time.order = d %>% mutate(time.char = Time) %>%
     reformat_fields("Time") %>% arrange(Time) %>%
     `[[`("time.char") %>% unique()
+  mode = match.arg(mode, c("lag", "lead"))
   if (mode == "lead")
     time.order = rev(time.order)
   # loop through cross sections. For each cross section, loop through time
@@ -476,8 +477,10 @@ survey_clip = function(d, extent.stations, station.col = "Station",
   } else {
     stop('Format of argument "extent.stations" not recognized')
   }
-  extent.stations = xs_extents(d) %>% left_join(extent.stations, by = "Station",
-    suffix = c(".old", ".new")) %>% mutate(
+  extent.stations = xs_extents(d) %>% 
+    left_join(extent.stations, by = "Station", 
+      suffix = c(".old", ".new")) %>% 
+    mutate(
       LE.new = ifelse(is.na(LE.new), LE.old, LE.new),
       RE.new = ifelse(is.na(RE.new), RE.old, RE.new)
     ) %>% select(Station, LE = LE.new, RE = RE.new)
@@ -511,3 +514,190 @@ survey_clip = function(d, extent.stations, station.col = "Station",
   unlist(d.list, recursive = FALSE) %>% bind_rows %>%
     rename_(.dots = select.cols)
 }
+
+#' Substitute Survey
+#'
+#' Substitute a portion of a cross section.
+#'
+#' @inheritParams survey_clip
+#' @inheritParams survey_extend
+#' @param substitute.stations The stations to substitute 
+#' @return The cross section data with substituted regions
+#'
+#' @export
+survey_substitute = function(d, substitute.stations, 
+  mode = c("lag", "lead"), station.col = "Station", 
+  time.col = "Time", distance.col = "Distance", 
+  elevation.col = "Elevation") {
+  # nse workaround
+  Station = NULL; Time = NULL; Distance = NULL;
+  . = NULL
+  mode = match.arg(mode, c("lag", "lead"))
+  # check substitute stations
+  if(length(setdiff(substitute.stations[[station.col]], d[[station.col]])) > 0)
+    stop('some stations in argument "substitute.station" are not in "d": ',
+      paste(setdiff(substitute.stations[[station.col]]), d[[station.col]]))
+  station.list = unique(substitute.stations[[station.col]])
+  # split stations
+  d.list = d %>% 
+    order_table() %>%
+    rename_(Station = station.col, Time = time.col,
+      Distance = distance.col, Elevation = elevation.col) %>%
+    split(.$Station) %>%
+    lapply(function(x) split(x, x$Time))
+
+  sub.list = substitute.stations %>%
+    order_table() %>%
+    rename_(Station = station.col, Time = time.col, 
+    start = "start", end = "end") %>%
+    split(.$Station) %>% 
+    lapply(function(x) split(x, x$Time))
+
+  for(station in station.list) {
+    # get substitute times
+    sub.times = names(sub.list[[station]])
+    # get list of available times
+    all.times = names(d.list[[station]])
+    # order to sequentially replace where necessary
+    if(mode == "lag") {
+      all.times = rev(all.times)
+    } else {
+      sub.times = rev(sub.times)
+    }
+    for(time in sub.times) {
+      # pick time to use as replacement data
+      subidx = which(time == all.times) + 1
+      if(!(subidx %in% seq_along(all.times))) {
+        warning("No ", mode, " data for Station ", 
+          station, " on ", time)
+        next
+      }
+      # get sub time and region
+      sub.time = all.times[subidx]
+      sub.station = sub.list[[c(station, time)]]
+      # extract starting xs
+      old.station = d.list[[c(station, time)]] %>%
+        filter(!between(Distance, sub.station$start, sub.station$end))
+      # extract replacement xs
+      new.station = d.list[[c(station, sub.time)]] %>%
+        mutate(Time = time) %>%
+        filter(between(Distance, sub.station$start, sub.station$end)) 
+      # replace old with new
+      updated.station = old.station %>% 
+        bind_rows(new.station) %>%
+        arrange(Distance)
+      d.list[[c(station, time)]] = updated.station
+    }
+  }
+  # recombine
+  d.list %>% lapply(function(x) bind_rows(x)) %>% bind_rows()
+}
+
+
+# Tweak Survey
+#
+# Spot fix artifacts in survey data
+#
+#
+survey_tweak = function(d, tweak.stations, 
+  mode = c("drop", "interpolate"), station.col = "Station",
+  time.col = "Time", distance.col = "Distance",
+  elevation.col = "Elevation") {
+  # nse workaround
+  Station = NULL;
+  Time = NULL;
+  Distance = NULL;
+  . = NULL
+  mode = match.arg(mode, c("drop", "interpolate"))
+  # check substitute stations
+  if (length(setdiff(tweak.stations[[station.col]], d[[station.col]])) > 0)
+    stop('some stations in argument "tweak.stations" are not in "d": ',
+      paste(setdiff(tweak.stations[[station.col]]), d[[station.col]]))
+  station.list = unique(tweak.stations[[station.col]])
+  # split stations
+  d.list = d %>%
+    order_table() %>%
+    rename_(Station = station.col, Time = time.col,
+      Distance = distance.col, Elevation = elevation.col) %>%
+    split(.$Station) %>%
+    lapply(function(x) split(x, x$Time))
+
+  for(i in 1:nrow(tweak.stations)) {
+    tweak.time = tweak.stations$Time[i]
+    tweak.station = tweak.stations$Station[i]
+    tweak.dist = tweak.stations$Distance[i]
+    
+    old.station = d.list[[c(tweak.station, tweak.time)]]
+
+  } 
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+survey_densify = function(d, points.out, station.col = "Station", 
+  distance.col = "Distance", elevation.col = "Elevation") {
+  Station = NULL; Elevation = NULL
+  # check points.out argument
+  if(missing(points.out)) {
+    stop('Argument "points.out" is missing')
+  } else if(is.numeric(points.out)) {
+    if (length(points.out) != 1L && length(points.out) != nrow(d))
+      stop('Dimensions of argument "points.out" not recognized')
+  } else if(is.data.frame(points.out)) {
+    if(ncol(points.out) != 2L)
+      stop('data frame "points.out" must have two columns: "Station" and "Points"')
+    if(names(points.out != c("Station", "Points"))) {
+      warning('Columns of "points.out" not recognized. Assuming "Station", "Points"')
+      names(points.out) = c("Station", "Points")
+    }
+  } else {
+  stop('Format of argument "points.out" not recognized')
+  }
+  # check survey data
+  stations = unique(d[[station.col]])
+  if (!all(stations %in% unique(points.out$Station)))
+    warning('Argument "points.out" is missing stations:', 
+      paste(stations[!(stations %in% unique(points.out$Station))], collapse = ", "))
+  # reformat survey data
+  station.data = d %>% select_(Station = station.col, Distance = distance.col, 
+    Elevation = elevation.col)
+  if(is.numeric(points.out)) {
+    station.data["Points"] = points.out
+  } else {
+    station.data = left_join(station.data, points.out, by = "Station")
+  }
+  # get local minima
+  station.data = group_by(station.data, Station) %>% 
+    mutate(is.minima = if_else((lead(Elevation) > Elevation) & 
+      (lag(Elevation) > Elevation), TRUE, FALSE, 
+      missing = FALSE))
+  # split by cross section
+
+
+
+  minimas = with(station.data, Elevation[is.minima])
+}
+
+# Densify Cross Section
+densifyxs = function(dist, elev, points) {
+  minima = if_else((lead(elev) > elev) & (lag(elev) > elev), 
+    TRUE, FALSE, missing = FALSE)
+  minelevs = elev[minima]
+
+#  elev.dens = seq(min(elev, )
+
+
+
+}
+
+

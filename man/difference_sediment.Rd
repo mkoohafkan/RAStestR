@@ -21,7 +21,7 @@
 \title{Difference Table (Sediment)}
 \usage{
 difference_sediment(d1, d2, difference.col = "Difference", relative = FALSE,
-  time.col, grain.col)
+  time.col = "Time", grain.col = "GrainClass")
 
 difference_fall_velocity(d1, d2, relative = FALSE)
 

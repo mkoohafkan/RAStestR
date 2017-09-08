@@ -38,7 +38,7 @@ cross section area. Can be a constant or a two column station of cross
 A wide-format table of cross section areas.
 }
 \description{
-Compute cross section flow area directly from cross section gometry.
+Compute cross section flow area directly from cross section geometry.
 }
 \details{
 The \code{bank.stations} argument can be formatted in multiple ways

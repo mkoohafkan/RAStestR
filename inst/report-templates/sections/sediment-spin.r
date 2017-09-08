@@ -2,9 +2,9 @@
 
 
 #+ echo = FALSE
-d1 = read_sediment(file1, section.label, type1, table.times.sediment,
+d1 = read_sediment(file1, section.label, table.times.sediment,
   table.stations.sediment, table.grains)
-d2 = read_sediment(file2, section.label, type2, table.times.sediment,
+d2 = read_sediment(file2, section.label, table.times.sediment,
   table.stations.sediment, table.grains)
 d.diff = diff_sediment(d1, d2, "Time", "GrainClass", "Diff", percent = FALSE)
 d.percent = diff_sediment(d1, d2, "Time", "GrainClass", "Percent", percent = TRUE)

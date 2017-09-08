@@ -525,7 +525,7 @@ calc_area = function(dist, elev, left.bank = NA, right.bank = NA,
 
 #' Cross Section Area
 #'
-#' Compute cross section flow area directly from cross section gometry.
+#' Compute cross section flow area directly from cross section geometry.
 #'
 #' @param d The cross section data, i.e. output of \code{read_xs}.
 #' @param time.col The column containing time stamps.
@@ -981,4 +981,35 @@ xs_region_cumulative_change = function(d, time.col = "Time",
     cumulative_sediment(time.col, "Region", over.time, longitudinal, direction)
 }
 
+
+#' Write Cross Section Data
+#'
+#' Write the cross section data to a csv format for import into RAS.
+#'
+#' @inheritParams xs_area
+#' @param river The River name (used by RAS).
+#' @param reach The Reach name (used by RAS).
+#' @return A dataframe with columns formatted to match the RAS csv import format.
+#'
+#' @import dplyr
+#' @import stringr
+#' @export
+xs_write = function(d, river, reach, 
+  station.col = "Station", distance.col = "Distance",
+  elevation.col = "Elevation") {
+  Station = NULL; Distance = NULL; Elevation = NULL; RS = NULL
+  out = d %>% 
+    select_(RS = station.col, Station = distance.col,
+      Elevation = elevation.col) %>%
+    transmute(
+      River = river, 
+      Reach = reach,
+      RS = str_replace(RS, "XS_", ""),
+      Station,
+      Elevation
+    )
+  if(any(duplicated(out)))
+    warning("Duplicate rows detected")
+  out
+}
 

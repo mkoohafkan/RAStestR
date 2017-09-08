@@ -54,7 +54,7 @@ get_run_type = function(f) {
   x = h5file(f)
   on.exit(h5close(x))
   event.x = openGroup(x, "Event Conditions")
-  on.exit(h5close(event.x))
+  on.exit(h5close(event.x), add = TRUE)
   event.groups = list.groups(event.x, full.names = FALSE, recursive = FALSE)
   if ("QuasiUnsteady" %in% event.groups)
     "QuasiUnsteady"
@@ -355,10 +355,11 @@ read_sediment = function(f, table.name, which.times = NULL,
 #' @import stringr
 read_hdtable = function(f, table.path, row.table.path, col.table.path,
   rowcolname, colprefix) {
-  # get run type
-  run.type = get_run_type(f)
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
+  # get run type
+  run.type = get_run_type(f)
+  # open file
   x = h5file(f)
   on.exit(h5close(x))
   for (pth in c(table.path, row.table.path, col.table.path))
@@ -443,14 +444,15 @@ difference_table = function(d1, d2, difference.col = "Difference",
 #' @import dplyr
 #' @export
 difference_sediment = function(d1, d2, difference.col = "Difference",
-  relative = FALSE, time.col, grain.col) {
+  relative = FALSE, time.col = "Time", grain.col = "GrainClass") {
   if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
   else
     fun = function(x1, x2)
       x2 - x1
-  operate_sediment(d1, d2, fun = fun) %>% to_longtable(difference.col)
+  operate_sediment(d1, d2, fun = fun, time.col = time.col, 
+    grain.col = grain.col) %>% to_longtable(difference.col)
 }
 
 #' Root Mean Square Error Table

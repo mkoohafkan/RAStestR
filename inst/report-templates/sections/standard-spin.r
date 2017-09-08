@@ -2,9 +2,9 @@
 
 
 #+ echo = FALSE
-d1 = read_standard(file1, section.label, type1, table.times.standard,
+d1 = read_standard(file1, section.label, table.times.standard,
   table.stations.standard)
-d2 = read_standard(file2, section.label, type2, table.times.standard,
+d2 = read_standard(file2, section.label, table.times.standard,
   table.stations.standard)
 d.diff = diff_table(d1, d2, "Time", "Diff", percent = FALSE)
 d.percent = diff_table(d1, d2, "Time", "Percent", percent = TRUE)

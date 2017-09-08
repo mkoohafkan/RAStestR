@@ -4,23 +4,14 @@
 \alias{generate_report}
 \title{Generate Report}
 \usage{
-generate_report(model1.file, model2.file, model1.type, model2.type,
-  model1.label = NULL, model2.label = NULL, sections,
-  standard.opts = list(), sediment.opts = list(), output.name,
-  output.folder = tempdir(), output.type = c("html", "pdf"))
+generate_report(base.file, new.file, sections, standard.opts = list(),
+  sediment.opts = list(), output.name, output.folder = tempdir(),
+  output.type = c("html", "pdf"))
 }
 \arguments{
-\item{model1.file}{The path to the first or "base" RAS model HDF output.}
+\item{base.file}{The path to the first or "base" RAS model HDF output.}
 
-\item{model2.file}{The path to the second or "new" RAS model HDF output.}
-
-\item{model1.type}{The type ("quasi" or "unsteady") of the base RAS model.}
-
-\item{model2.type}{The type of the new RAS model.}
-
-\item{model1.label}{Optional label for the base RAS model.}
-
-\item{model2.label}{Optional label for the new RAS model.}
+\item{new.file}{The path to the second or "new" RAS model HDF output.}
 
 \item{sections}{The sections to include in the report.}
 
@@ -75,6 +66,15 @@ Generating a report requires that the packages
     \item d90 active
     \item d90 inactive
   }
+}
+\examples{
+\dontrun{
+simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+  package = "RAStestR")
+generate_report(simple.quasi, simple.quasi, sections = c("Flow", "Vol In Cum"),
+  output.name = "test", output.type = "html")
+}
+
 }
 \seealso{
 \link{read_standard}
