@@ -16,9 +16,6 @@ env:
     - HDF5_RELEASE_URL="https://support.hdfgroup.org/ftp/HDF5/releases"
     - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   matrix:
-    - HDF5_VERSION=1.8.14
-    - HDF5_VERSION=1.8.16
-    - HDF5_VERSION=1.10.0-patch1
     - HDF5_VERSION=1.10.1
       
 warnings_are_errors: true
