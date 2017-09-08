@@ -18,8 +18,6 @@ r_packages:
  - rmarkdown
  - ggplot2
  - scales
-
-r_binary_packages:
  - h5
 
 before_install:
