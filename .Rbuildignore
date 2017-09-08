@@ -17,3 +17,4 @@ inst/_import.r
 ^\.Rproj\.user$
 ^docs$
 ^_pkgdown.yml$
+^\.travis\.yml$

@@ -1,0 +1,21 @@
+language: r
+r:
+  - release
+  - devel
+cache: packages
+sudo: false
+
+# Be strict when checking our package
+warnings_are_errors: true
+
+# System dependencies for HTTP calling
+r_packages:
+ - readr
+ - dplyr
+ - stringr
+ - tidyr
+ - h5
+ - knitr
+ - rmarkdown
+ - ggplot2
+ - scales
