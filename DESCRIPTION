@@ -31,6 +31,5 @@ Collate:
     'helper.r'
     'report.r'
     'export.r'
-    'fixes.r'
     'xs.r'
     'viewer.r'
