@@ -18,3 +18,4 @@ inst/_import.r
 ^docs$
 ^_pkgdown.yml$
 ^\.travis\.yml$
+^tests$

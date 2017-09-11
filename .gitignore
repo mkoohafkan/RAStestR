@@ -242,6 +242,8 @@ ModelManifest.xml
 .fake/
 /.Rhistory
 .Rproj.user
+
+# other
 Docs/
 tests/
-old/
+_old/

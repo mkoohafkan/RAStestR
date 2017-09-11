@@ -321,7 +321,7 @@ survey_change = function(d, time.col = "Time", station.col = "Station",
 #'   separate station. Note that in either case \code{d} will be reordered.
 #'
 #' @import dplyr
-#' @importFrom stringr str_detect
+#' @import stringr
 #' @importFrom stats approx
 #' @export
 survey_interp = function(d, by = c("space", "time"), time.col = "Time") {
