@@ -16,7 +16,8 @@ Writes the data table to the clipboard in tab-separated format.
 }
 \description{
 Write RAS data to clipboard in comma-separated format for pasting
-into e.g. Microsoft Excel.
+into e.g. Microsoft Excel. Note that the clipboard is only supported
+Windows platforms.
 }
 \examples{
 \dontrun{

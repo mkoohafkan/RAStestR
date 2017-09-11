@@ -32,6 +32,6 @@ quasi.flow = read_standard(simple.quasi, "Flow")
 to_longtable(quasi.flow, "Flow")
 
 quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
-to_longtable(quasi.volincum, "Vol In Cum")
+to_longtable(quasi.volincum, "VolumeIn")
 
 }

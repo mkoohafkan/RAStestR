@@ -19,7 +19,7 @@
 #' to_longtable(quasi.flow, "Flow")
 #'
 #' quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
-#' to_longtable(quasi.volincum, "Vol In Cum")
+#' to_longtable(quasi.volincum, "VolumeIn")
 #'
 #' @import tidyr
 #' @import dplyr
@@ -48,9 +48,9 @@ to_longtable = function(d, data.col, gather.cols, station.col = "Station") {
 #' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
 #'   package = "RAStestR")
 #' quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
-#' quasi.long = to_longtable(quasi.volincum, "Vol In Cum")
-#' to_widetable(quasi.long, "Station", "Vol In Cum")
-#' to_widetable(quasi.long, "GrainClass", "Vol In Cum")
+#' quasi.long = to_longtable(quasi.volincum, "VolIn")
+#' to_widetable(quasi.long, "Station", "VolIn")
+#' to_widetable(quasi.long, "GrainClass", "VolIn")
 #'
 #' @import tidyr
 #' @export
@@ -104,7 +104,8 @@ combine_data = function(..., data.list, id.col = "table") {
 #' Write Data To Clipboard
 #'
 #' Write RAS data to clipboard in comma-separated format for pasting
-#' into e.g. Microsoft Excel.
+#' into e.g. Microsoft Excel. Note that the clipboard is only supported
+#' Windows platforms.
 #'
 #' @param d The data table.
 #' @param header If \code{TRUE}, write the column names to the first row.
@@ -119,11 +120,14 @@ combine_data = function(..., data.list, id.col = "table") {
 #' }
 #'
 #' @import readr
-#' @importFrom utils writeClipboard
 #' @export
 data_to_clipboard = function(d, header = TRUE) {
-  writeClipboard(format_tsv(d, col_names = header))
-  message("Data copied to clipboard.")
+  if (Sys.info()['sysname'] == "Windows") {
+    cat(format_tsv(d, col_names = header), file = "clipboard")
+    message("Data copied to clipboard.")
+  } else {
+    message("Clipboard not supported on OSX/Linux systems.")
+  } 
   invisible(NULL)
 }
 

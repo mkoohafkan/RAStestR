@@ -10,7 +10,6 @@ warnings_are_errors: true
 
 # System dependencies for HTTP calling
 r_packages:
-  - h5
   - readr
   - dplyr
   - stringr
@@ -19,13 +18,13 @@ r_packages:
   - rmarkdown
   - ggplot2
   - scales
+  - h5
 
 before_install:
   - wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.1/src/hdf5-1.10.1.tar.gz
-  - tar -xzvf hdf5-1.10.1.tar.gz
+  - tar -xzf hdf5-1.10.1.tar.gz
   - cd hdf5-1.10.1
   - ./configure -q --prefix=/usr/local --enable-cxx --enable-build-mode=production 
-  - make --quiet
-  - sudo make install
+  - sudo make install > file.log 2>&1
   - cd ..
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib

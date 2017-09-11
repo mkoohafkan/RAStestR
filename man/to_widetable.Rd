@@ -28,8 +28,8 @@ individual columns).
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
   package = "RAStestR")
 quasi.volincum = read_sediment(simple.quasi, "Vol In Cum")
-quasi.long = to_longtable(quasi.volincum, "Vol In Cum")
-to_widetable(quasi.long, "Station", "Vol In Cum")
-to_widetable(quasi.long, "GrainClass", "Vol In Cum")
+quasi.long = to_longtable(quasi.volincum, "VolIn")
+to_widetable(quasi.long, "Station", "VolIn")
+to_widetable(quasi.long, "GrainClass", "VolIn")
 
 }
