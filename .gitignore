@@ -241,6 +241,7 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 /.Rhistory
-/vignettes/compare.html
-/vignettes/compare_files/figure-html
 .Rproj.user
+Docs/
+tests/
+old/

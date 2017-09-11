@@ -25,6 +25,7 @@ before_install:
   - tar -xzvf hdf5-1.10.1.tar.gz
   - cd hdf5-1.10.1
   - ./configure -q --prefix=/usr/local --enable-cxx --enable-build-mode=production 
-  - sudo make install
+  - sudo make -q
+  - sudo make install -q
   - cd ..
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
