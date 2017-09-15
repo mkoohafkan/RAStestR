@@ -210,8 +210,9 @@ reformat_fields = function(ld, fields = list("Time", "Station")) {
   time.col = fields[["Time"]]
   station.col = fields[["Station"]]
   if ("Time" %in% names(fields))
-    ld[time.col] = as.POSIXct(ld[[time.col]], tz = "UTC",
-      format = "%d%b%Y %H:%M:%S")
+    if(!("POSIXt" %in% class(ld[[time.col]])))
+      ld[time.col] = as.POSIXct(ld[[time.col]], tz = "UTC",
+        format = "%d%b%Y %H:%M:%S")
   if ("Station" %in% names(fields))
     ld[station.col] = ld[[station.col]] %>% as.character() %>%
       str_replace("XS_", "") %>% str_replace("[*]", "") %>% as.numeric()
