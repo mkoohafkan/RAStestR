@@ -2,14 +2,14 @@ language: r
 r:
   - release
   - devel
-cache: packages
 sudo: required
 
 # Be strict when checking our package
 warnings_are_errors: true
 
 # System dependencies for HTTP calling
-r_packages:
+
+r_binary_packages:
   - readr
   - dplyr
   - stringr
@@ -18,6 +18,8 @@ r_packages:
   - rmarkdown
   - ggplot2
   - scales
+
+r_packages:
   - h5
 
 before_install:
