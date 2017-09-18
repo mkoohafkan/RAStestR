@@ -6,9 +6,12 @@ d1 = read_sediment(file1, section.label, table.times.sediment,
   table.stations.sediment, table.grains)
 d2 = read_sediment(file2, section.label, table.times.sediment,
   table.stations.sediment, table.grains)
-d.diff = diff_sediment(d1, d2, "Time", "GrainClass", "Diff", percent = FALSE)
-d.percent = diff_sediment(d1, d2, "Time", "GrainClass", "Percent", percent = TRUE)
-d.rmse.time = rmse_table(d.diff, c("GrainClass", "Time"), "Diff", "RMSE")
+d.diff = difference_sediment(d1, d2, grain.col = "GrainClass", 
+  difference.col = "Diff", relative = FALSE)
+d.percent = difference_sediment(d1, d2, grain.col = "GrainClass", 
+  difference.col = "Percent", relative = TRUE)
+d.rmse.time = rmse_table(d.diff, group.col = c("GrainClass", "Time"), 
+  difference.col = "Diff", rmse.col = "RMSE")
 #diffidx = which.max(d.diff$Diff)
 #tidx = which.max(d.rmse.time$RMSE)
 #sidx = which.max(d.rmse.station$RMSE)

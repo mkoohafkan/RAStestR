@@ -6,10 +6,12 @@ d1 = read_standard(file1, section.label, table.times.standard,
   table.stations.standard)
 d2 = read_standard(file2, section.label, table.times.standard,
   table.stations.standard)
-d.diff = diff_table(d1, d2, "Time", "Diff", percent = FALSE)
-d.percent = diff_table(d1, d2, "Time", "Percent", percent = TRUE)
-d.rmse.station = rmse_table(d.diff, "Station", "Diff", "RMSE")
-d.rmse.time = rmse_table(d.diff, "Time", "Diff", "RMSE")
+d.diff = difference_table(d1, d2, difference.col = "Diff", relative = FALSE)
+d.percent = difference_table(d1, d2, difference.col = "Percent", relative = TRUE)
+d.rmse.station = rmse_table(d.diff, group.col = "Station", 
+  difference.col = "Diff", rmse.col = "RMSE")
+d.rmse.time = rmse_table(d.diff, group.col = "Time", difference.col = "Diff", 
+  rmse.col = "RMSE")
 diffidx = which.max(d.diff$Diff)
 tidx = which.max(d.rmse.time$RMSE)
 sidx = which.max(d.rmse.station$RMSE)

@@ -53,7 +53,8 @@
 #' \dontrun{
 #' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
 #'   package = "RAStestR")
-#' generate_report(simple.quasi, simple.quasi, sections = c("Flow", "Vol In Cum"),
+#' generate_report(simple.quasi, simple.quasi, 
+#'   sections = c("Flow", "Vol In Cum"),
 #'   output.name = "test", output.type = "html")
 #' }
 #'
@@ -195,13 +196,20 @@ list_tables = function() {
     "d90 Active", "d90 Cover", "d90 Inactive", "d90 Subsurface"
   )
   sediment = c(
-    "Fall Velocity", "Lat Struc Mass Div",
+    "Fall Velocity", 
+    "Lat Struc Mass Div", "Lat Struc Vol Div",
     "Long. Cum Mass Change", "Long. Cum Vol Change", 
-    "Long. Cum Mass Moveable Limit",
-    "Mass Bed Change", "Mass Bed Change Cum",
-    "Mass Capacity", "Mass Cover",
-    "Mass In", "Mass Inactive", "Mass In Cum",
-    "Mass Out", "Mass Out Cum", "Mass Subsurface",
+    "Long. Cum Mass Moveable Limit", "Long. Cum Vol Moveable Limit",
+    "Mass Bed Change", "Vol Bed Change",
+    "Mass Bed Change Cum", "Vol Bed Change Cum",
+    "Mass Capacity", "Vol Capacity",
+    "Mass Cover", "Vol Cover",
+    "Mass In", "Vol In",
+    "Mass Inactive", "Vol Inactive", 
+    "Mass In Cum", "Vol In Cum",
+    "Mass Out", "Vol Out", 
+    "Mass Out Cum", "Vol Out Cum", 
+    "Mass Subsurface", "Vol Subsurface",
     "Reduce Armor Factor"
   )
   list(standard = standard, sediment = sediment)
