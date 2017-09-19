@@ -4,7 +4,7 @@
 \alias{operate_sediment}
 \title{Table Operations (Sediment)}
 \usage{
-operate_sediment(..., fun = "+", time.col = "Time",
+operate_sediment(..., fun = "+", partial = FALSE, time.col = "Time",
   grain.col = "GrainClass")
 }
 \arguments{
@@ -15,6 +15,9 @@ operate_sediment(..., fun = "+", time.col = "Time",
 a function that accepts exactly two arguments. If only one table
 is supplied in \code{...}, \code{fun} must accept exactly one 
 argument.}
+
+\item{partial}{If TRUE, only the overlapping times and columns will 
+be processed.}
 
 \item{time.col}{The time column name.}
 

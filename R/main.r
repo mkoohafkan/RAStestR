@@ -491,8 +491,11 @@ difference_sediment = function(d1, d2, difference.col = "Difference",
 #' @export
 rmse_table = function(d, group.col, difference.col = "Difference", 
   rmse.col = "RMSE") {
-  d %>% group_by_(.dots = group.col) %>% summarize_(
-    .dots = setNames(str_c("sqrt(mean(", difference.col, "^2))"), rmse.col))
+  d %>% group_by_(.dots = group.col) %>% 
+    summarize_(
+      .dots = setNames(str_c("sqrt(mean(", difference.col, "^2))"), rmse.col)
+    ) %>%
+    ungroup()
 }
 
 #' Accumulate Data Over Time and/or Space
@@ -578,7 +581,7 @@ cumulative_sediment = function(d, time.col = "Time", grain.col = "GrainClass",
   # nse workaround
   . = NULL
   d %>% group_by_(grain.col) %>% do(cumulative_table(., time.col, over.time,
-    longitudinal, direction))
+    longitudinal, direction)) %>% ungroup()
 }
 
 #' Change Over Time
@@ -609,7 +612,8 @@ change_table = function(d, time.col = "Time") {
     reformat_fields(list("Time" = "ftime")) %>%
     arrange(ftime) %>%
     group_by(Station) %>%
-    mutate(Change = lag(Value) - Value)
+    mutate(Change = lag(Value) - Value) %>%
+    ungroup()
   vol.d[vol.d$ftime == min(vol.d$ftime), "Change"] = 0
   vol.d %>% select_(time.col, "Station", "Change") %>%
     spread_("Station", "Change", fill = NA)
@@ -637,7 +641,9 @@ change_table = function(d, time.col = "Time") {
 change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
   # nse workaround
   . = NULL
-  d %>% group_by_(grain.col) %>% do(change_table(., time.col = time.col))
+  d %>% group_by_(grain.col) %>% 
+    do(change_table(., time.col = time.col)) %>%
+    ungroup()
 }
 
 #' Order Table
@@ -697,7 +703,7 @@ order_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
   # nse workaround
   . = NULL
   d %>% arrange_(grain.col) %>% group_by_(grain.col) %>%
-    do(order_table(., time.col = time.col))
+    do(order_table(., time.col = time.col)) %>% ungroup()
 }
 
 #' Table Operations
@@ -710,6 +716,8 @@ order_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
 #'   a function that accepts exactly two arguments. If only one table
 #'   is supplied in \code{...}, \code{fun} must accept exactly one 
 #'   argument.
+#' @param partial If TRUE, only the overlapping times and columns will 
+#'   be processed.
 #' @inheritParams order_table
 #' @return A single table.
 #'
@@ -725,34 +733,43 @@ order_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
 #'
 #' @import dplyr
 #' @export
-operate_table = function(..., fun, time.col = "Time") {
+operate_table = function(..., fun, partial = FALSE, time.col = "Time") {
   dots = list(...)
   # single table
   if(length(dots) == 1L) {
     dots = dots[[1]]
-    datime.cols = names(dots)
-    datime.cols = datime.cols[datime.cols != time.col]
+    datime.cols = setdiff(names(dots),time.col)
     return(as_data_frame(cbind(dots[time.col],
       fun(dots[, datime.cols]))))
   }
   # check column names
-  if (length(setdiff(
-    Reduce(function(...) union(...), lapply(dots, names)),
-    Reduce(function(...) intersect(...), lapply(dots, names))
-  )) > 0L)
-    stop('Tables in "..." do not have matching columns')
+  union.cols = Reduce(function(...) union(...), 
+    lapply(dots, names))
+  intersect.cols = Reduce(function(...) intersect(...), 
+    lapply(dots, names))
+  diff.cols = setdiff(union.cols, intersect.cols)
+  if (length(diff.cols) > 0L)
+    if (partial)
+      message("Excluding columns: ", paste(diff.cols, sep = ", "))
+    else
+      stop('Tables in "..." do not have matching columns')
   # check time stamps
-  if (length(setdiff(
-    Reduce(function(...) union(...), lapply(dots, function(x) x[[time.col]])),
-    Reduce(function(...) intersect(...), lapply(dots, function(x) x[[time.col]]))
-  )) > 0L)
-    stop('Tables in "..." do not have matching time stamps')
+  union.times = Reduce(function(...) union(...), 
+    lapply(dots, function(x) x[[time.col]]))
+  intersect.times = Reduce(function(...) intersect(...), 
+    lapply(dots, function(x) x[[time.col]]))
+  diff.times = setdiff(union.times, intersect.times)
+  if (length(diff.times) > 0L)
+    if (partial)
+      message("Excluding timestamps: ", paste(diff.times, sep = ", "))
+    else
+      stop('Tables in "..." do not have matching time stamps')
+  # arrange and filter data
+  dots = lapply(dots, function(x) 
+    order_table(x[x[[time.col]] %in% intersect.times, intersect.cols],
+      time.col))
   # get data columns
-  datime.cols = Reduce(function(...) intersect(...), lapply(dots, names))
-  datime.cols = datime.cols[datime.cols != time.col]
-  # arrange data
-  for (i in seq_along(dots))
-    dots[[i]] = order_table(dots[[i]], time.col)
+  datime.cols = setdiff(intersect.cols, time.col)
   # apply function
   as_data_frame(cbind.data.frame(dots[[1]][time.col],
     Reduce(fun, lapply(dots, function(x) x[datime.cols]))))
@@ -778,41 +795,39 @@ operate_table = function(..., fun, time.col = "Time") {
 #'
 #' @import dplyr
 #' @export
-operate_sediment = function(..., fun = "+", time.col = "Time",
-  grain.col = "GrainClass") {
+operate_sediment = function(..., fun = "+", partial = FALSE, 
+  time.col = "Time", grain.col = "GrainClass") {
   dots = list(...)
   if (length(dots) == 1L) {
     dots = dots[[1]]
-    datime.cols = names(dots)
-    datime.cols = datime.cols[!(datime.cols %in% c(time.col, grain.col))]
+    datime.cols = setdiff(names(dots), c(time.col, grain.col))
     return(as_data_frame(cbind(dots[c(time.col, grain.col)],
         fun(dots[, datime.cols]))))
   }
   # check grain classes
-  if (length(setdiff(
-    Reduce(function(...) union(...), lapply(dots, function(x) unique(x[[grain.col]]))),
-    Reduce(function(...) intersect(...), lapply(dots, function(x) unique(x[[grain.col]])))
-  )) > 0L)
-    stop('Tables in "..." do not have matching grain classes')
-  # check column names
-  if (length(setdiff(
-    Reduce(function(...) union(...), lapply(dots, names)),
-    Reduce(function(...) intersect(...), lapply(dots, names))
-  )) > 0L)
-    stop('Tables in "..." do not have matching columns')
-  # check time stamps
-  if (length(setdiff(
-    Reduce(function(...) union(...), lapply(dots, function(x) x[[time.col]])),
-    Reduce(function(...) intersect(...), lapply(dots, function(x) x[[time.col]]))
-  )) > 0L)
-    stop('Tables in "..." do not have matching time stamps')
-  # get data columns
-  datime.cols = Reduce(function(...) intersect(...), lapply(dots, names))
-  datime.cols = datime.cols[!(datime.cols %in% c(time.col, grain.col))]
-  # arrange data
-  for (i in seq_along(dots))
-    dots[[i]] = order_sediment(dots[[i]], time.col, grain.col)
-  # apply function
-  as_data_frame(cbind.data.frame(dots[[1]][c(time.col, grain.col)],
-    Reduce(fun, lapply(dots, function(x) x[datime.cols]))))
+  union.grains = Reduce(function(...) union(...), 
+    lapply(dots, function(x) unique(x[[grain.col]])))
+  union.levels = Reduce(function(...) union(...), 
+    lapply(dots, function(x) levels(x[[grain.col]])))
+  intersect.grains = Reduce(function(...) intersect(...), 
+    lapply(dots, function(x) unique(x[[grain.col]])))
+  diff.grains = setdiff(union.grains, intersect.grains)
+  if (length(diff.grains) > 0L)
+    if (partial)
+      message("Excluding grain classes: ", paste(diff.grains, sep = ", "))
+    else
+      stop('Tables in "..." do not have matching grain classes')
+  # extract data by grain class
+  grain.tables = vector("list", length(intersect.grains))
+  names(grain.tables) = intersect.grains
+  for(g in intersect.grains) {
+    grain.tables[[g]] = lapply(dots, function(x) 
+      x[x[[grain.col]] == g, setdiff(names(x), grain.col)])
+  }
+  bind_rows(
+    lapply(grain.tables, function(x) 
+      do.call(operate_table, args = c(x, list(fun = fun, 
+        partial = partial, time.col = time.col)))),
+    .id = grain.col
+  )
 }

@@ -4,7 +4,7 @@
 \alias{operate_table}
 \title{Table Operations}
 \usage{
-operate_table(..., fun, time.col = "Time")
+operate_table(..., fun, partial = FALSE, time.col = "Time")
 }
 \arguments{
 \item{...}{Arbitrary number of wide-format data tables to combine.}
@@ -14,6 +14,9 @@ operate_table(..., fun, time.col = "Time")
 a function that accepts exactly two arguments. If only one table
 is supplied in \code{...}, \code{fun} must accept exactly one 
 argument.}
+
+\item{partial}{If TRUE, only the overlapping times and columns will 
+be processed.}
 
 \item{time.col}{The time column name.}
 }
