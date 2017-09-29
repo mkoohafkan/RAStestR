@@ -368,11 +368,11 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
   clabs = get_dataset(x, col.table.path, "character") %>% str_trim()
   rlabs = get_dataset(x, row.table.path, "character") %>% str_trim()
   this = get_dataset(x, table.path, "double") %>% as_data_frame()
-  if (run.type == "Unsteady") {
-    this = this %>% head(-1) #%>% tail(-1)
+#  if (run.type == "Unsteady") {
+#    this = this %>% head(-1) #%>% tail(-1)
 #    rlabs[2] = rlabs[1]
-    rlabs = rlabs %>% head(-1) #%>% tail(-1)
-  }
+#    rlabs = rlabs %>% head(-1) #%>% tail(-1)
+#  }
 #  else if (run.type == "QuasiUnsteady") {
 #    this = this %>% head(-1)
 #    rlabs = rlabs %>% head(-1)
@@ -387,11 +387,12 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
 #'
 #' Compute a difference table.
 #'
+#' @inheritParams operate_table
 #' @param d1 The first dataframe, considered the "base" result.
 #' @param d2 The second dataframe, considered the "new" result.
-#' @param time.col The time column name.
-#' @param difference.col The name of the difference column to be created.
+#' @inheritParams order_table
 #' @param relative Logical: report differences as relative difference.
+#' @param difference.col The name of the difference column to be created.
 #' @return A dataframe, with difference defined as \code{d2- d1}.
 #'   if \code{relative = TRUE}, the difference is defined as
 #'   \code{(d2 - d1)/(0.5*(d2 + d1))}.
@@ -409,15 +410,16 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
 #'
 #' @import dplyr
 #' @export
-difference_table = function(d1, d2, difference.col = "Difference", 
-  relative = FALSE, time.col = "Time") {
+difference_table = function(d1, d2, relative = FALSE, partial = FALSE,
+  difference.col = "Difference", time.col = "Time") {
   if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
     else
       fun = function(x1, x2)
         x2 - x1
-  operate_table(d1, d2, fun = fun) %>% to_longtable(difference.col)  
+  operate_table(d1, d2, fun = fun, partial = partial, time.col = time.col) %>%
+    to_longtable(difference.col)  
 }
 
 #' Difference Table (Sediment)
@@ -443,15 +445,15 @@ difference_table = function(d1, d2, difference.col = "Difference",
 #'
 #' @import dplyr
 #' @export
-difference_sediment = function(d1, d2, difference.col = "Difference",
-  relative = FALSE, time.col = "Time", grain.col = "GrainClass") {
+difference_sediment = function(d1, d2, relative = FALSE, partial = FALSE,
+  difference.col = "Difference", time.col = "Time", grain.col = "GrainClass") {
   if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
   else
     fun = function(x1, x2)
       x2 - x1
-  operate_sediment(d1, d2, fun = fun, time.col = time.col, 
+  operate_sediment(d1, d2, fun = fun, partial = partial, time.col = time.col, 
     grain.col = grain.col) %>% to_longtable(difference.col)
 }
 

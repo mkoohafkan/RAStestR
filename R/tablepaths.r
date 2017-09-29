@@ -2,6 +2,17 @@
 get_station_table = function(RAS.version = "5.0.3") {
   file.path("Geometry", "Cross Sections", "River Stations")
 }
+
+# river table path
+get_river_table = function(RAS.version = "5.0.3") {
+  file.path("Geometry", "Cross Sections", "River Names")
+}
+
+# reach table path
+get_reach_table = function(RAS.version = "5.0.3") {
+  file.path("Geometry", "Cross Sections", "Reach Names")
+}
+
 get_lengths_table = function(RAS.version = "5.0.3") {
   file.path("Geometry", "Cross Sections", "Lengths")
 }
@@ -69,6 +80,7 @@ get_xsection_block = function(run.type, RAS.version = "5.0.3"){
 #'
 #' @import h5
 #' @import stringr
+#' @export
 list_grains = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
@@ -94,6 +106,7 @@ list_grains = function(f) {
 #'
 #' @import h5
 #' @import stringr
+#' @export
 list_output_times = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
@@ -120,6 +133,7 @@ list_output_times = function(f) {
 #' RAStestR:::list_lengths(simple.quasi)
 #'
 #' @import h5
+#' @export
 list_lengths = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
@@ -144,6 +158,7 @@ list_lengths = function(f) {
 #' RAStestR:::list_bank_stations(simple.quasi)
 #'
 #' @import h5
+#' @export
 list_bank_stations = function(f){
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
@@ -169,6 +184,7 @@ list_bank_stations = function(f){
 #'
 #' @import h5
 #' @import stringr
+#' @export
 list_stations = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
@@ -179,6 +195,60 @@ list_stations = function(f) {
     stop('Table "', stationpath, '" could not be found.', call. = FALSE)
   get_dataset(x, stationpath, "character") %>% str_trim()
 }
+
+#' List River Names
+#'
+#' List RAS river names.
+#'
+#' @inheritParams read_standard
+#' @return a vector of river names.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_rivers(simple.quasi)
+#'
+#' @import h5
+#' @import stringr
+#' @export
+list_rivers = function(f) {
+  if (!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
+  x = h5file(f)
+  on.exit(h5close(x))
+  riverpath = get_river_table()
+  if (!existsDataSet(x, riverpath))
+    stop('Table "', riverpath, '" could not be found.', call. = FALSE)
+  get_dataset(x, riverpath, "character") %>% str_trim()
+}
+
+#' List Reach Names
+#'
+#' List RAS reach names.
+#'
+#' @inheritParams read_standard
+#' @return a vector of reach names.
+#'
+#' @examples
+#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#'   package = "RAStestR")
+#' RAStestR:::list_reaches(simple.quasi)
+#'
+#' @import h5
+#' @import stringr
+#' @export
+list_reaches = function(f) {
+  if (!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
+  x = h5file(f)
+  on.exit(h5close(x))
+  reachpath = get_reach_table()
+  if (!existsDataSet(x, reachpath))
+    stop('Table "', reachpath, '" could not be found.', call. = FALSE)
+  get_dataset(x, reachpath, "character") %>% str_trim()
+}
+
+
 
 #' List Sediment Tables
 #'

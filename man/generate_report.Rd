@@ -71,7 +71,8 @@ Generating a report requires that the packages
 \dontrun{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
   package = "RAStestR")
-generate_report(simple.quasi, simple.quasi, sections = c("Flow", "Vol In Cum"),
+generate_report(simple.quasi, simple.quasi, 
+  sections = c("Flow", "Vol In Cum"),
   output.name = "test", output.type = "html")
 }
 

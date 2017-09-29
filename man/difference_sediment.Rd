@@ -20,8 +20,9 @@
 \alias{difference_reduce_armor_factor}
 \title{Difference Table (Sediment)}
 \usage{
-difference_sediment(d1, d2, difference.col = "Difference", relative = FALSE,
-  time.col = "Time", grain.col = "GrainClass")
+difference_sediment(d1, d2, relative = FALSE, partial = FALSE,
+  difference.col = "Difference", time.col = "Time",
+  grain.col = "GrainClass")
 
 difference_fall_velocity(d1, d2, relative = FALSE)
 
@@ -60,9 +61,12 @@ difference_reduce_armor_factor(d1, d2, relative = FALSE)
 
 \item{d2}{The second dataframe, considered the "new" result.}
 
-\item{difference.col}{The name of the difference column to be created.}
-
 \item{relative}{Logical: report differences as relative difference.}
+
+\item{partial}{If TRUE, only the overlapping times and columns will 
+be processed.}
+
+\item{difference.col}{The name of the difference column to be created.}
 
 \item{time.col}{The time column name.}
 
