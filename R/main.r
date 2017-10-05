@@ -31,6 +31,7 @@ get_meta = function(f) {
     get_group_attr(x, "Plan Data/Plan Parameters")
   )
   # Other stuff?
+  plan.attr[["Type of Run"]] = get_run_type(f)
   return(plan.attr)
 }
 
@@ -294,7 +295,7 @@ read_sediment = function(f, table.name, which.times = NULL,
   # get run type
   run.type = get_run_type(f)
   grain.levels = c("", paste(1:20))
-  grain.labels = list_grains(f)
+  grain.labels = list_grain_classes(f)
   if (!is.null(which.grains)) {
     which.grains = as.character(which.grains)
     if (any(which.grains %in% grain.labels))

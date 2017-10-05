@@ -66,6 +66,32 @@ get_xsection_block = function(run.type, RAS.version = "5.0.3"){
       "Sediment SE", "Sediment Time Series", "Cross Section SE")
 }
 
+# Plan Information Path
+get_plan_info_table = function(RAS.version = "5.0.3") {
+  file.path("Plan Data", "Plan Information")
+}
+
+
+#' List Plan Information
+#'
+#' List Basic HEC-RAS plan information.
+#'
+#' @inheritParams read_standard
+#' @param print Print the plan information to the console in a nice format.
+#' @return A list of plan information.
+#'
+#' @export
+list_plan_info = function(f, print = TRUE) {
+  which.attr = c("Plan Name", "Plan ShortID", "Type of Run",
+    "Time Window", "Computation Time Step", "Output Interval")
+  metadata = get_meta(f)[which.attr]
+  if (print) {
+    message(paste(names(metadata), unlist(metadata),
+      sep = ": ", collapse = "\n"), "\n")
+  }
+  invisible(metadata)
+}
+
 #' List Grain Classes
 #'
 #' Get list of RAS sediment grain class labels.
@@ -76,12 +102,12 @@ get_xsection_block = function(run.type, RAS.version = "5.0.3"){
 #' @examples
 #' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
 #'   package = "RAStestR")
-#' RAStestR:::list_grains(simple.quasi)
+#' RAStestR:::list_grain_classes(simple.quasi)
 #'
 #' @import h5
 #' @import stringr
 #' @export
-list_grains = function(f) {
+list_grain_classes = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   x = h5file(f)
