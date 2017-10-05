@@ -7,7 +7,7 @@
 list_bank_stations(f)
 }
 \arguments{
-\item{f}{The h5 file to read.}
+\item{f}{The hDF5 file to read.}
 }
 \value{
 a vector of bank stations

@@ -7,7 +7,7 @@
 read_bed_limits_elev(f, which.stations = NULL, which.times = NULL)
 }
 \arguments{
-\item{f}{The h5 file to read.}
+\item{f}{The hDF5 file to read.}
 
 \item{which.stations}{Character vector of stations to extract. If
 NULL, all stations will be returned.}

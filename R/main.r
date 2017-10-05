@@ -9,18 +9,18 @@
 #' @docType package
 NULL
 
-#' Get RAS Plan Meta Data
-#'
-#' Get meta data of RAS plan.
-#'
-#' @param f The h5 file to read.
-#' @return A named list of plan meta data.
-#'
-#' @examples
-#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
-#'   package = "RAStestR")
-#' RAStestR:::get_meta(simple.quasi)
-#'
+# Get RAS Plan Meta Data
+#
+# Get meta data of RAS plan.
+#
+# @param f The HDF5 file to read.
+# @return A named list of plan meta data.
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+# RAStestR:::get_meta(simple.quasi)
+#
 #' @import h5
 get_meta = function(f) {
   x = h5file(f)
@@ -35,21 +35,21 @@ get_meta = function(f) {
   return(plan.attr)
 }
 
-#' Get RAS Plan Run Type
-#'
-#' Identify a RAS plan as Unsteady, Steady or QuasiUnsteady.
-#'
-#' @inheritParams get_meta
-#'
-#' @examples
-#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
-#'   package = "RAStestR")
-#' RAStestR:::get_run_type(simple.quasi)
-#'
-#' simple.unsteady= system.file("sample-data/SampleUnsteady.hdf",
-#'   package = "RAStestR")
-#' RAStestR:::get_run_type(simple.unsteady)
-#'
+# Get RAS Plan Run Type
+#
+# Identify a RAS plan as Unsteady, Steady or QuasiUnsteady.
+#
+# @inheritParams get_meta
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+# RAStestR:::get_run_type(simple.quasi)
+#
+# simple.unsteady= system.file("sample-data/SampleUnsteady.hdf",
+#   package = "RAStestR")
+# RAStestR:::get_run_type(simple.unsteady)
+#
 #' @import h5
 get_run_type = function(f) {
   x = h5file(f)
@@ -205,7 +205,7 @@ rename_interpolated_xs = function(d){
 #'
 #' Read a standard (not grain class-specific) table.
 #'
-#' @param f The h5 file to read.
+#' @param f The hDF5 file to read.
 #' @param table.name The table to read.
 #' @param which.times Character vector of timestamps to extract. If
 #'   NULL, all timestamps will be returned.
@@ -325,30 +325,30 @@ read_sediment = function(f, table.name, which.times = NULL,
   do.call(bind_rows, res)
 }
 
-#' Read RAS Table
-#'
-#' Read RAS sediment data output. This function is used internally and should
-#' not be called directly by the user.
-#'
-#' @param f The h5 file to read.
-#' @param table.path The table to read in.
-#' @param row.table.path The table containing the row identifiers.
-#' @param col.table.path The table containing the column identifiers.
-#' @param rowcolname The name to assign to the new row id column.
-#' @param colprefix A prefix to apply to the column IDs.
-#' @return A dataframe.
-#'
-#' @examples
-#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
-#'   package = "RAStestR")
-#' RAStestR:::read_hdtable(simple.quasi, 
-#'   file.path("Results", "Sediment", "Output Blocks", "Sediment", 
-#'     "Sediment Time Series", "Cross Sections", "Flow"),
-#'   file.path("Results", "Sediment", "Output Blocks", "Sediment", 
-#'     "Sediment Time Series", "Time Date Stamp"),
-#'   file.path("Geometry", "Cross Sections", "River Stations"),
-#'   "Time", "XS_")
-#'
+# Read RAS Table
+#
+# Read RAS sediment data output. This function is used internally and should
+# not be called directly by the user.
+#
+# @param f The HDF55 file to read.
+# @param table.path The table to read in.
+# @param row.table.path The table containing the row identifiers.
+# @param col.table.path The table containing the column identifiers.
+# @param rowcolname The name to assign to the new row id column.
+# @param colprefix A prefix to apply to the column IDs.
+# @return A dataframe.
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+# RAStestR:::read_hdtable(simple.quasi, 
+#   file.path("Results", "Sediment", "Output Blocks", "Sediment", 
+#     "Sediment Time Series", "Cross Sections", "Flow"),
+#   file.path("Results", "Sediment", "Output Blocks", "Sediment", 
+#     "Sediment Time Series", "Time Date Stamp"),
+#   file.path("Geometry", "Cross Sections", "River Stations"),
+#   "Time", "XS_")
+#
 #' @importFrom utils head
 #' @importFrom utils tail
 #' @import h5

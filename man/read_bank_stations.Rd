@@ -7,7 +7,7 @@
 read_bank_stations(f)
 }
 \arguments{
-\item{f}{The h5 file to read.}
+\item{f}{The hDF5 file to read.}
 }
 \value{
 A table with columns "Station", "LOB" and "ROB", where

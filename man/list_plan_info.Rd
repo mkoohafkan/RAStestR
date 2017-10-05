@@ -7,7 +7,7 @@
 list_plan_info(f, print = TRUE)
 }
 \arguments{
-\item{f}{The h5 file to read.}
+\item{f}{The hDF5 file to read.}
 
 \item{print}{Print the plan information to the console in a nice format.}
 }

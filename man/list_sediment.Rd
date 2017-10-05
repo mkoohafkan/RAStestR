@@ -7,7 +7,7 @@
 list_sediment(f, table.name)
 }
 \arguments{
-\item{f}{The h5 file to read.}
+\item{f}{The hDF5 file to read.}
 
 \item{table.name}{The table to read.}
 }
