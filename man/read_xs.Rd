@@ -7,7 +7,7 @@
 read_xs(f, which.times = NULL, which.stations = NULL)
 }
 \arguments{
-\item{f}{The hDF5 file to read.}
+\item{f}{The HDF5 file to read.}
 
 \item{which.times}{Character vector of timestamps to extract. If
 NULL, all timestamps will be returned.}

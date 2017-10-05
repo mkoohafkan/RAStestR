@@ -205,7 +205,7 @@ rename_interpolated_xs = function(d){
 #'
 #' Read a standard (not grain class-specific) table.
 #'
-#' @param f The hDF5 file to read.
+#' @param f The HDF5 file to read.
 #' @param table.name The table to read.
 #' @param which.times Character vector of timestamps to extract. If
 #'   NULL, all timestamps will be returned.

@@ -7,7 +7,7 @@
 read_station_lengths(f)
 }
 \arguments{
-\item{f}{The hDF5 file to read.}
+\item{f}{The HDF5 file to read.}
 }
 \value{
 a dataframe with columns "Station", "LOB", "Channel" and "ROB", where

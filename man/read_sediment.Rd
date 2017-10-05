@@ -8,7 +8,7 @@ read_sediment(f, table.name, which.times = NULL, which.stations = NULL,
   which.grains = NULL)
 }
 \arguments{
-\item{f}{The hDF5 file to read.}
+\item{f}{The HDF5 file to read.}
 
 \item{table.name}{The table to read.}
 

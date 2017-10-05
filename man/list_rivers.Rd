@@ -7,7 +7,7 @@
 list_rivers(f)
 }
 \arguments{
-\item{f}{The hDF5 file to read.}
+\item{f}{The HDF5 file to read.}
 }
 \value{
 a vector of river names.
