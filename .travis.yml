@@ -3,13 +3,14 @@ r:
   - release
   - devel
 sudo: required
+cache: packages
 
 # Be strict when checking our package
 warnings_are_errors: true
 
 # System dependencies for HTTP calling
 
-r_binary_packages:
+r_packages:
   - readr
   - dplyr
   - stringr
@@ -18,8 +19,6 @@ r_binary_packages:
   - rmarkdown
   - ggplot2
   - scales
-
-r_packages:
   - h5
 
 before_install:
