@@ -237,19 +237,21 @@ read_standard = function(f, table.name, which.times = NULL,
   run.type = get_run_type(f)
   # argument checks
   if (is.null(which.times))
-    which.times = list_output_times(f)
-  else if (is.numeric(which.times))
-    which.times = list_output_times(f)[which.times]
-  if (!any(which.times %in% list_output_times(f)))
+    which.times = seq_along(list_output_times(f))
+  else if (!is.numeric(which.times))
+    which.times = which(list_output_times(f) %in% which.times)
+  else
+    which.times = which(seq_along(list_output_times(f)) %in% which.times)
+  if (length(which.times) < 1L)
     stop("No data matching 'which.times' was found")
   if (is.null(which.stations))
-    which.stations = str_c("XS_", list_stations(f))
-  else if (is.numeric(which.stations))
-    which.stations = str_c("XS_", str_replace(list_stations(f)[which.stations], 
+    which.stations = seq_along(list_stations(f))
+  else if (!is.numeric(which.stations))
+    which.stations = which(list_stations(f) %in% str_replace(which.stations, 
       "XS_", ""))
-  else if (is.character(which.stations))
-    which.stations = str_c("XS_", str_replace(which.stations, "XS_", ""))
-  if (!any(which.stations %in% str_c("XS_", list_stations(f))))
+  else
+    which.stations = which(seq_along(list_stations(f)) %in% which.stations)
+  if (length(which.stations) < 1L)
     stop("No data matching 'which.stations' was found")
   # specify tables
   geompath = get_station_table(run.type)
@@ -258,10 +260,9 @@ read_standard = function(f, table.name, which.times = NULL,
   # read data
   res = read_hdtable(f, tblpath, tspath, geompath, "Time", "XS_")
   # filter by time/station
-  res = res[res$Time %in% which.times,]
-  othercols = !str_detect(names(res), "XS_")
-  stationcols = names(res) %in%  which.stations
-  res[, which(othercols | stationcols)]
+  othercols = which(!str_detect(names(res), "XS_"))
+  stationcols = which(str_detect(names(res), "XS_"))[which.stations]
+  res[which.times, c(othercols, stationcols)]
 }
 
 #' Sediment By Grain Class Table
