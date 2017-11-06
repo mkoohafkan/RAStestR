@@ -982,9 +982,9 @@ xs_region_cumulative_change = function(d, time.col = "Time",
 }
 
 
-#' Write Cross Section Data
+#' Format Cross Section Data
 #'
-#' Write the cross section data to a csv format for import into RAS.
+#' Format the cross section data for import by RAS.
 #'
 #' @inheritParams xs_area
 #' @param river The River name (used by RAS).
@@ -994,7 +994,7 @@ xs_region_cumulative_change = function(d, time.col = "Time",
 #' @import dplyr
 #' @import stringr
 #' @export
-xs_write = function(d, river, reach, 
+xs_format = function(d, river, reach, 
   station.col = "Station", distance.col = "Distance",
   elevation.col = "Elevation") {
   Station = NULL; Distance = NULL; Elevation = NULL; RS = NULL
@@ -1012,4 +1012,3 @@ xs_write = function(d, river, reach,
     warning("Duplicate rows detected")
   out
 }
-
