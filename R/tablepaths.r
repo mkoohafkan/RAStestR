@@ -27,48 +27,82 @@ get_bank_stations_table = function(RAS.version = "5.0.3") {
 
 # output interval table path
 get_timestep_table = function(run.type, RAS.version = "5.0.3"){
-  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
-  if (run.type == "Unsteady")
+  run.type = match.arg(run.type, c("Steady", "Unsteady", 
+    "Unsteady+Sediment", "QuasiUnsteady"))
+  if (run.type == "Unsteady+Sediment")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Time Date Stamp")
+  else if (run.type == "Unsteady")
+    file.path("Results", "Unsteady", "Output", "Output Blocks",
+      "Base Output", "Unsteady Time Series", "Time Date Stamp")
+  else if (run.type == "Steady")
+    file.path("Results", "Steady", "Output", "Output Blocks", 
+      "Base Output", "Steady Profiles", "Profile Names")
   else
     file.path("Results", "Sediment", "Output Blocks",
       "Sediment", "Sediment Time Series", "Time Date Stamp")
 }
 # parent path of output data
 get_output_block = function(run.type, RAS.version = "5.0.3") {
-  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
-  if (run.type == "Unsteady")
+  run.type = match.arg(run.type, c("Steady", "Unsteady", 
+    "Unsteady+Sediment", "QuasiUnsteady"))
+  if (run.type == "Unsteady+Sediment")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections")
+  else if (run.type == "Unsteady")
+    file.path("Results", "Unsteady", "Output", "Output Blocks",
+      "Base Output", "Unsteady Time Series", "Cross Sections")
+  else if (run.type == "Steady")
+    file.path("Results", "Steady", "Output", "Output Blocks", 
+      "Base Output", "Steady Profiles", "Cross Sections")
   else
     file.path("Results", "Sediment", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections")
 }
 # parent path of sediment output data
 get_sediment_block = function(run.type, RAS.version = "5.0.3") {
-  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
-  if (run.type == "Unsteady")
+  run.type = match.arg(run.type, c("Steady", "Unsteady", 
+    "Unsteady+Sediment", "QuasiUnsteady"))
+  if (run.type == "Unsteady+Sediment")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections")
-  else
+  else if (run.type == "QuasiUnsteady")
     file.path("Results", "Sediment", "Output Blocks",
       "Sediment", "Sediment Time Series", "Cross Sections")
+  else
+    stop(sprintf('No sediment data available for run type "%s"', run.type))
 }
 # parent path of cross section output data
 get_xsection_block = function(run.type, RAS.version = "5.0.3"){
-  run.type = match.arg(run.type, c("Unsteady", "QuasiUnsteady"))
-  if (run.type == "Unsteady")
+  run.type = match.arg(run.type, c("Steady", "Unsteady", 
+    "Unsteady+Sediment", "QuasiUnsteady"))
+  if (run.type == "Unsteady+Sediment")
     file.path("Results", "Unsteady", "Output", "Output Blocks",
       "Sediment SE", "Sediment Time Series", "Cross Section SE")
-  else
+  else if (run.type == "QuasiUnsteady")
     file.path("Results", "Sediment", "Output Blocks",
       "Sediment SE", "Sediment Time Series", "Cross Section SE")
+  else
+    stop(sprintf('No sediment data available for run type "%s"', run.type))
+  }
+# parent path of 2D flow area output data
+get_2darea_block = function(run.type, RAS.version = "5.0.3") {
+  run.type = match.arg(run.type, c("Steady", "Unsteady", 
+    "Unsteady+Sediment", "QuasiUnsteady"))
+  if (run.type == "Unsteady")
+    file.path("Results", "Unsteady", "Output", "Output Blocks",
+      "Base Output", "Unsteady Time Series", "2D Flow Areas")
+  else
+    stop(sprintf('No 2D data available for run type "%s"', run.type))
 }
 
 # Plan Information Path
 get_plan_info_table = function(RAS.version = "5.0.3") {
   file.path("Plan Data", "Plan Information")
+}
+
+get_2d_flow_area_table = function(RAS.version = "5.0.3") {
+    file.path("Geometry", "2D Flow Areas", "Names")
 }
 
 
@@ -110,6 +144,9 @@ list_plan_info = function(f, print = TRUE) {
 list_grain_classes = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
+  run.type = get_run_type(f)
+  if(!(run.type %in% c("QuasiUnsteady", "Unsteady+Sediment"))) 
+    stop(sprintf('No sediment data available for run type "%s"', run.type))
   x = h5file(f)
   on.exit(h5close(x))
   grainpath = get_grain_class_table()
@@ -276,26 +313,26 @@ list_reaches = function(f) {
 
 
 
-#' List Sediment Tables
-#'
-#' List grain class-specific tables of the specified type.
-#'
-#' @inheritParams read_standard
-#' @return a vector of grain glass labels.
-#'
-#' @examples
-#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
-#'   package = "RAStestR")
-#' RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
-#'     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
-#'     "Vol In"))
-#' RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
-#'     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
-#'     "Vol Inactive"))
-#' RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
-#'     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
-#'     "Vol In Cum"))
-#'
+# List Sediment Tables
+#
+# List grain class-specific tables of the specified type.
+#
+# @inheritParams read_standard
+# @return a vector of grain glass labels.
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+# RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+#     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+#     "Vol In"))
+# RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+#     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+#     "Vol Inactive"))
+# RAStestR:::list_sediment(simple.quasi, file.path("Results", "Sediment", 
+#     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
+#     "Vol In Cum"))
+#
 #' @import h5
 #' @import stringr
 list_sediment = function(f, table.name) {
@@ -337,3 +374,27 @@ list_xs = function(f, xs.block) {
 }
 
 
+list_2dareas = function(f) {
+  if (!file.exists(f))
+    stop("Could not find ", suppressWarnings(normalizePath(f)))
+  x = h5file(f)
+  on.exit(h5close(x))
+  flowareapath = get_2d_flow_area_table ()
+  if (!existsDataSet(x, flowareapath))
+    stop('Table "', flowareapath, '" could not be found.', call. = FALSE)
+  get_dataset(x, flowareapath, "character") %>% str_trim()
+}
+
+# Set RAS Version
+#
+# Specify the RAS version.
+#
+# @param version The RAS version to use.
+#
+RAS_version = function(version) {
+  version = match.arg(version, c("5.0.3"))
+  if (missing(version))
+    return(options()$RAStestR.RASversion)
+  options(RAStestR.RASversion = version)
+  invisible(version)
+}

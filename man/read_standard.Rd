@@ -4,7 +4,8 @@
 \alias{read_standard}
 \title{Read Standard Table}
 \usage{
-read_standard(f, table.name, which.times = NULL, which.stations = NULL)
+read_standard(f, table.name, which.times = NULL, which.stations = NULL,
+  override.sediment = FALSE)
 }
 \arguments{
 \item{f}{The HDF5 file to read.}
@@ -16,6 +17,9 @@ NULL, all timestamps will be returned.}
 
 \item{which.stations}{Character vector of stations to extract. If
 NULL, all stations will be returned.}
+
+\item{override.sediment}{(For Unsteady+Sediment models only) If True,
+extract data from the hydraulic rather than sediment output.}
 }
 \value{
 A dataframe with a column "Time" containing the Date Time

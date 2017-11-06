@@ -60,7 +60,10 @@ get_run_type = function(f) {
   if ("QuasiUnsteady" %in% event.groups)
     "QuasiUnsteady"
   else if ("Unsteady" %in% event.groups)
-    "Unsteady"
+    if ("Sediment" %in% event.groups)
+      "Unsteady+Sediment"
+    else
+      "Unsteady"
   else if ("Steady" %in% event.groups)
     "Steady"
   else
@@ -211,6 +214,8 @@ rename_interpolated_xs = function(d){
 #'   NULL, all timestamps will be returned.
 #' @param which.stations Character vector of stations to extract. If
 #'   NULL, all stations will be returned.
+#' @param override.sediment (For Unsteady+Sediment models only) If True,
+#'   extract data from the hydraulic rather than sediment output.
 #' @return A dataframe with a column "Time" containing the Date Time
 #'   Stamp data and columns "XS_####" where ### is the cross-section ID.
 #'
@@ -232,9 +237,11 @@ rename_interpolated_xs = function(d){
 #' @import stringr
 #' @export
 read_standard = function(f, table.name, which.times = NULL,
-  which.stations = NULL) {
+  which.stations = NULL, override.sediment = FALSE) {
   # get run type
   run.type = get_run_type(f)
+  if (run.type == "Unsteady+Sediment" && override.sediment)
+    run.type == "Unsteady"
   # argument checks
   if (is.null(which.times))
     which.times = seq_along(list_output_times(f))
@@ -254,7 +261,7 @@ read_standard = function(f, table.name, which.times = NULL,
   if (length(which.stations) < 1L)
     stop("No data matching 'which.stations' was found")
   # specify tables
-  geompath = get_station_table(run.type)
+  geompath = get_station_table()
   tblpath = file.path(get_output_block(run.type), table.name)
   tspath = get_timestep_table(run.type)
   # read data
