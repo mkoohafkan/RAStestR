@@ -13,7 +13,7 @@ list_grain_classes(f)
 a vector of grain glass labels.
 }
 \description{
-Get list of RAS sediment grain class labels.
+List sediment grain class labels.
 }
 \examples{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",

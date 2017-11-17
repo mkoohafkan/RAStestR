@@ -13,7 +13,7 @@ list_reaches(f)
 a vector of reach names.
 }
 \description{
-List RAS reach names.
+List reach names.
 }
 \examples{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",

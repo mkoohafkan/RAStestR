@@ -1,32 +1,50 @@
 # station table path
-get_station_table = function(RAS.version = "5.0.3") {
-  file.path("Geometry", "Cross Sections", "River Stations")
+get_station_table = function(RAS.version) {
+  if (is.null(RAS.version))
+    RAS.version = options()[["RAStestR.RASversion"]]
+  switch(RAS.version,
+    "5.0.3" = file.path("Geometry", "Cross Sections", "River Stations")
+  )
 }
 
 # river table path
-get_river_table = function(RAS.version = "5.0.3") {
-  file.path("Geometry", "Cross Sections", "River Names")
+get_river_table = function(RAS.version) {
+  switch(RAS.version,
+    "5.0.3" = file.path("Geometry", "Cross Sections", "River Names"),
+    "5.0.4" = file.path("Geometry", "Cross Sections", "Attributes")
+  )
 }
 
 # reach table path
-get_reach_table = function(RAS.version = "5.0.3") {
-  file.path("Geometry", "Cross Sections", "Reach Names")
+get_reach_table = function(RAS.version) {
+  switch(RAS.version,
+    "5.0.3" = file.path("Geometry", "Cross Sections", "Reach Names"),
+    "5.0.4" = file.path("Geometry", "Cross Sections", "Attributes")
+  )
 }
 
-get_lengths_table = function(RAS.version = "5.0.3") {
-  file.path("Geometry", "Cross Sections", "Lengths")
+get_lengths_table = function(RAS.version) {
+  switch(RAS.version,
+    "5.0.3" = file.path("Geometry", "Cross Sections", "Lengths"),
+    "5.0.4" = file.path("Geometry", "Cross Sections", "Attributes")
+  )
 }
 # grain class table path
-get_grain_class_table = function(RAS.version = "5.0.3") {
-  file.path("Event Conditions", "Sediment", "Grain Class Names")
+get_grain_class_table = function(RAS.version) {
+  switch(RAS.version,
+    "5.0.3" = file.path("Event Conditions", "Sediment", "Grain Class Names")
+  )
 }
 # bank station table path
-get_bank_stations_table = function(RAS.version = "5.0.3") {
-  file.path("Geometry", "Cross Sections", "Bank Stations")
+get_bank_stations_table = function(RAS.version) {
+  switch(RAS.version,
+    "5.0.3" = file.path("Geometry", "Cross Sections", "Bank Stations"),
+    "5.0.4" = file.path("Geometry", "Cross Sections", "Attributes")
+  )
 }
 
 # output interval table path
-get_timestep_table = function(run.type, RAS.version = "5.0.3"){
+get_timestep_table = function(run.type, RAS.version) {
   run.type = match.arg(run.type, c("Steady", "Unsteady", 
     "Unsteady+Sediment", "QuasiUnsteady"))
   if (run.type == "Unsteady+Sediment")
@@ -43,7 +61,7 @@ get_timestep_table = function(run.type, RAS.version = "5.0.3"){
       "Sediment", "Sediment Time Series", "Time Date Stamp")
 }
 # parent path of output data
-get_output_block = function(run.type, RAS.version = "5.0.3") {
+get_output_block = function(run.type, RAS.version) {
   run.type = match.arg(run.type, c("Steady", "Unsteady", 
     "Unsteady+Sediment", "QuasiUnsteady"))
   if (run.type == "Unsteady+Sediment")
@@ -60,7 +78,7 @@ get_output_block = function(run.type, RAS.version = "5.0.3") {
       "Sediment", "Sediment Time Series", "Cross Sections")
 }
 # parent path of sediment output data
-get_sediment_block = function(run.type, RAS.version = "5.0.3") {
+get_sediment_block = function(run.type, RAS.version) {
   run.type = match.arg(run.type, c("Steady", "Unsteady", 
     "Unsteady+Sediment", "QuasiUnsteady"))
   if (run.type == "Unsteady+Sediment")
@@ -73,7 +91,7 @@ get_sediment_block = function(run.type, RAS.version = "5.0.3") {
     stop(sprintf('No sediment data available for run type "%s"', run.type))
 }
 # parent path of cross section output data
-get_xsection_block = function(run.type, RAS.version = "5.0.3"){
+get_xsection_block = function(run.type, RAS.version) {
   run.type = match.arg(run.type, c("Steady", "Unsteady", 
     "Unsteady+Sediment", "QuasiUnsteady"))
   if (run.type == "Unsteady+Sediment")
@@ -86,7 +104,7 @@ get_xsection_block = function(run.type, RAS.version = "5.0.3"){
     stop(sprintf('No sediment data available for run type "%s"', run.type))
   }
 # parent path of 2D flow area output data
-get_2darea_block = function(run.type, RAS.version = "5.0.3") {
+get_2darea_block = function(run.type, RAS.version) {
   run.type = match.arg(run.type, c("Steady", "Unsteady", 
     "Unsteady+Sediment", "QuasiUnsteady"))
   if (run.type == "Unsteady")
@@ -97,18 +115,21 @@ get_2darea_block = function(run.type, RAS.version = "5.0.3") {
 }
 
 # Plan Information Path
-get_plan_info_table = function(RAS.version = "5.0.3") {
-  file.path("Plan Data", "Plan Information")
+get_plan_info_table = function(RAS.version) {
+  switch(RAS.version,
+    "5.0.3" = file.path("Plan Data", "Plan Information")
+  )
 }
 
-get_2d_flow_area_table = function(RAS.version = "5.0.3") {
-    file.path("Geometry", "2D Flow Areas", "Names")
+get_2d_flow_area_table = function(RAS.version) {
+  switch(RAS.version,
+    "5.0.3" = file.path("Geometry", "2D Flow Areas", "Names")
+  )
 }
-
 
 #' List Plan Information
 #'
-#' List Basic HEC-RAS plan information.
+#' List basic plan information.
 #'
 #' @inheritParams read_standard
 #' @param print Print the plan information to the console in a nice format.
@@ -128,7 +149,7 @@ list_plan_info = function(f, print = TRUE) {
 
 #' List Grain Classes
 #'
-#' Get list of RAS sediment grain class labels.
+#' List sediment grain class labels.
 #'
 #' @inheritParams read_standard
 #' @return a vector of grain glass labels.
@@ -138,26 +159,25 @@ list_plan_info = function(f, print = TRUE) {
 #'   package = "RAStestR")
 #' RAStestR:::list_grain_classes(simple.quasi)
 #'
-#' @import h5
+#' @import hdf5r
 #' @import stringr
 #' @export
 list_grain_classes = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   run.type = get_run_type(f)
+  ras.version =get_RAS_version(f) 
   if(!(run.type %in% c("QuasiUnsteady", "Unsteady+Sediment"))) 
     stop(sprintf('No sediment data available for run type "%s"', run.type))
-  x = h5file(f)
-  on.exit(h5close(x))
-  grainpath = get_grain_class_table()
-  if (!existsDataSet(x, grainpath))
-    stop('Table "', grainpath, '" could not be found.', call. = FALSE)
-  c("ALL", get_dataset(x, grainpath, "character")) %>% str_trim()
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  grainpath = get_grain_class_table(ras.version)
+  c("ALL", str_trim(get_dataset(x, grainpath)))
 }
 
-#' List Time Steps
+#' List Output Times
 #'
-#' Get list of output times.
+#' List output times.
 #'
 #' @inheritParams read_standard
 #' @return a vector of cross section lengths.
@@ -167,50 +187,53 @@ list_grain_classes = function(f) {
 #'   package = "RAStestR")
 #' RAStestR:::list_output_times(simple.quasi)
 #'
-#' @import h5
+#' @import hdf5r
 #' @import stringr
 #' @export
 list_output_times = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   run.type = get_run_type(f)
-  timespath = get_timestep_table(run.type)
-  x = h5file(f)
-  on.exit(h5close(x))
-  if (!existsDataSet(x, timespath))
-    stop('Table "', timespath, '" could not be found.', call. = FALSE)
-  get_dataset(x, timespath, "character") %>% str_trim()
+  ras.version =get_RAS_version(f) 
+  timespath = get_timestep_table(run.type, ras.version)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  str_trim(get_dataset(x, timespath))
 }
 
 
 #' List Cross Section Lengths
 #'
-#' Get list cross section lengths.
+#' List cross section lengths.
 #'
 #' @inheritParams read_standard
-#' @return a vector of cross section lengths.
+#' @return a matrix of cross section lengths.
 #'
 #' @examples
 #' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
 #'   package = "RAStestR")
 #' RAStestR:::list_lengths(simple.quasi)
 #'
-#' @import h5
+#' @import hdf5r
 #' @export
 list_lengths = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  lengthpath = get_lengths_table()
-  if (!existsDataSet(x, lengthpath))
-    stop('Table "', lengthpath, '" could not be found.', call. = FALSE)
-  get_dataset(x, lengthpath, "double")
+  ras.version = get_RAS_version(f)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  lengthpath = get_lengths_table(ras.version)
+  switch(ras.version,
+    "5.0.3" = get_dataset(x, lengthpath),
+    "5.0.4" = setNames(as.matrix(
+      get_dataset(x, lengthpath)[[c("Len Left", "Len Channel", "Len Right")]]
+      ), NULL)
+  )
 }
 
 #' List Bank Stations
 #'
-#' Get list of bank stations
+#' List bank stations.
 #'
 #' @inheritParams read_standard
 #' @return a vector of bank stations
@@ -220,22 +243,26 @@ list_lengths = function(f) {
 #'   package = "RAStestR")
 #' RAStestR:::list_bank_stations(simple.quasi)
 #'
-#' @import h5
+#' @import hdf5r
 #' @export
 list_bank_stations = function(f){
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  bankpath = get_bank_stations_table()
-  if (!existsDataSet(x, bankpath))
-    stop('Table "', bankpath, '" could not be found.', call. = FALSE)
-  get_dataset(x, bankpath, "double")
+  ras.version = get_RAS_version(f)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  bankpath = get_bank_stations_table(ras.version)
+  switch(ras.version,
+    "5.0.3" = get_dataset(x, bankpath),
+    "5.0.4" = setNames(as.matrix(
+      get_dataset(x, bankpath)[[c("Left Bank", "Right Bank")]]
+      ), NULL)
+  )
 }
 
 #' List River Stations
 #'
-#' List RAS river station labels.
+#' List river station labels.
 #'
 #' @inheritParams read_standard
 #' @return a vector of river station labels.
@@ -245,23 +272,25 @@ list_bank_stations = function(f){
 #'   package = "RAStestR")
 #' RAStestR:::list_stations(simple.quasi)
 #'
-#' @import h5
+#' @import hdf5r
 #' @import stringr
 #' @export
 list_stations = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  stationpath = get_station_table()
-  if (!existsDataSet(x, stationpath))
-    stop('Table "', stationpath, '" could not be found.', call. = FALSE)
-  get_dataset(x, stationpath, "character") %>% str_trim()
+  ras.version = get_RAS_version(f)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  stationpath = get_station_table(ras.version)
+  switch(ras.version,
+    "5.0.3" = str_trim(get_dataset(x, stationpath)),
+    "5.0.4" = str_trim(get_dataset(x, stationpath)[["RS"]])
+  )
 }
 
 #' List River Names
 #'
-#' List RAS river names.
+#' List river names.
 #'
 #' @inheritParams read_standard
 #' @return a vector of river names.
@@ -271,23 +300,25 @@ list_stations = function(f) {
 #'   package = "RAStestR")
 #' RAStestR:::list_rivers(simple.quasi)
 #'
-#' @import h5
+#' @import hdf5r
 #' @import stringr
 #' @export
 list_rivers = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  riverpath = get_river_table()
-  if (!existsDataSet(x, riverpath))
-    stop('Table "', riverpath, '" could not be found.', call. = FALSE)
-  get_dataset(x, riverpath, "character") %>% str_trim()
+  ras.version = get_RAS_version(f)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  riverpath = get_river_table(ras.version)
+  switch(ras.version,
+    "5.0.3" = str_trim(get_dataset(x, riverpath)),
+    "5.0.4" = str_trim(get_dataset(x, riverpath)[["River"]])
+  )
 }
 
 #' List Reach Names
 #'
-#' List RAS reach names.
+#' List reach names.
 #'
 #' @inheritParams read_standard
 #' @return a vector of reach names.
@@ -297,18 +328,20 @@ list_rivers = function(f) {
 #'   package = "RAStestR")
 #' RAStestR:::list_reaches(simple.quasi)
 #'
-#' @import h5
+#' @import hdf5r
 #' @import stringr
 #' @export
 list_reaches = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  reachpath = get_reach_table()
-  if (!existsDataSet(x, reachpath))
-    stop('Table "', reachpath, '" could not be found.', call. = FALSE)
-  get_dataset(x, reachpath, "character") %>% str_trim()
+  ras.version = get_RAS_version(f)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  reachpath = get_reach_table(ras.version)
+  switch(ras.version,
+    "5.0.3" = str_trim(get_dataset(x, reachpath)),
+    "5.0.4" = str_trim(get_dataset(x, reachpath)[["River"]])
+  )
 }
 
 
@@ -333,15 +366,19 @@ list_reaches = function(f) {
 #     "Output Blocks", "Sediment", "Sediment Time Series", "Cross Sections", 
 #     "Vol In Cum"))
 #
-#' @import h5
+#' @import hdf5r
 #' @import stringr
 list_sediment = function(f, table.name) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  str_subset(list.datasets(x, path = dirname(table.name), recursive = FALSE),
-    sprintf("%s\\b(\\s\\d)*$", table.name))
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  group.x = x$open(dirname(table.name))
+  on.exit(group.x$close(), add = TRUE)
+  file.path(dirname(table.name),
+    str_subset(group.x$ls(recursive = FALSE)$name,
+      sprintf("%s\\b(\\s\\d)*$", basename(table.name)))
+  )
 }
 
 #' List Cross Section Tables
@@ -359,42 +396,86 @@ list_sediment = function(f, table.name) {
 #'     "Output Blocks", "Sediment SE", "Sediment Time Series", 
 #'     "Cross Section SE"))
 #'
-#' @import h5
+#' @import hdf5r
 #' @import stringr
 list_xs = function(f, xs.block) {
   # nse workaround
   . = NULL
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
   tblpath = file.path(dirname(xs.block), "Time Date Stamp")
-  get_dataset(x, tblpath, "character") %>% str_trim() %>%
+  get_dataset(x, tblpath) %>% str_trim() %>%
     sprintf("Station Elevation (%s)", .) %>% unique()
 }
 
-
+#' List 2D Areas
+#'
+#' List 2D flow areas
+#'
+#' @inheritParams read_standard
+#' @return a vector of 2D flow area names.
+#'
+#' @import hdf5r
+#' @export
 list_2dareas = function(f) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  x = h5file(f)
-  on.exit(h5close(x))
-  flowareapath = get_2d_flow_area_table ()
-  if (!existsDataSet(x, flowareapath))
-    stop('Table "', flowareapath, '" could not be found.', call. = FALSE)
-  get_dataset(x, flowareapath, "character") %>% str_trim()
+  ras.version = get_RAS_version(f)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  flowareapath = get_2d_flow_area_table(ras.version)
+  str_trim(get_dataset(x, flowareapath) )
 }
 
-# Set RAS Version
-#
-# Specify the RAS version.
-#
-# @param version The RAS version to use.
-#
-RAS_version = function(version) {
+#' Force RAS Version
+#'
+#' Force RAStestR to assume the specified RAS version. Useful for
+#' working with RAS development environments or incomplete datasets 
+#' that do not include RAS version info.
+#'
+#' @param version The RAS version to use.
+#'
+#' @export
+force_RAS_version = function(version) {
   version = match.arg(version, c("5.0.3"))
   if (missing(version))
     return(options()$RAStestR.RASversion)
   options(RAStestR.RASversion = version)
   invisible(version)
+}
+
+#' Get RAS Version
+#'
+#' Get the RAS version that generated the specified file.
+#' @inheritParams read_standard
+#' @return The RAS version.
+#'
+#' @export
+get_RAS_version = function(f) {
+  if (!is.null(options()[["RAStestR.ForceVersion"]]))
+    return(options()[["RAStestR.ForceVersion"]])
+  v = str_split(get_meta(f)[["File Version"]], " ", simplify = TRUE)[2]
+  if (v %in% names(options()[["RAStestR.VersionOverride"]]))
+    options()[["RAStestR.VersionOverride"]][[v]]
+  else
+    v
+  }
+
+#' Override RAS Version
+#'
+#' Specify RAS version overrides. Useful when working with files produced 
+#' from both RAS development and release versions, e.g. by assuming that
+#' files produced with RAS development x.x are structured in the same way
+#' as a specific release version.
+#'
+#' @param v The RAS version to override.
+#' @param override.v The RAS version to be assumed.
+#'
+#' @export
+override_RAS_version = function(v, override.v) {
+  ops = options()[["RAStestR.VersionOverride"]]
+  ops[[v]] = override.v
+  options(RAStestR.VersionOverride = ops)
 }

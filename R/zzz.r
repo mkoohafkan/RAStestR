@@ -1,5 +1,7 @@
 RAStestR_default_options = list(
-    RAStestR.RASversion = "5.0.3"
+    RAStestR.DefaultVersion = "5.0.3",
+    RAStestR.ForceVersion = NULL,
+    RAStestR.VersionOverride = NULL
 )
 
 .onLoad = function(libname, pkgname) {

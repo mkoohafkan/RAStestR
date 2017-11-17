@@ -64,7 +64,7 @@ read_2d_standard = function(f, table.name, which.times = NULL,
 # @examples
 #
 #
-#' @import h5
+#' @import hdf5r
 #' @import dplyr
 #' @import stringr
 read_2dtable = function(f, table.path, row.table.path,
@@ -74,13 +74,10 @@ read_2dtable = function(f, table.path, row.table.path,
   # get run type
   run.type = get_run_type(f)
   # open file
-  x = h5file(f)
-  on.exit(h5close(x))
-  for (pth in c(table.path, row.table.path))
-    if (!existsDataSet(x, pth))
-      stop('Table "', pth, '" could not be found', call. = FALSE)
-  rlabs = get_dataset(x, row.table.path, "character") %>% str_trim()
-  this = get_dataset(x, table.path, "double") %>% as_data_frame()
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  rlabs = get_dataset(x, row.table.path) %>% str_trim()
+  this = get_dataset(x, table.path) %>% as_data_frame()
   clabs = str_c(colprefix, 1:ncol(this) - 1)
   names(this) = clabs
   this[rowcolname] = rlabs

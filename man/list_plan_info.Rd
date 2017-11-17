@@ -15,5 +15,5 @@ list_plan_info(f, print = TRUE)
 A list of plan information.
 }
 \description{
-List Basic HEC-RAS plan information.
+List basic plan information.
 }

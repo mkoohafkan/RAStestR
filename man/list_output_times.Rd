@@ -2,7 +2,7 @@
 % Please edit documentation in R/tablepaths.r
 \name{list_output_times}
 \alias{list_output_times}
-\title{List Time Steps}
+\title{List Output Times}
 \usage{
 list_output_times(f)
 }
@@ -13,7 +13,7 @@ list_output_times(f)
 a vector of cross section lengths.
 }
 \description{
-Get list of output times.
+List output times.
 }
 \examples{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",

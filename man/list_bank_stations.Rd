@@ -13,7 +13,7 @@ list_bank_stations(f)
 a vector of bank stations
 }
 \description{
-Get list of bank stations
+List bank stations.
 }
 \examples{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",

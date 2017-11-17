@@ -13,7 +13,7 @@ list_rivers(f)
 a vector of river names.
 }
 \description{
-List RAS river names.
+List river names.
 }
 \examples{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",

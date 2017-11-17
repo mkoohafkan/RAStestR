@@ -21,17 +21,23 @@ NULL
 #   package = "RAStestR")
 # RAStestR:::get_meta(simple.quasi)
 #
-#' @import h5
-get_meta = function(f) {
-  x = h5file(f)
-  on.exit(h5close(x))
+#' @import hdf5r
+get_meta = function(f, mode = 'r') {
+  run.type = get_run_type(f)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  tryCatch({
   plan.attr = c(
-    get_group_attr(x),
-    get_group_attr(x, "Plan Data/Plan Information"),
-    get_group_attr(x, "Plan Data/Plan Parameters")
+      get_group_attr(x),
+      get_group_attr(x, "Plan Data/Plan Information"),
+      get_group_attr(x, "Plan Data/Plan Parameters")
+    )
+  }, error = function(e) {
+       warning(e)
+       stop("Could not find Plan Data", call. = FALSE)
+     }
   )
-  # Other stuff?
-  plan.attr[["Type of Run"]] = get_run_type(f)
+  plan.attr[["Type of Run"]] = run.type
   return(plan.attr)
 }
 
@@ -50,13 +56,18 @@ get_meta = function(f) {
 #   package = "RAStestR")
 # RAStestR:::get_run_type(simple.unsteady)
 #
-#' @import h5
+#' @import hdf5r
 get_run_type = function(f) {
-  x = h5file(f)
-  on.exit(h5close(x))
-  event.x = openGroup(x, "Event Conditions")
-  on.exit(h5close(event.x), add = TRUE)
-  event.groups = list.groups(event.x, full.names = FALSE, recursive = FALSE)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  event.x = tryCatch(x$open("Event Conditions"),
+    error = function(e) {
+      warning(e)
+      stop("Could not find Event Conditions", call. = FALSE)
+    }
+  )
+  on.exit(event.x$close(), add = TRUE)
+  event.groups = basename(event.x$ls(recursive = FALSE)$name)
   if ("QuasiUnsteady" %in% event.groups)
     "QuasiUnsteady"
   else if ("Unsteady" %in% event.groups)
@@ -71,73 +82,83 @@ get_run_type = function(f) {
       "'Unsteady' or 'QuasiUnsteady'")
 }
 
-#' Read HDF Table
-#'
-#' Safely read in a specific HDF table. This function is used internally and
-#' should not be called directly by the user.
-#'
-#' @param x an HDF object, e.g. output of \code{h5file()}.
-#' @param path The table path.
-#' @param type The type of data contained in the table. Can be one of "double",
-#' "integer", or "character".
-#'
-#' @examples
-#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
-#'   package = "RAStestR")
-#' tryCatch({
-#'     test.table = "Geometry/Cross Sections/Bank Stations"
-#'     quasi.h5 = h5::h5file(simple.quasi)
-#'     RAStestR:::get_dataset(quasi.h5, test.table, "double")
-#'   }, finally = {
-#'     h5::h5close(quasi.h5)
-#'   }) 
-#'
-#' @import h5
-get_dataset = function(x, path, type){
-  g = openDataSet(x, path, type)
-  on.exit(h5close(g))
-  readDataSet(g)
+# Read HDF Table
+#
+# Safely read in a specific HDF table. This function is used internally and
+# should not be called directly by the user.
+#
+# @param x an HDF object, e.g. output of \code{H5File$new()}.
+# @param path The table path.
+# @param type The type of data contained in the table. Can be one of "double",
+# "integer", or "character".
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+# tryCatch({
+#     test.table = "Geometry/Cross Sections/Bank Stations"
+#     quasi.h5 = hdf5r::H5File$new(simple.quasi)
+#     RAStestR:::get_dataset(quasi.h5, test.table, "double")
+#   }, finally = {
+#     invisible(try(quasi.h5$close_all()))
+#   }) 
+#
+#' @import hdf5r
+get_dataset = function(x, path) {
+  g = tryCatch(
+        x$open(path),
+        error = function(e) {
+          warning(e)
+          stop("Could not find ", x, call. = FALSE)
+    }
+  )
+  on.exit(g$close())
+  if (length(g$dims) == 2L)
+    t(g$read())
+  else
+    g$read()
 }
 
-#' Read HDF Attributes
-#'
-#' Safely read attributes of an HDF Group
-#'
-#' @inheritParams get_dataset
-#' @param attrs The attributes to read. If \code{NULL}, all 
-#'   attributes will be read.
-#' @return a named list of attributes.
-#'
-#' @examples
-#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
-#'   package = "RAStestR")
-#'
-#' tryCatch({
-#'     quasi.h5 = h5::h5file(simple.quasi)
-#'     RAStestR:::get_group_attr(quasi.h5)
-#'   }, finally = {
-#'     h5::h5close(quasi.h5)
-#'   }) 
-#'
-#' tryCatch({
-#'     test.group = "Plan Data/Plan Information"
-#'     quasi.h5 = h5::h5file(simple.quasi)
-#'     RAStestR:::get_group_attr(quasi.h5, test.group)
-#'   }, finally = {
-#'     h5::h5close(quasi.h5)
-#'   }) 
-#'
-#' @import h5
+# Read HDF Attributes
+#
+# Safely read attributes of an HDF Group
+#
+# @inheritParams get_dataset
+# @param attrs The attributes to read. If \code{NULL}, all 
+#   attributes will be read.
+# @return a named list of attributes.
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+#
+# tryCatch({
+#     quasi.h5 = hdf5r::H5File$new(simple.quasi)
+#     RAStestR:::get_group_attr(quasi.h5)
+#   }, finally = {
+#     invisible(try(quasi.h5$close_all()))
+#   }) 
+#
+# tryCatch({
+#     test.group = "Plan Data/Plan Information"
+#     quasi.h5 = hdf5r::H5File$new(simple.quasi)
+#     RAStestR:::get_group_attr(quasi.h5, test.group)
+#   }, finally = {
+#     invisible(try(quasi.h5$close_all()))
+#   }) 
+#
+#' @import hdf5r
 get_group_attr = function(x, path = NULL, attrs = NULL) {
   if (!is.null(path)) {
-    group.x = openGroup(x, path)
-    on.exit(h5close(group.x))
+    group.x = x$open(path)
+    on.exit(group.x$close())
   } else {
     group.x = x
   }
   if (is.null(attrs))
-    attrs = list.attributes(group.x)
-  group.attr = lapply(attrs, h5attr, .Object = group.x)
+    attrs = h5attr_names(group.x)
+  group.attr = lapply(attrs, function(a)
+    group.x$attr_open_by_name(a, ".")$read())
   names(group.attr) = attrs
   group.attr
 }
@@ -240,6 +261,7 @@ read_standard = function(f, table.name, which.times = NULL,
   which.stations = NULL, override.sediment = FALSE) {
   # get run type
   run.type = get_run_type(f)
+  ras.version = get_RAS_version(f)
   if (run.type == "Unsteady+Sediment" && override.sediment)
     run.type == "Unsteady"
   # argument checks
@@ -261,9 +283,9 @@ read_standard = function(f, table.name, which.times = NULL,
   if (length(which.stations) < 1L)
     stop("No data matching 'which.stations' was found")
   # specify tables
-  geompath = get_station_table()
-  tblpath = file.path(get_output_block(run.type), table.name)
-  tspath = get_timestep_table(run.type)
+  geompath = get_station_table(ras.version)
+  tblpath = file.path(get_output_block(run.type, ras.version), table.name)
+  tspath = get_timestep_table(run.type, ras.version)
   # read data
   res = read_hdtable(f, tblpath, tspath, geompath, "Time", "XS_")
   # filter by time/station
@@ -294,7 +316,7 @@ read_standard = function(f, table.name, which.times = NULL,
 #' read_sediment(simple.quasi, "Vol Out Cum", 
 #'   which.grains = c("VFS", "FS"))
 #'
-#' @import h5
+#' @import hdf5r
 #' @import dplyr
 #' @import stringr
 #' @export
@@ -302,6 +324,7 @@ read_sediment = function(f, table.name, which.times = NULL,
   which.stations = NULL, which.grains = NULL) {
   # get run type
   run.type = get_run_type(f)
+  ras.version = get_RAS_version(f)
   grain.levels = c("", paste(1:20))
   grain.labels = list_grain_classes(f)
   if (!is.null(which.grains)) {
@@ -310,7 +333,7 @@ read_sediment = function(f, table.name, which.times = NULL,
       which.grains[which.grains %in% grain.labels] = grain.levels[
         match(which.grains[which.grains %in% grain.labels], grain.labels)]
   }
-  sedimentpath = file.path(get_sediment_block(run.type), table.name)
+  sedimentpath = file.path(get_sediment_block(run.type, ras.version), table.name)
   alltables = list_sediment(f, sedimentpath)
   if (length(alltables) < 1)
     stop('Table "', sedimentpath, '" could not be found.', call. = FALSE)
@@ -359,7 +382,7 @@ read_sediment = function(f, table.name, which.times = NULL,
 #
 #' @importFrom utils head
 #' @importFrom utils tail
-#' @import h5
+#' @import hdf5r
 #' @import dplyr
 #' @import stringr
 read_hdtable = function(f, table.path, row.table.path, col.table.path,
@@ -369,14 +392,12 @@ read_hdtable = function(f, table.path, row.table.path, col.table.path,
   # get run type
   run.type = get_run_type(f)
   # open file
-  x = h5file(f)
-  on.exit(h5close(x))
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
   for (pth in c(table.path, row.table.path, col.table.path))
-    if (!existsDataSet(x, pth))
-      stop('Table "', pth, '" could not be found', call. = FALSE)
-  clabs = get_dataset(x, col.table.path, "character") %>% str_trim()
-  rlabs = get_dataset(x, row.table.path, "character") %>% str_trim()
-  this = get_dataset(x, table.path, "double") %>% as_data_frame()
+  clabs = get_dataset(x, col.table.path) %>% str_trim()
+  rlabs = get_dataset(x, row.table.path) %>% str_trim()
+  this = get_dataset(x, table.path) %>% as_data_frame()
 #  if (run.type == "Unsteady") {
 #    this = this %>% head(-1) #%>% tail(-1)
 #    rlabs[2] = rlabs[1]

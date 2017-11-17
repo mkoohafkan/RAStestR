@@ -18,7 +18,7 @@
 #'   which.stations = c("XS_800", "XS_796.00*"))
 #' read_xs(simple.quasi, which.times = 2:4, which.stations = 1:3)
 #'
-#' @import h5
+#' @import hdf5r
 #' @import dplyr
 #' @import stringr
 #' @export
@@ -26,7 +26,8 @@ read_xs = function(f, which.times = NULL, which.stations = NULL) {
   Station = NULL # workaround for nse
   # get run type
   run.type = get_run_type(f)
-  tblblock = get_xsection_block(run.type)
+  ras.version = get_RAS_version(f)
+  tblblock = get_xsection_block(run.type, ras.version)
   xsoutputs = list_xs(f, tblblock)
   if (is.null(which.times))
     which.times = str_split_fixed(xsoutputs, "[(.+)]", 3)[,2]
@@ -53,8 +54,8 @@ read_xs = function(f, which.times = NULL, which.stations = NULL) {
   if (!any(which.stations %in% str_c("XS_", list_stations(f))))
     stop("No data matching 'which.stations' was found")
 
-  x = h5file(f)
-  on.exit(h5close(x))
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
   dlist = vector("list", length(which.times))
   for (i in seq_along(which.times)) {
     this.time = which.times[i]
@@ -63,8 +64,8 @@ read_xs = function(f, which.times = NULL, which.stations = NULL) {
       stop("multiple tables named ", xs)
     index.table = file.path(tblblock, str_c(xs, " info"))
     values.table = file.path(tblblock, str_c(xs, " values"))
-    xs.indices = rep(stations, get_dataset(x, index.table, "integer")[,2])
-    xs.table = as_data_frame(get_dataset(x, values.table, "double"))
+    xs.indices = rep(stations, get_dataset(x, index.table)[,2])
+    xs.table = as_data_frame(get_dataset(x, values.table))
     names(xs.table) = c("Distance", "Elevation")
     xs.table["Station"] = str_c("XS_", xs.indices)
     xs.table["Time"] = this.time

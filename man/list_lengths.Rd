@@ -10,10 +10,10 @@ list_lengths(f)
 \item{f}{The HDF5 file to read.}
 }
 \value{
-a vector of cross section lengths.
+a matrix of cross section lengths.
 }
 \description{
-Get list cross section lengths.
+List cross section lengths.
 }
 \examples{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
