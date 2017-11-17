@@ -287,7 +287,7 @@ read_standard = function(f, table.name, which.times = NULL,
   tblpath = file.path(get_output_block(run.type, ras.version), table.name)
   tspath = get_timestep_table(run.type, ras.version)
   # read data
-  res = read_hdtable(f, tblpath, tspath, geompath, "Time", "XS_")
+  res = read_hdtable(f, tblpath, tspath, geompath, "Time", "XS_")[[1]]
   # filter by time/station
   othercols = which(!str_detect(names(res), "XS_"))
   stationcols = which(str_detect(names(res), "XS_"))[which.stations]
@@ -322,9 +322,12 @@ read_standard = function(f, table.name, which.times = NULL,
 #' @export
 read_sediment = function(f, table.name, which.times = NULL,
   which.stations = NULL, which.grains = NULL) {
+  # nse workaround
+  GrainClass = NULL
   # get run type
   run.type = get_run_type(f)
   ras.version = get_RAS_version(f)
+  # argument checks
   grain.levels = c("", paste(1:20))
   grain.labels = list_grain_classes(f)
   if (!is.null(which.grains)) {
@@ -332,7 +335,28 @@ read_sediment = function(f, table.name, which.times = NULL,
     if (any(which.grains %in% grain.labels))
       which.grains[which.grains %in% grain.labels] = grain.levels[
         match(which.grains[which.grains %in% grain.labels], grain.labels)]
-  }
+    }
+  if (is.null(which.times))
+    which.times = seq_along(list_output_times(f))
+  else if (!is.numeric(which.times))
+    which.times = which(list_output_times(f) %in% which.times)
+  else
+    which.times = which(seq_along(list_output_times(f)) %in% which.times)
+  if (length(which.times) < 1L)
+    stop("No data matching 'which.times' was found")
+  if (is.null(which.stations))
+    which.stations = seq_along(list_stations(f))
+  else if (!is.numeric(which.stations))
+    which.stations = which(list_stations(f) %in% str_replace(which.stations, 
+      "XS_", ""))
+  else
+    which.stations = which(seq_along(list_stations(f)) %in% which.stations)
+  if (length(which.stations) < 1L)
+    stop("No data matching 'which.stations' was found")
+  # specify tables
+  geompath = get_station_table(ras.version)
+  tspath = get_timestep_table(run.type, ras.version)
+  # get sediment tables
   sedimentpath = file.path(get_sediment_block(run.type, ras.version), table.name)
   alltables = list_sediment(f, sedimentpath)
   if (length(alltables) < 1)
@@ -345,15 +369,16 @@ read_sediment = function(f, table.name, which.times = NULL,
     which.grains = basename(table.paths) %>% str_replace(table.name, "") %>%
       str_trim()
   }
+  # read in data
   table.names = basename(table.paths)
-  res = vector("list", length(table.names))
-  for (i in seq_along(table.names)) {
-    res[[i]] = read_standard(f, table.names[[i]], which.times,
-      which.stations)
-    res[[i]]["GrainClass"] = factor(which.grains[i],
-      levels = grain.levels, labels = grain.labels)
-  }
-  do.call(bind_rows, res)
+  res.list = read_hdtable(f, table.paths, tspath, geompath, "Time", "XS_")
+  names(res.list) = grain.labels[which.grains]
+  res = bind_rows(res.list, .id = "GrainClass") %>%
+    mutate(GrainClass = factor(GrainClass, levels = grain.levels,
+      labels = grain.labels))
+  othercols = which(!str_detect(names(res), "XS_"))
+  stationcols = which(str_detect(names(res), "XS_"))[which.stations]
+  res[which.times, c(othercols, stationcols)]  
 }
 
 # Read RAS Table
@@ -385,32 +410,32 @@ read_sediment = function(f, table.name, which.times = NULL,
 #' @import hdf5r
 #' @import dplyr
 #' @import stringr
-read_hdtable = function(f, table.path, row.table.path, col.table.path,
+read_hdtable = function(f, table.paths, row.table.path, col.table.path,
   rowcolname, colprefix) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
-  # get run type
-  run.type = get_run_type(f)
   # open file
   x = H5File$new(f, mode = 'r')
   on.exit(x$close_all())
-  for (pth in c(table.path, row.table.path, col.table.path))
-  clabs = get_dataset(x, col.table.path) %>% str_trim()
-  rlabs = get_dataset(x, row.table.path) %>% str_trim()
-  this = get_dataset(x, table.path) %>% as_data_frame()
-#  if (run.type == "Unsteady") {
-#    this = this %>% head(-1) #%>% tail(-1)
-#    rlabs[2] = rlabs[1]
-#    rlabs = rlabs %>% head(-1) #%>% tail(-1)
-#  }
-#  else if (run.type == "QuasiUnsteady") {
-#    this = this %>% head(-1)
-#    rlabs = rlabs %>% head(-1)
-#  }
-  clabs = str_c(colprefix, clabs)
-  names(this) = clabs
-  this[rowcolname] = rlabs
-  this[c(rowcolname, clabs)]
+  clabs = str_c(colprefix, str_trim(get_dataset(x, col.table.path)))
+  rlabs = str_trim(get_dataset(x, row.table.path))
+  process_table = function(pth) {
+    this = as_data_frame(get_dataset(x, pth))
+    names(this) = clabs
+    this[rowcolname] = rlabs
+    this[c(rowcolname, clabs)]
+#    run.type = get_run_type(f)
+#    if (run.type == "Unsteady") {
+#      this = this %>% head(-1) #%>% tail(-1)
+#      rlabs[2] = rlabs[1]
+#      rlabs = rlabs %>% head(-1) #%>% tail(-1)
+#    }
+#    else if (run.type == "QuasiUnsteady") {
+#      this = this %>% head(-1)
+#      rlabs = rlabs %>% head(-1)
+#    }
+  }
+  lapply(table.paths, process_table)
 }
 
 #' Difference Table
