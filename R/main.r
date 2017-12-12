@@ -606,9 +606,12 @@ cumulative_table = function(d, time.col = "Time", over.time = TRUE,
   longitudinal = TRUE, direction = c("upstream", "downstream")){
   # nse workaround
   . = NULL
-  time.order = d %>% reformat_fields(time.col) %>% `[[`(time.col) %>% order()
+  time.order = d %>%
+    reformat_fields(time.col = time.col, station.col = NULL) %>%
+    `[[`(time.col) %>% order()
   xs.order = names(d) %>% str_subset("XS_") %>% data_frame(Station = .) %>%
-    reformat_fields("Station") %>% `[[`("Station") %>% order()
+    reformat_fields(station.col = "Station", time.col = NULL) %>%
+    `[[`("Station") %>% order()
   ordered.xs = names(d) %>% str_subset("XS_") %>% `[`(xs.order)
   ordered.d = d[time.order, c("Time", ordered.xs)]
   if (over.time)
@@ -684,7 +687,7 @@ change_table = function(d, time.col = "Time") {
   Value = NULL; ftime = NULL; Station = NULL
   vol.d = d %>% to_longtable("Value", station.col = "Station") %>%
     mutate_(.dots = list(ftime = time.col)) %>%
-    reformat_fields(list("Time" = "ftime")) %>%
+    reformat_fields(time.col = "ftime", station.col = NULL) %>%
     arrange(ftime) %>%
     group_by(Station) %>%
     mutate(Change = lag(Value) - Value) %>%
@@ -746,12 +749,12 @@ order_table = function(d, time.col = "Time") {
   col.names = names(d)
   station.cols = col.names %>% `[`(str_detect(., "XS_")) %>%
     data_frame(Station = .) %>% mutate(station.num = Station) %>%
-    reformat_fields(list(Station = "station.num")) %>%
+    reformat_fields(station.col = "station.num", time.col = NULL) %>%
     arrange(station.num) %>% `[[`("Station")
   other.cols = setdiff(col.names, station.cols)
   d["time.order"] = d[[time.col]]
-  d %>% reformat_fields(list(Time = "time.order")) %>% arrange(time.order) %>%
-    `[`(c(other.cols, station.cols))
+  d %>% reformat_fields(time.col = "time.order", station.col = NULL) %>%
+    arrange(time.order) %>% `[`(c(other.cols, station.cols))
 }
 
 #' Order Table (Sediment)

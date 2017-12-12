@@ -4,14 +4,16 @@
 \alias{reformat_fields}
 \title{Reformat Standard Fields}
 \usage{
-reformat_fields(ld, fields = list("Time", "Station"))
+reformat_fields(ld, time.col = "Time", station.col = "Station")
 }
 \arguments{
 \item{ld}{A data table.}
 
-\item{fields}{The fields to reformat. For non-default Station and Time
-columns, \code{fields} must be a named list identifying the actual names or
-positions of the "Time" and "Station" columns.}
+\item{time.col}{The time column name.
+To skip formatting the times, set to \code{NULL}.}
+
+\item{station.col}{(For long tables) The station column name. 
+To skip formatting the stations, set to \code{NULL}.}
 }
 \value{
 The data table with reformatted fields.
@@ -20,10 +22,10 @@ The data table with reformatted fields.
 Reformat standard RAStestR fields as standard R data types.
 }
 \details{
-If the "Time" field is specified, values in that column
-  will be formatted as R timestamps (POSIXct). If the "Station"
-  field is specified, stations will be converted to numeric values
-  (only applicable to long format tables).
+Values in the Time column are formatted as R timestamps 
+  (POSIXct). No adjustments for daylight savings or leap years are 
+  made. Values in the Station column of long-format tables are 
+  converted to numeric values.
 }
 \examples{
 simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",

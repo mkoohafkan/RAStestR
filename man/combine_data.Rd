@@ -7,7 +7,7 @@
 combine_data(..., data.list, id.col = "table")
 }
 \arguments{
-\item{...}{Series of named data sets to combine.}
+\item{...}{Series of named tables to combine.}
 
 \item{data.list}{Alternative input to \code{...}. A single list of
 data tables to combine. If not named, the elements will be named
@@ -22,7 +22,7 @@ A single data table with an additional column specifying
 }
 \description{
 Combine data tables into a single table. The tables must have
-  identical column names. For Data sourced from plans with different
+  identical column names. For data sourced from plans with different
   geometry or stations, use \code{to_longtable} to format the tables
   consistently before combining. If combining tables of different
   data, provide explicit names to the tables to easily differentiate

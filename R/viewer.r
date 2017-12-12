@@ -408,7 +408,7 @@ survey_extend = function(d, mode = c("lag", "lead"),
     Distance = distance.col)
   station.order = sort(unique(d$Station))
   time.order = d %>% mutate(time.char = Time) %>%
-    reformat_fields("Time") %>% arrange(Time) %>%
+    reformat_fields(time.col = "Time") %>% arrange(Time) %>%
     `[[`("time.char") %>% unique()
   mode = match.arg(mode, c("lag", "lead"))
   if (mode == "lead")

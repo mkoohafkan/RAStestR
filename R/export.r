@@ -63,13 +63,13 @@ to_widetable = function(d, key.col, value.col, key.prefix) {
 #' Combine Data Tables
 #'
 #' Combine data tables into a single table. The tables must have
-#'   identical column names. For Data sourced from plans with different
+#'   identical column names. For data sourced from plans with different
 #'   geometry or stations, use \code{to_longtable} to format the tables
 #'   consistently before combining. If combining tables of different
 #'   data, provide explicit names to the tables to easily differentiate
 #'   between variables.
 #'
-#' @param ... Series of named data sets to combine.
+#' @param ... Series of named tables to combine.
 #' @param data.list Alternative input to \code{...}. A single list of
 #'  data tables to combine. If not named, the elements will be named
 #'  sequentially using \code{id.col}, e.g. "table 1", "table 2",
@@ -161,7 +161,7 @@ station_to_distance = function(d, distance.col = "Distance",
   station.col = "Station", direction = c("downstream", "upstream"), 
   metric = FALSE) {
   direction = match.arg(direction, c("downstream", "upstream"))
-  ld = reformat_fields(d, list(Station = station.col))
+  ld = reformat_fields(d, station.col = station.col)
   if (metric)
     ld[distance.col] = 1000 * (as.numeric(ld[[station.col]]) -
       min(as.numeric(ld[[station.col]])))
@@ -180,15 +180,16 @@ station_to_distance = function(d, distance.col = "Distance",
 #' Reformat standard RAStestR fields as standard R data types.
 #'
 #' @param ld A data table.
-#' @param fields The fields to reformat. For non-default Station and Time
-#'   columns, \code{fields} must be a named list identifying the actual names or
-#'   positions of the "Time" and "Station" columns.
+#' @param time.col The time column name.
+#'   To skip formatting the times, set to \code{NULL}.
+#' @param station.col (For long tables) The station column name. 
+#'   To skip formatting the stations, set to \code{NULL}.
 #' @return The data table with reformatted fields.
 #'
-#' @details If the "Time" field is specified, values in that column
-#'   will be formatted as R timestamps (POSIXct). If the "Station"
-#'   field is specified, stations will be converted to numeric values
-#'   (only applicable to long format tables).
+#' @details Values in the Time column are formatted as R timestamps 
+#'   (POSIXct). No adjustments for daylight savings or leap years are 
+#'   made. Values in the Station column of long-format tables are 
+#'   converted to numeric values.
 #'
 #' @examples
 #' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
@@ -201,20 +202,29 @@ station_to_distance = function(d, distance.col = "Distance",
 #'
 #' @import stringr
 #' @export
-reformat_fields = function(ld, fields = list("Time", "Station")) {
-  fields = as.list(fields)
-  if (is.null(names(fields)))
-    names(fields) = fields
-  if (!all(names(fields) %in% c("Time", "Station")))
-    stop("Argument 'fields' not recognized")
-  time.col = fields[["Time"]]
-  station.col = fields[["Station"]]
-  if ("Time" %in% names(fields))
-    if(!("POSIXt" %in% class(ld[[time.col]])))
-      ld[time.col] = as.POSIXct(ld[[time.col]], tz = "UTC",
-        format = "%d%b%Y %H:%M:%S")
-  if ("Station" %in% names(fields))
-    ld[station.col] = ld[[station.col]] %>% as.character() %>%
-      str_replace("XS_", "") %>% str_replace("[*]", "") %>% as.numeric()
+reformat_fields = function(ld, time.col = "Time", station.col = "Station") {
+  if (!is.null(time.col)) {
+    if (is.numeric(time.col))
+      time.col = names(ld)[time.col]
+    if (time.col %in% names(ld)) {
+      if (!("POSIXt" %in% class(ld[[time.col]])))
+        ld[time.col] = as.POSIXct(ld[[time.col]], tz = "UTC",
+          format = "%d%b%Y %H:%M:%S")
+    } else {
+      warning("Could not find column ", sprintf('"%s"', time.col))
+    }
+  }
+  if (!is.null(station.col)) {
+    if (is.numeric(station.col))
+      station.col = names(ld)[station.col]
+    if (station.col %in% names(ld)) { 
+      if (is.character(ld[[station.col]]))
+        ld[station.col] = as.numeric(
+          str_replace_all(ld[[station.col]],
+            c("XS_" = "", "[*]" = "")))
+    } else {
+      warning("Could not find column ", sprintf('"%s"', station.col))
+    }
+  }
   ld
 }
