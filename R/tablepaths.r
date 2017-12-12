@@ -3,7 +3,8 @@ get_station_table = function(RAS.version) {
   if (is.null(RAS.version))
     RAS.version = options()[["RAStestR.RASversion"]]
   switch(RAS.version,
-    "5.0.3" = file.path("Geometry", "Cross Sections", "River Stations")
+    "5.0.3" = file.path("Geometry", "Cross Sections", "River Stations"),
+    "5.0.4" = file.path("Geometry", "Cross Sections", "Attributes")
   )
 }
 
@@ -32,7 +33,8 @@ get_lengths_table = function(RAS.version) {
 # grain class table path
 get_grain_class_table = function(RAS.version) {
   switch(RAS.version,
-    "5.0.3" = file.path("Event Conditions", "Sediment", "Grain Class Names")
+    "5.0.3" = file.path("Event Conditions", "Sediment", "Grain Class Names"),
+    "5.0.4" = file.path("Sediment", "Grain Class Data", "Grain Class Names")
   )
 }
 # bank station table path
@@ -123,7 +125,8 @@ get_plan_info_table = function(RAS.version) {
 
 get_2d_flow_area_table = function(RAS.version) {
   switch(RAS.version,
-    "5.0.3" = file.path("Geometry", "2D Flow Areas", "Names")
+    "5.0.3" = file.path("Geometry", "2D Flow Areas", "Names"),
+    "5.0.4" = file.path("Geometry", "2D Flow Areas", "Names")
   )
 }
 

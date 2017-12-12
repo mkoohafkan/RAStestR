@@ -265,29 +265,30 @@ read_standard = function(f, table.name, which.times = NULL,
   if (run.type == "Unsteady+Sediment" && override.sediment)
     run.type == "Unsteady"
   # argument checks
+  output.times = list_output_times(f)
   if (is.null(which.times))
-    which.times = seq_along(list_output_times(f))
+    which.times = seq_along(output.times)
   else if (!is.numeric(which.times))
-    which.times = which(list_output_times(f) %in% which.times)
+    which.times = which(output.times %in% which.times)
   else
-    which.times = which(seq_along(list_output_times(f)) %in% which.times)
+    which.times = which(seq_along(output.times) %in% which.times)
   if (length(which.times) < 1L)
     stop("No data matching 'which.times' was found")
+  stations = list_stations(f)
   if (is.null(which.stations))
-    which.stations = seq_along(list_stations(f))
+    which.stations = seq_along(stations)
   else if (!is.numeric(which.stations))
-    which.stations = which(list_stations(f) %in% str_replace(which.stations, 
+    which.stations = which(stations %in% str_replace(which.stations, 
       "XS_", ""))
   else
-    which.stations = which(seq_along(list_stations(f)) %in% which.stations)
+    which.stations = which(seq_along(stations) %in% which.stations)
   if (length(which.stations) < 1L)
     stop("No data matching 'which.stations' was found")
   # specify tables
-  geompath = get_station_table(ras.version)
   tblpath = file.path(get_output_block(run.type, ras.version), table.name)
-  tspath = get_timestep_table(run.type, ras.version)
   # read data
-  res = read_hdtable(f, tblpath, tspath, geompath, "Time", "XS_")[[1]]
+  res = read_hdtable(f, tblpath, "Time", output.times,
+    str_c("XS_", stations))[[1]]
   # filter by time/station
   othercols = which(!str_detect(names(res), "XS_"))
   stationcols = which(str_detect(names(res), "XS_"))[which.stations]
@@ -328,57 +329,72 @@ read_sediment = function(f, table.name, which.times = NULL,
   run.type = get_run_type(f)
   ras.version = get_RAS_version(f)
   # argument checks
-  grain.levels = c("", paste(1:20))
   grain.labels = list_grain_classes(f)
+  grain.levels = c("", paste(1:20))
   if (!is.null(which.grains)) {
-    which.grains = as.character(which.grains)
-    if (any(which.grains %in% grain.labels))
-      which.grains[which.grains %in% grain.labels] = grain.levels[
-        match(which.grains[which.grains %in% grain.labels], grain.labels)]
+    given.grains = which.grains
+    if (any(which.grains %in% grain.labels)) {
+      error.grains = setdiff(which.grains, grain.labels)
+      if (length(error.grains) > 0L)
+        stop("Grain class ID not recognized: ",
+          paste(error.grains, collapse =", "))
+      which.grains = grain.levels[grain.labels %in% which.grains]
     }
-  if (is.null(which.times))
-    which.times = seq_along(list_output_times(f))
-  else if (!is.numeric(which.times))
-    which.times = which(list_output_times(f) %in% which.times)
+    else if (any(which.grains %in% grain.levels)) {
+      error.grains = setdiff(which.grains, grain.levels)
+      if (length(error.grains) > 0L)
+        stop("Grain class ID not recognized: ",
+          paste(error.grains, collapse =", "))
+      which.grains = grain.levels[grain.levels %in% which.grains]
+    }
+    else
+      stop("No data matching 'which.grains' was found")
+    }
   else
-    which.times = which(seq_along(list_output_times(f)) %in% which.times)
+    which.grains = grain.levels
+  output.times = list_output_times(f)
+  if (is.null(which.times))
+    which.times = seq_along(output.times)
+  else if (!is.numeric(which.times))
+    which.times = which(output.times %in% which.times)
+  else
+    which.times = which(seq_along(output.times) %in% which.times)
   if (length(which.times) < 1L)
     stop("No data matching 'which.times' was found")
+  stations = list_stations(f)
   if (is.null(which.stations))
-    which.stations = seq_along(list_stations(f))
+    which.stations = seq_along(stations)
   else if (!is.numeric(which.stations))
-    which.stations = which(list_stations(f) %in% str_replace(which.stations, 
+    which.stations = which(stations %in% str_replace(which.stations, 
       "XS_", ""))
   else
-    which.stations = which(seq_along(list_stations(f)) %in% which.stations)
+    which.stations = which(seq_along(stations) %in% which.stations)
   if (length(which.stations) < 1L)
     stop("No data matching 'which.stations' was found")
-  # specify tables
-  geompath = get_station_table(ras.version)
-  tspath = get_timestep_table(run.type, ras.version)
   # get sediment tables
   sedimentpath = file.path(get_sediment_block(run.type, ras.version), table.name)
-  alltables = list_sediment(f, sedimentpath)
-  if (length(alltables) < 1)
+  included.grains = str_trim(str_replace(list_sediment(f, sedimentpath),
+    sedimentpath, ""))
+  if (length(included.grains) < 1)
     stop('Table "', sedimentpath, '" could not be found.', call. = FALSE)
-  if (!is.null(which.grains)) {
-    whichtables = str_c(table.name, which.grains, sep = " ") %>% str_trim()
-    table.paths = alltables[basename(alltables) %in% whichtables]
-  } else {
-    table.paths = alltables
-    which.grains = basename(table.paths) %>% str_replace(table.name, "") %>%
-      str_trim()
-  }
+  missing.grains = setdiff(which.grains, included.grains)
+  selected.grains = intersect(which.grains, included.grains)  
+#  if (length(missing.grains) > 0L)
+#    warning("Some grain classes could not be found: ",
+#      paste(grain.labels[grain.levels %in% missing.grains],
+#        collapse = ", "))
+  table.paths = str_trim(str_c(sedimentpath, selected.grains, sep = " "))
+  table.labels = grain.labels[grain.levels %in% selected.grains]
   # read in data
-  table.names = basename(table.paths)
-  res.list = read_hdtable(f, table.paths, tspath, geompath, "Time", "XS_")
-  names(res.list) = grain.labels[which.grains]
+  res.list = read_hdtable(f, table.paths, "Time", output.times,
+    str_c("XS_", stations))
+  res.list = lapply(res.list, function(tbl) tbl[which.times,])
+  names(res.list) = table.labels
   res = bind_rows(res.list, .id = "GrainClass") %>%
-    mutate(GrainClass = factor(GrainClass, levels = grain.levels,
-      labels = grain.labels))
+    mutate(GrainClass = factor(GrainClass, levels = grain.labels))
   othercols = which(!str_detect(names(res), "XS_"))
   stationcols = which(str_detect(names(res), "XS_"))[which.stations]
-  res[which.times, c(othercols, stationcols)]  
+  res[c(othercols, stationcols)]  
 }
 
 # Read RAS Table
@@ -388,10 +404,9 @@ read_sediment = function(f, table.name, which.times = NULL,
 #
 # @param f The HDF55 file to read.
 # @param table.path The table to read in.
-# @param row.table.path The table containing the row identifiers.
-# @param col.table.path The table containing the column identifiers.
 # @param rowcolname The name to assign to the new row id column.
-# @param colprefix A prefix to apply to the column IDs.
+# @param rlabs A vector of row identifiers.
+# @param clabs A vector of column identifiers.
 # @return A dataframe.
 #
 # @examples
@@ -410,15 +425,18 @@ read_sediment = function(f, table.name, which.times = NULL,
 #' @import hdf5r
 #' @import dplyr
 #' @import stringr
-read_hdtable = function(f, table.paths, row.table.path, col.table.path,
-  rowcolname, colprefix) {
+read_hdtable = function(f, table.paths, rowcolname, rlabs, clabs) {
   if (!file.exists(f))
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   # open file
   x = H5File$new(f, mode = 'r')
   on.exit(x$close_all())
-  clabs = str_c(colprefix, str_trim(get_dataset(x, col.table.path)))
-  rlabs = str_trim(get_dataset(x, row.table.path))
+  all.tables = list.datasets(x)
+  missing.tables = setdiff(table.paths, all.tables)
+  if (length(missing.tables) > 0L)
+    stop("Could not find tables: ",
+      paste(basename(missing.tables), collapse = ", "),
+      call. = FALSE)
   process_table = function(pth) {
     this = as_data_frame(get_dataset(x, pth))
     names(this) = clabs
