@@ -10,6 +10,9 @@
 #' @param gather.cols The column names to gather data from. If not specified,
 #'   all columns with the prefix "XS_" will be used.
 #' @param station.col The name of the new column holding station IDs.
+#' @param gather.attr The attributes to include in the resulting 
+#'   long-format table. By default the "River" and "Reach" attributes are
+#'   added as additional columns to the long-format table.
 #' @return The original data table in long format.
 #'
 #' @examples
@@ -24,11 +27,38 @@
 #' @import tidyr
 #' @import dplyr
 #' @export
-to_longtable = function(d, data.col, gather.cols, station.col = "Station") {
-  if (missing(gather.cols))
-    gather.cols = names(d)[grepl("XS_", names(d))]
-  gather_(d, station.col, data.col, gather.cols, convert = FALSE,
-    factor_key = FALSE)
+to_longtable = function(d, data.col, gather.cols,
+  station.col = "Station", gather.attr = c("River", "Reach")) {
+  if (missing(gather.cols)) {
+    gather.idx = grepl("XS_", names(d))
+    gather.cols = names(d)[gather.idx]
+  } else if(is.numeric(gather.cols)) {
+    gather.idx = gather.cols
+    gather.cols = names(d)[gather.idx]
+  } else {
+    gather.idx = names(d) %in% gather.cols
+  }
+  attr.names = intersect(names(attributes(d)), gather.attr)
+  if (length(attr.names) > 0L) {
+    missing.attr = setdiff(gather.attr, attr.names)
+    if (length(missing.attr) > 0L)
+      warning("Could not find attributes: ", str_c(missing.attr,
+        collapse = ", "))
+    namepref = do.call(str_c, c(attributes(d)[attr.names],
+      list(sep = "\t")))
+    newnames = str_c(namepref, names(d), sep = "\t")
+    names(d)[gather.idx] = newnames[gather.idx]
+    gather.cols = names(d)[gather.idx]
+  }
+  res = gather_(d, station.col, data.col, gather.cols,
+    convert = FALSE, factor_key = FALSE)
+  if (length(attr.names) > 0L) {
+    split.names = str_split(res[[station.col]], "\t")
+    for (i in seq_along(attr.names))
+      res[attr.names[i]] = sapply(split.names, function(x) x[i])
+    res[station.col] = sapply(split.names, function(x) x[i + 1])
+  }
+  res
 }
 
 #'Reformat As Wide Table
@@ -42,6 +72,10 @@ to_longtable = function(d, data.col, gather.cols, station.col = "Station") {
 #' @param value.col The name of the column holding data values.
 #' @param key.prefix Text to prepend to the new columns created from
 #'   keys in \code{key.col}.
+#' @param key.attr Columns to maintain as attributes in the resulting 
+#'   wide-format table. By default, columns "River" and "Reach" will be
+#'   searched for and maintained as attributes in the output wide-format
+#    table (if they exist).
 #' @return The original data table in wide format.
 #'
 #' @examples
@@ -54,10 +88,41 @@ to_longtable = function(d, data.col, gather.cols, station.col = "Station") {
 #'
 #' @import tidyr
 #' @export
-to_widetable = function(d, key.col, value.col, key.prefix) {
+to_widetable = function(d, key.col, value.col, key.prefix,
+  key.attr = c("River", "Reach")) {
   if (!missing(key.prefix))
     d[key.col] = paste0(key.prefix, d[[key.col]])
-  d %>% spread_(key.col, value.col)
+  # add attributes to key
+  attr.names = intersect(names(d), key.attr)
+  if (length(attr.names) != length(key.attr)) {
+    missing.attr = setdiff(key.attr, attr.names)
+    warning("Could not find columns: ",
+    str_c(missing.attr, collapse = ", "))
+  }
+  if (length(attr.names) > 0L) {
+    namepref = do.call(str_c, c(as.list(d[attr.names]), sep = "\t"))
+    d[key.col] = str_c(namepref, d[[key.col]], sep = "\t")
+    spreadcols = setdiff(names(d), attr.names)
+  } else {
+  spreadcols = names(d)
+  }
+  res = spread(d[spreadcols], key.col, value.col)
+  if (length(attr.names) > 0L) {
+    valcols = tail(names(res), - (length(spreadcols) - length(attr.names)))
+    othercols = head(names(res), - length(valcols))
+    split.attr = str_split(valcols, "\t")
+    new.attr = vector("list", length(attr.names))
+    names(new.attr) = attr.names
+    for (i in seq_along(attr.names))
+      new.attr[[attr.names[i]]] = sapply(split.attr, function(x) x[i])
+    newnames = sapply(split.attr, function(x) tail(x, 1))
+    names(res)[length(othercols) + 1:length(valcols)] = newnames
+    # generate column attributes
+    for (n in names(new.attr))
+      attr(res, n) = c(rep("", length(othercols)), new.attr[[n]])
+  }
+  # return result
+  res
 }
 
 #' Combine Data Tables
@@ -218,10 +283,10 @@ reformat_fields = function(ld, time.col = "Time", station.col = "Station") {
     if (is.numeric(station.col))
       station.col = names(ld)[station.col]
     if (station.col %in% names(ld)) { 
-      if (is.character(ld[[station.col]]))
-        ld[station.col] = as.numeric(
-          str_replace_all(ld[[station.col]],
-            c("XS_" = "", "[*]" = "")))
+      if (is.character(ld[[station.col]])) {
+        ld[station.col] = as.numeric(str_replace_all(ld[[station.col]], 
+          c("XS_" = "", "[*]" = "")))
+      }
     } else {
       warning("Could not find column ", sprintf('"%s"', station.col))
     }
