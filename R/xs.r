@@ -3,6 +3,11 @@
 #' Read the cross section data output.
 #'
 #' @inheritParams read_standard
+#' @param from.geometry if \code{TRUE}, read the station elevtion data from the
+#'   plan geometry instead of from the sediment output data. This is useful
+#'   for reading geometry from a hydraulics-only model or directly from the 
+#'   geometry data (file extension .g*.hdf). Argument \code{which.times} 
+#'   will be ignored. 
 #' @return A dataframe with a column "Time" containing the Date Time
 #'   Stamp data; column "Station" containing the station ID in format "XS_####"
 #'   where ### is the cross-section ID; column "Distance" containing the lateral
@@ -22,11 +27,49 @@
 #' @import dplyr
 #' @import stringr
 #' @export
-read_xs = function(f, which.times = NULL, which.stations = NULL) {
+read_xs = function(f, which.times = NULL, which.stations = NULL,
+  from.geometry = FALSE) {
   Station = NULL # workaround for nse
   # get run type
-  run.type = get_run_type(f)
   ras.version = get_RAS_version(f)
+
+  # get stations
+  stations = list_stations(f)
+  if (is.null(which.stations))
+    which.stations = str_c("XS_", stations)
+  else if (is.numeric(which.stations))
+    which.stations = str_c("XS_", str_replace(stations[which.stations],
+      "XS_", ""))
+  else if (is.character(which.stations))
+    which.stations = str_c("XS_", str_replace(which.stations, "XS_", ""))
+  if (!any(which.stations %in% str_c("XS_", list_stations(f))))
+    stop("No data matching 'which.stations' was found")
+
+  # read from geometry if specified
+  if (from.geometry) {
+    tblblock = get_xsection_block_geometry(ras.version)
+    stations = list_stations(f)
+    rivers = list_rivers(f)
+    reaches = list_reaches(f)
+    index.table = file.path(tblblock, "Station Elevation Info")
+    values.table = file.path(tblblock, "Station Elevation Values")
+    x = H5File$new(f, mode = 'r')
+    on.exit(x$close_all())
+    indices = get_dataset(x, index.table)[, 2]
+    xs.indices = rep(stations, indices)
+    river.indices = rep(rivers, indices)
+    reach.indices = rep(reaches, indices)
+    xs.table = as_data_frame(get_dataset(x, values.table))
+    names(xs.table) = c("Distance", "Elevation")
+    xs.table["Station"] = str_c("XS_", xs.indices)
+    xs.table["River"] = river.indices
+    xs.table["Reach"] = reach.indices
+    xs.table["Time"] = NA
+    xs.table = filter(xs.table, Station %in% which.stations)
+    return(xs.table[c("Time", "River", "Reach", "Station", "Distance", "Elevation")])
+  }
+  # read from sediment output data
+  run.type = get_run_type(f)
   tblblock = get_xsection_block(run.type, ras.version)
   xsoutputs = list_xs(f, tblblock)
   if (is.null(which.times))
@@ -43,16 +86,6 @@ read_xs = function(f, which.times = NULL, which.stations = NULL) {
       str_c(which.times[!times.found], collapse = ", "))
     which.times = which.times[times.found]
   }
-  stations = list_stations(f)
-  if (is.null(which.stations))
-    which.stations = str_c("XS_", stations)
-  else if (is.numeric(which.stations))
-    which.stations = str_c("XS_", str_replace(stations[which.stations],
-      "XS_", ""))
-  else if (is.character(which.stations))
-    which.stations = str_c("XS_", str_replace(which.stations, "XS_", ""))
-  if (!any(which.stations %in% str_c("XS_", list_stations(f))))
-    stop("No data matching 'which.stations' was found")
 
   x = H5File$new(f, mode = 'r')
   on.exit(x$close_all())
