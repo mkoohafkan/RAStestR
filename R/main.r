@@ -284,15 +284,22 @@ read_standard = function(f, table.name, which.times = NULL,
     which.stations = which(seq_along(stations) %in% which.stations)
   if (length(which.stations) < 1L)
     stop("No data matching 'which.stations' was found")
+  #generate station labels
+  station.labels = str_c("XS_", stations)
   # specify tables
   tblpath = file.path(get_output_block(run.type, ras.version), table.name)
   # read data
   res = read_hdtable(f, tblpath, "Time", output.times,
-    str_c("XS_", stations))[[1]]
+    station.labels)[[1]]
   # filter by time/station
   othercols = which(!str_detect(names(res), "XS_"))
   stationcols = which(str_detect(names(res), "XS_"))[which.stations]
-  res[which.times, c(othercols, stationcols)]
+  res = res[which.times, c(othercols, stationcols)]
+  # generate River and Reach column attributes
+  attr(res, "River") = c(rep("", length(othercols)), list_rivers(f)[which.stations])
+  attr(res, "Reach") = c(rep("", length(othercols)), list_reaches(f)[which.stations])
+  # return result
+  res
 }
 
 #' Sediment By Grain Class Table
@@ -385,16 +392,23 @@ read_sediment = function(f, table.name, which.times = NULL,
 #        collapse = ", "))
   table.paths = str_trim(str_c(sedimentpath, selected.grains, sep = " "))
   table.labels = grain.labels[grain.levels %in% selected.grains]
+  #generate station labels
+  station.labels = str_c("XS_", stations)
   # read in data
   res.list = read_hdtable(f, table.paths, "Time", output.times,
-    str_c("XS_", stations))
+    station.labels)
   res.list = lapply(res.list, function(tbl) tbl[which.times,])
   names(res.list) = table.labels
   res = bind_rows(res.list, .id = "GrainClass") %>%
     mutate(GrainClass = factor(GrainClass, levels = grain.labels))
   othercols = which(!str_detect(names(res), "XS_"))
   stationcols = which(str_detect(names(res), "XS_"))[which.stations]
-  res[c(othercols, stationcols)]  
+  res = res[c(othercols, stationcols)]
+  # generate River and Reach column attributes
+  attr(res, "River") = c(rep("", length(othercols)), list_rivers(f)[which.stations])
+  attr(res, "Reach") = c(rep("", length(othercols)), list_reaches(f)[which.stations])
+  # return result
+  res  
 }
 
 # Read RAS Table
@@ -485,6 +499,7 @@ read_hdtable = function(f, table.paths, rowcolname, rlabs, clabs) {
 #' @export
 difference_table = function(d1, d2, relative = FALSE, partial = FALSE,
   difference.col = "Difference", time.col = "Time") {
+#  store.attr = save_attributes(d)
   if (relative)
     fun = function(x1, x2)
       2 * (x2 - x1) / (x2 + x1)
@@ -606,6 +621,7 @@ cumulative_table = function(d, time.col = "Time", over.time = TRUE,
   longitudinal = TRUE, direction = c("upstream", "downstream")){
   # nse workaround
   . = NULL
+#  store.attr = save_attributes(d)
   time.order = d %>%
     reformat_fields(time.col = time.col, station.col = NULL) %>%
     `[[`(time.col) %>% order()
@@ -626,9 +642,12 @@ cumulative_table = function(d, time.col = "Time", over.time = TRUE,
     cum.d = as.matrix(ordered.d[ordered.xs])
     for (i in seq(nrow(cum.d)))
       cum.d[i,] = lon.fun(cumsum(lon.fun(cum.d[i,])))
-    bind_cols(ordered.d[time.col], as_data_frame(cum.d))
+    res = bind_cols(ordered.d[time.col], as_data_frame(cum.d))
   } else
-    ordered.d
+    res = ordered.d
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  res
 }
 
 #' Accumulate Data Over Time and/or Space (Sediment)
@@ -658,8 +677,14 @@ cumulative_sediment = function(d, time.col = "Time", grain.col = "GrainClass",
   direction = c("upstream", "downstream")){
   # nse workaround
   . = NULL
-  d %>% group_by_(grain.col) %>% do(cumulative_table(., time.col, over.time,
-    longitudinal, direction)) %>% ungroup()
+#  store.attr = save_attributes(d)
+  res = d %>%
+    group_by_(grain.col) %>%
+    do(cumulative_table(., time.col, over.time, longitudinal, direction)) %>%
+    ungroup()
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  res
 }
 
 #' Change Over Time
@@ -685,6 +710,7 @@ cumulative_sediment = function(d, time.col = "Time", grain.col = "GrainClass",
 change_table = function(d, time.col = "Time") {
   # nse workaround
   Value = NULL; ftime = NULL; Station = NULL
+#  store.attr = save_attributes(d)
   vol.d = d %>% to_longtable("Value", station.col = "Station") %>%
     mutate_(.dots = list(ftime = time.col)) %>%
     reformat_fields(time.col = "ftime", station.col = NULL) %>%
@@ -693,8 +719,11 @@ change_table = function(d, time.col = "Time") {
     mutate(Change = lag(Value) - Value) %>%
     ungroup()
   vol.d[vol.d$ftime == min(vol.d$ftime), "Change"] = 0
-  vol.d %>% select_(time.col, "Station", "Change") %>%
+  res = vol.d %>% select_(time.col, "Station", "Change") %>%
     spread_("Station", "Change", fill = NA)
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  res
 }
 
 #' Change Over Time (Sediment)
@@ -719,9 +748,13 @@ change_table = function(d, time.col = "Time") {
 change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
   # nse workaround
   . = NULL
-  d %>% group_by_(grain.col) %>% 
+#  store.attr = save_attributes(d)
+  res = d %>% group_by_(grain.col) %>%
     do(change_table(., time.col = time.col)) %>%
     ungroup()
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  res
 }
 
 #' Order Table
@@ -746,6 +779,7 @@ change_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
 order_table = function(d, time.col = "Time") {
   # nse workaround
   . = NULL; time.order = NULL; Station = NULL; station.num = NULL
+#  store.attr = save_attributes(d)
   col.names = names(d)
   station.cols = col.names %>% `[`(str_detect(., "XS_")) %>%
     data_frame(Station = .) %>% mutate(station.num = Station) %>%
@@ -753,8 +787,11 @@ order_table = function(d, time.col = "Time") {
     arrange(station.num) %>% `[[`("Station")
   other.cols = setdiff(col.names, station.cols)
   d["time.order"] = d[[time.col]]
-  d %>% reformat_fields(time.col = "time.order", station.col = NULL) %>%
+  res = d %>% reformat_fields(time.col = "time.order", station.col = NULL) %>%
     arrange(time.order) %>% `[`(c(other.cols, station.cols))
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  res
 }
 
 #' Order Table (Sediment)
@@ -780,8 +817,14 @@ order_table = function(d, time.col = "Time") {
 order_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
   # nse workaround
   . = NULL
-  d %>% arrange_(grain.col) %>% group_by_(grain.col) %>%
-    do(order_table(., time.col = time.col)) %>% ungroup()
+#  store.attr = save_attributes(d)
+  res = arrange_(d, grain.col)
+  res = group_by_(res, grain.col)
+  res = do(res, order_table(., time.col = time.col))
+  res = ungroup(res)
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  res
 }
 
 #' Table Operations
@@ -813,12 +856,17 @@ order_sediment = function(d, time.col = "Time", grain.col = "GrainClass") {
 #' @export
 operate_table = function(..., fun, partial = FALSE, time.col = "Time") {
   dots = list(...)
+#  dots.attr = lapply(dots, save_attributes)
   # single table
   if(length(dots) == 1L) {
     dots = dots[[1]]
+#    store.attr = dots.attr[[1]]
     datime.cols = setdiff(names(dots),time.col)
-    return(as_data_frame(cbind(dots[time.col],
-      fun(dots[, datime.cols]))))
+    res = as_data_frame(cbind(dots[time.col],
+      fun(dots[, datime.cols])))
+#    for (a in names(store.attr))
+#      attr(res, a) = store.attr[[a]]
+    return(res)
   }
   # check column names
   union.cols = Reduce(function(...) union(...), 
@@ -831,6 +879,16 @@ operate_table = function(..., fun, partial = FALSE, time.col = "Time") {
       message("Excluding columns: ", paste(diff.cols, sep = ", "))
     else
       stop('Tables in "..." do not have matching columns')
+  # slice attributes
+#  intersect.col.idx = lapply(dots, function(x) names(x) %in% intersect.cols)
+#  dots.attr.intersect = lapply(seq_along(dots.attr), function(i)
+#    lapply(dots.attr[[i]], function(x) x[intersect.col.idx[[i]]])) 
+  # check if all attributes are equal
+#  if (!all(sapply(dots.attr.intersect, function(x)
+#    identical(x, dots.attr.intersect[[1]]))))
+#  warning('Attributes of tables in "..." are not consistent. ',
+#    'Defaulting to attributes of first element')
+#  store.attr = dots.attr.intersect[[1]] 
   # check time stamps
   union.times = Reduce(function(...) union(...), 
     lapply(dots, function(x) x[[time.col]]))
@@ -849,8 +907,11 @@ operate_table = function(..., fun, partial = FALSE, time.col = "Time") {
   # get data columns
   datime.cols = setdiff(intersect.cols, time.col)
   # apply function
-  as_data_frame(cbind.data.frame(dots[[1]][time.col],
+  res = as_data_frame(cbind.data.frame(dots[[1]][time.col],
     Reduce(fun, lapply(dots, function(x) x[datime.cols]))))
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  res
 }
 
 #' Table Operations (Sediment)
@@ -873,14 +934,18 @@ operate_table = function(..., fun, partial = FALSE, time.col = "Time") {
 #'
 #' @import dplyr
 #' @export
-operate_sediment = function(..., fun = "+", partial = FALSE, 
+operate_sediment = function(..., fun, partial = FALSE, 
   time.col = "Time", grain.col = "GrainClass") {
   dots = list(...)
   if (length(dots) == 1L) {
     dots = dots[[1]]
+#    store.attr = save_attributes(dots)
     datime.cols = setdiff(names(dots), c(time.col, grain.col))
-    return(as_data_frame(cbind(dots[c(time.col, grain.col)],
-        fun(dots[, datime.cols]))))
+    res = as_data_frame(cbind(dots[c(time.col, grain.col)],
+        fun(dots[, datime.cols])))
+#    for (a in names(store.attr))
+#      attr(res, a) = store.attr[[a]]
+    return(res)
   }
   # check grain classes
   union.grains = Reduce(function(...) union(...), 
@@ -902,10 +967,18 @@ operate_sediment = function(..., fun = "+", partial = FALSE,
     grain.tables[[g]] = lapply(dots, function(x) 
       x[x[[grain.col]] == g, setdiff(names(x), grain.col)])
   }
-  bind_rows(
+  res = bind_rows(
     lapply(grain.tables, function(x) 
       do.call(operate_table, args = c(x, list(fun = fun, 
         partial = partial, time.col = time.col)))),
     .id = grain.col
   )
+#  store.attr = save_attributes(grain.tables[[1]])
+#  for (a in names(store.attr))
+#    attr(res, a) = store.attr[[a]]
+  return(res)
 }
+
+#save_attributes = function(d) {
+#  attributes(d)[c("River", "Reach")]
+#}
