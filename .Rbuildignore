@@ -11,6 +11,7 @@ LICENSE
 inst/build_helper.r
 inst/FARGO-report
 inst/DS-GAV
+inst/DS-GAV-BedChange
 inst/_old.R
 inst/_import.r
 ^.*\.Rproj$
@@ -19,3 +20,4 @@ inst/_import.r
 ^_pkgdown.yml$
 ^\.travis\.yml$
 ^tests$
+^alphaR$
