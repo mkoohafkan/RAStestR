@@ -47,7 +47,7 @@ grain classes. **RAStestR** provides listing functions to retrieve possible valu
 
 ```{r}
 list_output_times(ras.file)
-list_output_times(ras.file)
+list_stations(ras.file)
 list_grain_classes(ras.file)
 ```
 
