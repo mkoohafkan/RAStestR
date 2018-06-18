@@ -4,7 +4,8 @@
 \alias{read_xs}
 \title{Cross Section Table}
 \usage{
-read_xs(f, which.times = NULL, which.stations = NULL)
+read_xs(f, which.times = NULL, which.stations = NULL,
+  from.geometry = FALSE)
 }
 \arguments{
 \item{f}{The HDF5 file to read.}
@@ -14,6 +15,12 @@ NULL, all timestamps will be returned.}
 
 \item{which.stations}{Character vector of stations to extract. If
 NULL, all stations will be returned.}
+
+\item{from.geometry}{if \code{TRUE}, read the station elevtion data from the
+plan geometry instead of from the sediment output data. This is useful
+for reading geometry from a hydraulics-only model or directly from the 
+geometry data (file extension .g*.hdf). Argument \code{which.times} 
+will be ignored.}
 }
 \value{
 A dataframe with a column "Time" containing the Date Time

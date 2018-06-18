@@ -4,7 +4,8 @@
 \alias{to_widetable}
 \title{Reformat As Wide Table}
 \usage{
-to_widetable(d, key.col, value.col, key.prefix)
+to_widetable(d, key.col, value.col, key.prefix, key.attr = c("River",
+  "Reach"))
 }
 \arguments{
 \item{d}{The data table, i.e. output from \code{to_longtable}.}
@@ -15,6 +16,10 @@ to_widetable(d, key.col, value.col, key.prefix)
 
 \item{key.prefix}{Text to prepend to the new columns created from
 keys in \code{key.col}.}
+
+\item{key.attr}{Columns to maintain as attributes in the resulting 
+wide-format table. By default, columns "River" and "Reach" will be
+searched for and maintained as attributes in the output wide-format}
 }
 \value{
 The original data table in wide format.

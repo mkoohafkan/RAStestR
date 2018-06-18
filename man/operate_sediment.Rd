@@ -4,7 +4,7 @@
 \alias{operate_sediment}
 \title{Table Operations (Sediment)}
 \usage{
-operate_sediment(..., fun = "+", partial = FALSE, time.col = "Time",
+operate_sediment(..., fun, partial = FALSE, time.col = "Time",
   grain.col = "GrainClass")
 }
 \arguments{

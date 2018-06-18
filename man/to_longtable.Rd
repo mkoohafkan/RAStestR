@@ -4,7 +4,8 @@
 \alias{to_longtable}
 \title{Reformat As Long Table}
 \usage{
-to_longtable(d, data.col, gather.cols, station.col = "Station")
+to_longtable(d, data.col, gather.cols, station.col = "Station",
+  gather.attr = c("River", "Reach"))
 }
 \arguments{
 \item{d}{The data table, i.e. output from \code{read_table} or
@@ -16,6 +17,10 @@ to_longtable(d, data.col, gather.cols, station.col = "Station")
 all columns with the prefix "XS_" will be used.}
 
 \item{station.col}{The name of the new column holding station IDs.}
+
+\item{gather.attr}{The attributes to include in the resulting 
+long-format table. By default the "River" and "Reach" attributes are
+added as additional columns to the long-format table.}
 }
 \value{
 The original data table in long format.
