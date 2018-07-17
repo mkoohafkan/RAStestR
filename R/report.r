@@ -85,8 +85,8 @@ generate_report = function(base.file, new.file, sections,
     stop("file ", new.file, " could not be found.")
 
   # get plan attributes
-  base.attr = get_meta(base.file)
-  new.attr = get_meta(new.file)
+  base.attr = get_plan_meta(base.file)
+  new.attr = get_plan_meta(new.file)
   # get plan run types
   base.type = get_run_type(base.file)
   new.type = get_run_type(new.file)

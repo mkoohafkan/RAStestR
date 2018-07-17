@@ -11,7 +11,7 @@ NULL
 
 # Get RAS Plan Meta Data
 #
-# Get meta data of RAS plan.
+# Get plan meta data of the RAS plan.
 #
 # @param f The HDF5 file to read.
 # @return A named list of plan meta data.
@@ -19,18 +19,20 @@ NULL
 # @examples
 # simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
 #   package = "RAStestR")
-# RAStestR:::get_meta(simple.quasi)
+# RAStestR:::get_plan_meta(simple.quasi)
 #
 #' @import hdf5r
-get_meta = function(f, mode = 'r') {
+get_plan_meta = function(f) {
   run.type = get_run_type(f)
+  RAS.version = get_RAS_version(f)
+  paths = get_plan_meta_table(run.type, RAS.version)
   x = H5File$new(f, mode = 'r')
   on.exit(x$close_all())
   tryCatch({
   plan.attr = c(
       get_group_attr(x),
-      get_group_attr(x, "Plan Data/Plan Information"),
-      get_group_attr(x, "Plan Data/Plan Parameters")
+      get_group_attr(x, paths[[1]]),
+      get_group_attr(x, paths[[2]])
     )
   }, error = function(e) {
        warning(e)
@@ -41,11 +43,41 @@ get_meta = function(f, mode = 'r') {
   return(plan.attr)
 }
 
+# Get RAS Results Meta Data
+#
+# Get meta data of the RAS results.
+#
+# @param f The HDF5 file to read.
+# @return A named list of results meta data.
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+# RAStestR:::get_results_meta(simple.quasi)
+#
+#' @import hdf5r
+get_results_meta = function(f) {
+  run.type = get_run_type(f)
+  RAS.version = get_RAS_version(f)
+  path = get_results_meta_table(run.type, RAS.version)
+  x = H5File$new(f, mode = 'r')
+  on.exit(x$close_all())
+  tryCatch({
+    results.attr = get_group_attr(x, path)
+  }, error = function(e) {
+       warning(e)
+       stop("Could not find Results metadata", call. = FALSE)
+     }
+  )
+  results.attr[["Type of Run"]] = run.type
+  return(results.attr)
+}
+
 # Get RAS Plan Run Type
 #
 # Identify a RAS plan as Unsteady, Steady or QuasiUnsteady.
 #
-# @inheritParams get_meta
+# @inheritParams get_plan_meta
 #
 # @examples
 # simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",

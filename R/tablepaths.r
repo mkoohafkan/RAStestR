@@ -180,6 +180,32 @@ get_2d_flow_area_table = function(RAS.version) {
   )
 }
 
+get_results_meta_table = function(run.type, RAS.version) {
+  if(run.type %in% c("Unsteady", "Unsteady+Sediment"))
+    switch(RAS.version,
+      "5.0.3" = file.path("Results", "Unsteady", "Summary"),
+      "5.0.4" = file.path("Results", "Unsteady", "Summary"),
+      "5.0.5" = file.path("Results", "Unsteady", "Summary")
+    )
+  else if (run.type == "QuasiUnsteady")
+    switch(RAS.version,
+      "5.0.6" = file.path("Results", "Sediment", "Summary")
+    )
+  else
+    switch(RAS.version,
+      "5.0.3" = file.path("Results", "Steady", "Summary"),
+      "5.0.4" = file.path("Results", "Steady", "Summary"),
+      "5.0.5" = file.path("Results", "Steady", "Summary")
+    )
+}
+
+get_plan_meta_table = function(run.type, RAS.version) {
+  list(
+    "Plan Data/Plan Information",
+    "Plan Data/Plan Parameters"
+  )
+}
+
 #' List Plan Information
 #'
 #' List basic plan information.
@@ -192,7 +218,7 @@ get_2d_flow_area_table = function(RAS.version) {
 list_plan_info = function(f, print = TRUE) {
   which.attr = c("Plan Name", "Plan ShortID", "Type of Run",
     "Time Window", "Computation Time Step", "Output Interval")
-  metadata = get_meta(f)[which.attr]
+  metadata = get_plan_meta(f)[which.attr]
   if (print) {
     message(paste(names(metadata), unlist(metadata),
       sep = ": ", collapse = "\n"), "\n")
