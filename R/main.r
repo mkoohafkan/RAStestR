@@ -27,7 +27,7 @@ get_plan_meta = function(f) {
   RAS.version = get_RAS_version(f)
   paths = get_plan_meta_table(run.type, RAS.version)
   x = H5File$new(f, mode = 'r')
-  on.exit(x$close_all())
+  on.exit(x$close())
   tryCatch({
   plan.attr = c(
       get_group_attr(x),
@@ -61,7 +61,7 @@ get_results_meta = function(f) {
   RAS.version = get_RAS_version(f)
   path = get_results_meta_table(run.type, RAS.version)
   x = H5File$new(f, mode = 'r')
-  on.exit(x$close_all())
+  on.exit(x$close())
   tryCatch({
     results.attr = get_group_attr(x, path)
   }, error = function(e) {
@@ -91,7 +91,7 @@ get_results_meta = function(f) {
 #' @import hdf5r
 get_run_type = function(f) {
   x = H5File$new(f, mode = 'r')
-  on.exit(x$close_all())
+  on.exit(x$close())
   event.x = tryCatch(x$open("Event Conditions"),
     error = function(e) {
       warning(e)
@@ -132,7 +132,7 @@ get_run_type = function(f) {
 #     quasi.h5 = hdf5r::H5File$new(simple.quasi)
 #     RAStestR:::get_dataset(quasi.h5, test.table, "double")
 #   }, finally = {
-#     invisible(try(quasi.h5$close_all()))
+#     invisible(try(quasi.h5$close()))
 #   }) 
 #
 #' @import hdf5r
@@ -168,7 +168,7 @@ get_dataset = function(x, path) {
 #     quasi.h5 = hdf5r::H5File$new(simple.quasi)
 #     RAStestR:::get_group_attr(quasi.h5)
 #   }, finally = {
-#     invisible(try(quasi.h5$close_all()))
+#     invisible(try(quasi.h5$close()))
 #   }) 
 #
 # tryCatch({
@@ -176,7 +176,7 @@ get_dataset = function(x, path) {
 #     quasi.h5 = hdf5r::H5File$new(simple.quasi)
 #     RAStestR:::get_group_attr(quasi.h5, test.group)
 #   }, finally = {
-#     invisible(try(quasi.h5$close_all()))
+#     invisible(try(quasi.h5$close()))
 #   }) 
 #
 #' @import hdf5r
@@ -476,7 +476,7 @@ read_hdtable = function(f, table.paths, rowcolname, rlabs, clabs) {
     stop("Could not find ", suppressWarnings(normalizePath(f)))
   # open file
   x = H5File$new(f, mode = 'r')
-  on.exit(x$close_all())
+  on.exit(x$close())
   all.tables = list.datasets(x)
   missing.tables = setdiff(table.paths, all.tables)
   if (length(missing.tables) > 0L)

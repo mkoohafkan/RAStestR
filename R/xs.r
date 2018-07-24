@@ -54,7 +54,7 @@ read_xs = function(f, which.times = NULL, which.stations = NULL,
     index.table = file.path(tblblock, "Station Elevation Info")
     values.table = file.path(tblblock, "Station Elevation Values")
     x = H5File$new(f, mode = 'r')
-    on.exit(x$close_all())
+    on.exit(x$close())
     indices = get_dataset(x, index.table)[, 2]
     xs.indices = rep(stations, indices)
     river.indices = rep(rivers, indices)
@@ -88,7 +88,7 @@ read_xs = function(f, which.times = NULL, which.stations = NULL,
   }
 
   x = H5File$new(f, mode = 'r')
-  on.exit(x$close_all())
+  on.exit(x$close())
   dlist = vector("list", length(which.times))
   for (i in seq_along(which.times)) {
     this.time = which.times[i]
