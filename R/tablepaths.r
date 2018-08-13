@@ -556,8 +556,8 @@ list_reaches = function(f) {
   reachpath = get_reach_table(ras.version)
   switch(ras.version,
     "5.0.3" = str_trim(get_dataset(x, reachpath)),
-    "5.0.4" = str_trim(get_dataset(x, reachpath)[["River"]]),
-    "5.0.5" = str_trim(get_dataset(x, reachpath)[["River"]])
+    "5.0.4" = str_trim(get_dataset(x, reachpath)[["Reach"]]),
+    "5.0.5" = str_trim(get_dataset(x, reachpath)[["Reach"]])
   )
 }
 
