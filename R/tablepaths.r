@@ -665,7 +665,7 @@ force_RAS_version = function(version) {
   version = match.arg(version, supported_RAS_versions())
   if (missing(version))
     return(options()$RAStestR.RASversion)
-  options(RAStestR.RASversion = version)
+  options(RAStestR.ForceVersion = version)
   invisible(version)
 }
 
@@ -692,11 +692,11 @@ get_RAS_version = function(f) {
     v = str_split(meta.attr[["File Version"]], " ", simplify = TRUE)[2]
     if (v %in% names(options()[["RAStestR.VersionOverride"]]))
       options()[["RAStestR.VersionOverride"]][[v]]
-    else if (v %in% supported_RAS_versions())
-      v
-    else
-      stop("RAS version ", v, " is not currently supported", .call = FALSE)
     }
+
+  if (!(v %in% supported_RAS_versions()))
+    stop("RAS version ", v, " is not currently supported", call. = FALSE)
+  v
 }
 
 #' Override RAS Version
