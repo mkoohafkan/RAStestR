@@ -318,6 +318,11 @@ read_standard = function(f, table.name, which.times = NULL,
     stop("No data matching 'which.stations' was found")
   #generate station labels
   station.labels = str_c("XS_", stations)
+  # warn about duplicates
+  if (any(duplicated(station.labels)))
+    warning("Duplicate station labels detected: ",
+      paste(station.labels[duplicated(station.labels)], collapse = ", "),
+      call. = FALSE)
   # specify tables
   tblpath = file.path(get_output_block(run.type, ras.version), table.name)
   # read data
@@ -427,6 +432,11 @@ read_sediment = function(f, table.name, which.times = NULL,
   table.labels = grain.labels[grain.levels %in% selected.grains]
   #generate station labels
   station.labels = str_c("XS_", stations)
+  # warn about duplicates
+  if (any(duplicated(station.labels)))
+    warning("Duplicate station labels detected: ",
+      paste(station.labels[duplicated(station.labels)], collapse = ", "),
+      call. = FALSE)
   # read in data
   res.list = read_hdtable(f, table.paths, "Time", output.times,
     station.labels)
