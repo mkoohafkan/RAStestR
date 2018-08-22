@@ -378,36 +378,37 @@ read_sediment = function(f, table.name, which.times = NULL,
         stop("Grain class ID not recognized: ",
           paste(error.grains, collapse =", "))
       which.grains = grain.levels[grain.labels %in% which.grains]
-    }
-    else if (any(which.grains %in% grain.levels)) {
+    } else if (any(which.grains %in% grain.levels)) {
       error.grains = setdiff(which.grains, grain.levels)
       if (length(error.grains) > 0L)
         stop("Grain class ID not recognized: ",
           paste(error.grains, collapse =", "))
       which.grains = grain.levels[grain.levels %in% which.grains]
-    }
-    else
+    } else {
       stop("No data matching 'which.grains' was found")
     }
-  else
+  } else {
     which.grains = grain.levels
+  }
   output.times = list_output_times(f)
-  if (is.null(which.times))
+  if (is.null(which.times)) {
     which.times = seq_along(output.times)
-  else if (!is.numeric(which.times))
+  } else if (!is.numeric(which.times)) {
     which.times = which(output.times %in% which.times)
-  else
+  } else {
     which.times = which(seq_along(output.times) %in% which.times)
+  }
   if (length(which.times) < 1L)
     stop("No data matching 'which.times' was found")
   stations = list_stations(f)
-  if (is.null(which.stations))
+  if (is.null(which.stations)) {
     which.stations = seq_along(stations)
-  else if (!is.numeric(which.stations))
+  } else if (!is.numeric(which.stations)) {
     which.stations = which(stations %in% str_replace(which.stations, 
       "XS_", ""))
-  else
+  } else {
     which.stations = which(seq_along(stations) %in% which.stations)
+  }
   if (length(which.stations) < 1L)
     stop("No data matching 'which.stations' was found")
   # get sediment tables
@@ -430,8 +431,9 @@ read_sediment = function(f, table.name, which.times = NULL,
   res.list = read_hdtable(f, table.paths, "Time", output.times,
     station.labels)
   res.list = lapply(res.list, function(tbl) tbl[which.times,])
-  names(res.list) = table.labels
-  res = bind_rows(res.list, .id = "GrainClass") %>%
+  for (i in seq_along(table.labels))
+    res.list[[i]]["GrainClass"] = table.labels[i]
+  res = do.call(rbind.data.frame, res.list) %>%
     mutate(GrainClass = factor(GrainClass, levels = grain.labels))
   othercols = which(!str_detect(names(res), "XS_"))
   stationcols = which(str_detect(names(res), "XS_"))[which.stations]
@@ -488,16 +490,6 @@ read_hdtable = function(f, table.paths, rowcolname, rlabs, clabs) {
     names(this) = clabs
     this[rowcolname] = rlabs
     this[c(rowcolname, clabs)]
-#    run.type = get_run_type(f)
-#    if (run.type == "Unsteady") {
-#      this = this %>% head(-1) #%>% tail(-1)
-#      rlabs[2] = rlabs[1]
-#      rlabs = rlabs %>% head(-1) #%>% tail(-1)
-#    }
-#    else if (run.type == "QuasiUnsteady") {
-#      this = this %>% head(-1)
-#      rlabs = rlabs %>% head(-1)
-#    }
   }
   lapply(table.paths, process_table)
 }
