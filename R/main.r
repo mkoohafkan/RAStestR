@@ -288,6 +288,7 @@ rename_interpolated_xs = function(d){
 #'   which.stations = 1:4)
 #'
 #' @import stringr
+#' @import tibble
 #' @export
 read_standard = function(f, table.name, which.times = NULL,
   which.stations = NULL, override.sediment = FALSE) {
@@ -319,10 +320,12 @@ read_standard = function(f, table.name, which.times = NULL,
   #generate station labels
   station.labels = str_c("XS_", stations)
   # warn about duplicates
-  if (any(duplicated(station.labels[which.stations])))
+  if (any(duplicated(station.labels[which.stations]))) {
     warning("Duplicate station labels detected: ", paste(
       station.labels[which.stations][duplicated(station.labels[which.stations])],
       collapse = ", "), call. = FALSE)
+    station.labels = tidy_names(station.labels)
+  }
   # specify tables
   tblpath = file.path(get_output_block(run.type, ras.version), table.name)
   # read data
@@ -362,6 +365,7 @@ read_standard = function(f, table.name, which.times = NULL,
 #'   which.grains = c("VFS", "FS"))
 #'
 #' @import hdf5r
+#' @import tibble
 #' @import dplyr
 #' @import stringr
 #' @export
@@ -433,17 +437,18 @@ read_sediment = function(f, table.name, which.times = NULL,
   #generate station labels
   station.labels = str_c("XS_", stations)
   # warn about duplicates
-  if (any(duplicated(station.labels[which.stations])))
+    if (any(duplicated(station.labels[which.stations]))) {
     warning("Duplicate station labels detected: ", paste(
       station.labels[which.stations][duplicated(station.labels[which.stations])],
       collapse = ", "), call. = FALSE)
+    station.labels = tidy_names(station.labels)
+  }
   # read in data
   res.list = read_hdtable(f, table.paths, "Time", output.times,
     station.labels)
   res.list = lapply(res.list, function(tbl) tbl[which.times,])
-  for (i in seq_along(table.labels))
-    res.list[[i]]["GrainClass"] = table.labels[i]
-  res = do.call(rbind.data.frame, res.list) %>%
+  names(res.list) = table.labels
+  res = bind_rows(res.list, .id = "GrainClass") %>%
     mutate(GrainClass = factor(GrainClass, levels = grain.labels))
   othercols = which(!str_detect(names(res), "XS_"))
   stationcols = which(str_detect(names(res), "XS_"))[which.stations]
