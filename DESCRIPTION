@@ -17,6 +17,7 @@ Imports:
     stringr (>= 1.1.0),
     tidyr (>= 0.6.0),
     hdf5r (>= 0.9.8),
+    tibble (>= 1.4.2),
     utils,
     stats
 Suggests:
