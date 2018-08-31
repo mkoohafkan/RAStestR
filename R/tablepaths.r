@@ -245,6 +245,17 @@ get_coordinates_cell = function(RAS.version, name) {
   )
 }  
 
+#' List 2D Area Coordinates
+#'
+#' list the face point or cell center coordinates of a 2D area.
+#'
+#' @inheritParams read_standard
+#' @param which.area The 2D area to get the coordinates for.
+#' @param type The type of coordinates to get, i.e. `FacePoint`
+#'  or `Cell` (center) coordinates.
+#' @return a dataframe of XY coordinates for the 2D area.
+#'
+#' @export
 list_2d_coordinates = function(f, which.area, type = c("FacePoint", "Cell")) {
   type = str_to_upper(type)
   RAS.version = get_RAS_version(f)
@@ -598,21 +609,21 @@ list_sediment = function(f, table.name) {
   )
 }
 
-#' List Cross Section Tables
-#'
-#' List cross section tables.
-#'
-#' @inheritParams read_standard
-#' @param xs.block The HDF folder containing the cross section output tables.
-  #' @return a vector of cross section output labels.
-#'
-#' @examples
-#' simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
-#'   package = "RAStestR")
-#' RAStestR:::list_xs(simple.quasi, file.path("Results", "Sediment",
-#'     "Output Blocks", "Sediment SE", "Sediment Time Series", 
-#'     "Cross Section SE"))
-#'
+# List Cross Section Tables
+#
+# List cross section tables.
+#
+# @inheritParams read_standard
+# @param xs.block The HDF folder containing the cross section output tables.
+# @return a vector of cross section output labels.
+#
+# @examples
+# simple.quasi = system.file("sample-data/SampleQuasiUnsteady.hdf",
+#   package = "RAStestR")
+# RAStestR:::list_xs(simple.quasi, file.path("Results", "Sediment",
+#     "Output Blocks", "Sediment SE", "Sediment Time Series", 
+#     "Cross Section SE"))
+#
 #' @import hdf5r
 #' @import stringr
 list_xs = function(f, xs.block) {
